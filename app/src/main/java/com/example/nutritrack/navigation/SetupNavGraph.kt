@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
 import com.example.nutritrack.data.user.UserGoalViewModel
 import com.example.nutritrack.data.user.UserRegistrationViewModel
+import com.example.nutritrack.screens.SplashScreen
 import com.example.nutritrack.screens.WelcomeScreen
 
 @Composable
@@ -17,8 +18,11 @@ fun SetupNavGraph(navController: NavHostController) {
     val userGoalViewModel: UserGoalViewModel = viewModel()
     NavHost(
         navController = navController,
-        startDestination = "welcome_screen"
+        startDestination = "splash_screen"
     ) {
+        composable("splash_screen") {
+            SplashScreen(navController = navController)
+        }
         composable("welcome_screen") {
             WelcomeScreen(
                 onNewUserClick = {

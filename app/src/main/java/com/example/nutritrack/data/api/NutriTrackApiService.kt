@@ -2,6 +2,8 @@ package com.example.nutritrack.data.api
 
 import android.util.Log
 import com.example.nutritrack.model.ConsultantRegistrationData
+import com.example.nutritrack.model.GoalIdResponse
+import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +15,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 @Serializable
 data class LoginRequest(val idToken: String)
@@ -36,6 +40,11 @@ interface ApiServiceInterface {
     @POST("api/Goal/create-user-goal")
     suspend fun createUserGoal(@Body data: UserGoalData): Response<Void>
 
+    @GET("api/User/get-user-by-uid")
+    suspend fun getUserByUid(@Query("uid") uid: String): Response<UserData>
+
+    @GET("api/Goal/get-all-user-goal-ids")
+    suspend fun getAllUserGoalIds(@Query("idToken") idToken: String): Response<List<GoalIdResponse>>
 }
 
 object ApiService {
@@ -118,6 +127,40 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to create user goal: $e")
                 false
+            }
+        }
+    }
+
+    suspend fun getUserByUid(uid: String): UserData? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getUserByUid(uid)
+                if (response.isSuccessful) {
+                    response.body()
+                } else {
+                    Log.e("ApiService", "Failed to get user by UID: ${response.code()}")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get user by UID: $e")
+                null
+            }
+        }
+    }
+
+    suspend fun getAllUserGoalIds(idToken: String): List<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAllUserGoalIds(idToken)
+                if (response.isSuccessful) {
+                    response.body()?.map { it.goal_id } ?: emptyList()
+                } else {
+                    Log.e("ApiService", "Failed to get user goal IDs: ${response.code()}")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get user goal IDs: $e")
+                emptyList()
             }
         }
     }

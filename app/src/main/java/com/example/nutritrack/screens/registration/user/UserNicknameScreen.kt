@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
-import com.example.nutritrack.data.consultant.GoogleAuth
+import com.example.nutritrack.data.auth.GoogleAuth
 import com.example.nutritrack.data.user.UserRegistrationViewModel
 import kotlinx.coroutines.launch
 

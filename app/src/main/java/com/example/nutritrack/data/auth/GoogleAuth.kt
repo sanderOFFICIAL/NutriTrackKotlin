@@ -1,4 +1,4 @@
-package com.example.nutritrack.data.consultant
+package com.example.nutritrack.data.auth
 
 import android.app.PendingIntent
 import android.content.Context
