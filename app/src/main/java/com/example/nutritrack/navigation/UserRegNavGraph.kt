@@ -4,7 +4,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.nutritrack.data.user.UserGoalViewModel
 import com.example.nutritrack.data.user.UserRegistrationViewModel
+import com.example.nutritrack.screens.UserMainScreen
 import com.example.nutritrack.screens.UserSuccessScreen
 import com.example.nutritrack.screens.registration.user.ActivityLevelScreen
 import com.example.nutritrack.screens.registration.user.CurrentWeightScreen
@@ -12,10 +14,14 @@ import com.example.nutritrack.screens.registration.user.GenderSelectionScreen
 import com.example.nutritrack.screens.registration.user.HeightSelectionScreen
 import com.example.nutritrack.screens.registration.user.UserNicknameScreen
 import com.example.nutritrack.screens.registration.user.YearSelectionScreen
+import com.example.nutritrack.screens.registration.user.create_goal.UserDesiredWeightScreen
+import com.example.nutritrack.screens.registration.user.create_goal.UserGoalTypeScreen
+import com.example.nutritrack.screens.registration.user.create_goal.UserWeeksScreen
 
 fun NavGraphBuilder.userRegistrationNavGraph(
     navController: NavHostController,
-    viewModel: UserRegistrationViewModel
+    registrationViewModel: UserRegistrationViewModel,
+    goalViewModel: UserGoalViewModel
 ) {
     navigation(
         startDestination = "gender_selection_screen",
@@ -23,7 +29,7 @@ fun NavGraphBuilder.userRegistrationNavGraph(
     ) {
         composable("gender_selection_screen") {
             GenderSelectionScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onNextClick = {
                     navController.navigate("activity_level_screen")
                 }
@@ -31,7 +37,7 @@ fun NavGraphBuilder.userRegistrationNavGraph(
         }
         composable("activity_level_screen") {
             ActivityLevelScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onNextClick = {
                     navController.navigate("year_selection_screen")
                 }
@@ -39,13 +45,13 @@ fun NavGraphBuilder.userRegistrationNavGraph(
         }
         composable("year_selection_screen") {
             YearSelectionScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onNextClick = { navController.navigate("height_selection_screen") }
             )
         }
         composable("height_selection_screen") {
             HeightSelectionScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onNextClick = {
                     navController.navigate("current_weight_screen")
                 }
@@ -53,13 +59,13 @@ fun NavGraphBuilder.userRegistrationNavGraph(
         }
         composable("current_weight_screen") {
             CurrentWeightScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onNextClick = { navController.navigate("user_nickname_screen") },
             )
         }
         composable("user_nickname_screen") {
             UserNicknameScreen(
-                viewModel = viewModel,
+                viewModel = registrationViewModel,
                 onRegistrationSuccess = {
                     navController.navigate("user_success_screen")
                 },
@@ -67,11 +73,45 @@ fun NavGraphBuilder.userRegistrationNavGraph(
         }
         composable("user_success_screen") {
             UserSuccessScreen(
-                onNavigateToMainScreen = {
+                onNavigateToGoalScreen = {
+                    navController.navigate("user_goal_type_screen")
+                },
+            )
+        }
+        composable("user_goal_type_screen") {
+            UserGoalTypeScreen(
+                viewModel = goalViewModel,
+                onNextClick = {
+                    navController.navigate("user_desire_weight_screen")
+                },
+            )
+        }
+        composable("user_desire_weight_screen") {
+            UserDesiredWeightScreen(
+                viewModel = goalViewModel,
+                onNextClick = {
+                    navController.navigate("user_weeks_screen")
+                },
+            )
+        }
+        composable("user_weeks_screen") {
+            UserWeeksScreen(
+                viewModel = goalViewModel,
+                onCreateGoalClick = {
                     navController.navigate("user_main_screen") {
                         popUpTo("user_registration_graph") { inclusive = true }
                     }
-                }
+                },
+            )
+        }
+        composable("user_main_screen") {
+            UserMainScreen(
+                onNextClick = {
+                    navController.navigate("user_weeks_screen")
+                },
+                onViewGoalClick = {
+                    navController.navigate("view_goal_screen")
+                },
             )
         }
     }

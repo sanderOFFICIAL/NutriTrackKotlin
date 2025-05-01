@@ -2,6 +2,7 @@ package com.example.nutritrack.data.api
 
 import android.util.Log
 import com.example.nutritrack.model.ConsultantRegistrationData
+import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,6 +32,10 @@ interface ApiServiceInterface {
 
     @POST("api/Auth/register/user")
     suspend fun registerUser(@Body data: UserRegistrationData): Response<Void>
+
+    @POST("api/Goal/create-user-goal")
+    suspend fun createUserGoal(@Body data: UserGoalData): Response<Void>
+
 }
 
 object ApiService {
@@ -104,4 +109,17 @@ object ApiService {
             }
         }
     }
+
+    suspend fun createUserGoal(data: UserGoalData): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.createUserGoal(data)
+                response.isSuccessful
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to create user goal: $e")
+                false
+            }
+        }
+    }
+
 }

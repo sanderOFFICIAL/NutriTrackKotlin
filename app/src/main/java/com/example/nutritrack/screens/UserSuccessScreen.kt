@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun UserSuccessScreen(
-    onNavigateToMainScreen: () -> Unit
+    onNavigateToGoalScreen: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -72,7 +72,7 @@ fun UserSuccessScreen(
 
             // Кнопка "Перейти до головного екрану"
             Button(
-                onClick = { onNavigateToMainScreen() },
+                onClick = { onNavigateToGoalScreen() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
