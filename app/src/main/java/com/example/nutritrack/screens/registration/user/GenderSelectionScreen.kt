@@ -23,12 +23,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 
 
 @Composable
 fun GenderSelectionScreen(
-    onFemaleSelected: () -> Unit,
-    onMaleSelected: () -> Unit,
+    viewModel: UserRegistrationViewModel,
+    onNextClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -72,7 +73,8 @@ fun GenderSelectionScreen(
         ) {
             Button(
                 onClick = {
-                    onFemaleSelected()
+                    viewModel.setGender("female")
+                    onNextClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +94,8 @@ fun GenderSelectionScreen(
 
             Button(
                 onClick = {
-                    onMaleSelected()
+                    viewModel.setGender("male")
+                    onNextClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()

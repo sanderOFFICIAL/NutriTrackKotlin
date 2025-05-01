@@ -23,10 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 
 @Composable
 fun ActivityLevelScreen(
-    onActivityLevelSelected: (String) -> Unit
+    viewModel: UserRegistrationViewModel,
+    onNextClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -67,7 +69,10 @@ fun ActivityLevelScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Button(
-                onClick = { onActivityLevelSelected("Сидячий спосіб життя") },
+                onClick = {
+                    viewModel.setActivityLevel(0)
+                    onNextClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -96,7 +101,10 @@ fun ActivityLevelScreen(
             }
 
             Button(
-                onClick = { onActivityLevelSelected("Легка активність 1-3 рази на тиждень") },
+                onClick = {
+                    viewModel.setActivityLevel(1)
+                    onNextClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -125,7 +133,10 @@ fun ActivityLevelScreen(
             }
 
             Button(
-                onClick = { onActivityLevelSelected("Помірна активність 2-4 рази на тиждень") },
+                onClick = {
+                    viewModel.setActivityLevel(2)
+                    onNextClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -154,7 +165,10 @@ fun ActivityLevelScreen(
             }
 
             Button(
-                onClick = { onActivityLevelSelected("Висока активність тренування 6-7 разів на тиждень") },
+                onClick = {
+                    viewModel.setActivityLevel(3)
+                    onNextClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)

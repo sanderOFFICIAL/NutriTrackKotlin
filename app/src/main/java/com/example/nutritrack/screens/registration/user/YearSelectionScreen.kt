@@ -28,10 +28,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 
 @Composable
 fun YearSelectionScreen(
-    onYearSelected: (Int) -> Unit,
+    viewModel: UserRegistrationViewModel,
     onNextClick: () -> Unit
 ) {
     // Список років від 1900 до 2025
@@ -113,7 +114,7 @@ fun YearSelectionScreen(
         // Кнопка "Продовжити"
         Button(
             onClick = {
-                onYearSelected(selectedYear.value)
+                viewModel.setBirthYear(selectedYear.value)
                 onNextClick()
             },
             modifier = Modifier

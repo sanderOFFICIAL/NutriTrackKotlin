@@ -4,63 +4,74 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.nutritrack.data.user.UserRegistrationViewModel
+import com.example.nutritrack.screens.UserSuccessScreen
 import com.example.nutritrack.screens.registration.user.ActivityLevelScreen
 import com.example.nutritrack.screens.registration.user.CurrentWeightScreen
-import com.example.nutritrack.screens.registration.user.DesiredWeightScreen
 import com.example.nutritrack.screens.registration.user.GenderSelectionScreen
 import com.example.nutritrack.screens.registration.user.HeightSelectionScreen
+import com.example.nutritrack.screens.registration.user.UserNicknameScreen
 import com.example.nutritrack.screens.registration.user.YearSelectionScreen
 
-fun NavGraphBuilder.userRegistrationNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.userRegistrationNavGraph(
+    navController: NavHostController,
+    viewModel: UserRegistrationViewModel
+) {
     navigation(
         startDestination = "gender_selection_screen",
         route = "user_registration_graph"
     ) {
         composable("gender_selection_screen") {
             GenderSelectionScreen(
-                onFemaleSelected = { navController.navigate("activity_level_screen") },
-                onMaleSelected = { navController.navigate("activity_level_screen") }
+                viewModel = viewModel,
+                onNextClick = {
+                    navController.navigate("activity_level_screen")
+                }
             )
         }
         composable("activity_level_screen") {
             ActivityLevelScreen(
-                onActivityLevelSelected = { level ->
+                viewModel = viewModel,
+                onNextClick = {
                     navController.navigate("year_selection_screen")
                 }
             )
         }
         composable("year_selection_screen") {
             YearSelectionScreen(
-                onYearSelected = { year ->
-                    // Зберігаємо рік, якщо потрібно
-                },
+                viewModel = viewModel,
                 onNextClick = { navController.navigate("height_selection_screen") }
             )
         }
         composable("height_selection_screen") {
             HeightSelectionScreen(
-                onHeightSelected = { height ->
+                viewModel = viewModel,
+                onNextClick = {
                     navController.navigate("current_weight_screen")
                 }
             )
         }
         composable("current_weight_screen") {
             CurrentWeightScreen(
-                onWeightSelected = { weight ->
-                    // Зберігаємо поточну вагу, якщо потрібно
-                },
-                onNextClick = { navController.navigate("desired_weight_screen") },
+                viewModel = viewModel,
+                onNextClick = { navController.navigate("user_nickname_screen") },
             )
         }
-        composable("desired_weight_screen") {
-            DesiredWeightScreen(
-                onDesiredWeightSelected = { desiredWeight ->
-
+        composable("user_nickname_screen") {
+            UserNicknameScreen(
+                viewModel = viewModel,
+                onRegistrationSuccess = {
+                    navController.navigate("user_success_screen")
                 },
-                onNextClick = {
-
-                    navController.navigate("google_sign_in_screen/user")
-                },
+            )
+        }
+        composable("user_success_screen") {
+            UserSuccessScreen(
+                onNavigateToMainScreen = {
+                    navController.navigate("user_main_screen") {
+                        popUpTo("user_registration_graph") { inclusive = true }
+                    }
+                }
             )
         }
     }

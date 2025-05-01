@@ -28,10 +28,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
 
 @Composable
 fun ConsultantExperienceYearsScreen(
-    onExperienceYearsSelected: (Int) -> Unit,
+    viewModel: ConsultantRegistrationViewModel,
     onNextClick: () -> Unit,
 ) {
     val experienceYearsList = (0..50).toList()
@@ -122,7 +123,7 @@ fun ConsultantExperienceYearsScreen(
             // Кнопка "Продовжити"
             Button(
                 onClick = {
-                    onExperienceYearsSelected(selectedExperienceYears.value)
+                    viewModel.setExperienceYears(selectedExperienceYears.value)
                     onNextClick()
                 },
                 modifier = Modifier

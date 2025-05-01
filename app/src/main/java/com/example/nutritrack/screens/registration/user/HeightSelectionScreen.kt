@@ -28,10 +28,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 
 @Composable
 fun HeightSelectionScreen(
-    onHeightSelected: (Int) -> Unit,
+    viewModel: UserRegistrationViewModel,
+    onNextClick: () -> Unit,
 ) {
     // Список зросту від 100 до 250 см
     val heights = (100..250).toList()
@@ -112,7 +114,8 @@ fun HeightSelectionScreen(
         // Кнопка "Продовжити"
         Button(
             onClick = {
-                onHeightSelected(selectedHeight.value)
+                viewModel.setHeight(selectedHeight.value)
+                onNextClick()
             },
             modifier = Modifier
                 .fillMaxWidth()

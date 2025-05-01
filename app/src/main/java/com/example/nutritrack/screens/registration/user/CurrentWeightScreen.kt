@@ -28,10 +28,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 
 @Composable
 fun CurrentWeightScreen(
-    onWeightSelected: (Int) -> Unit,
+    viewModel: UserRegistrationViewModel,
     onNextClick: () -> Unit,
 ) {
     // Список ваги від 30 до 200 кг
@@ -113,7 +114,7 @@ fun CurrentWeightScreen(
         // Кнопка "Продовжити"
         Button(
             onClick = {
-                onWeightSelected(selectedWeight.value)
+                viewModel.setCurrentWeight(selectedWeight.value)
                 onNextClick()
             },
             modifier = Modifier

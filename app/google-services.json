@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "996859537378",
-    "project_id": "nutri-track-app-kotlin",
-    "storage_bucket": "nutri-track-app-kotlin.firebasestorage.app"
+    "project_number": "236833381634",
+    "project_id": "nutritrackkotlin",
+    "storage_bucket": "nutritrackkotlin.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:996859537378:android:1904651618648a9f01bbbb",
+        "mobilesdk_app_id": "1:236833381634:android:c64a801b304006c8c2361b",
         "android_client_info": {
           "package_name": "com.example.nutritrack"
         }
       },
       "oauth_client": [
         {
-          "client_id": "996859537378-tkq9nqbqul06vqqk5jmc8qle3ifsq2i5.apps.googleusercontent.com",
+          "client_id": "236833381634-cba30oohcmibi8eda4vqi4hafjkmdk05.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.nutritrack",
-            "certificate_hash": "e87b5928e2e843ccde2a1594a91968b7978e5de2"
+            "certificate_hash": "51d3de9f9f6557ecdeebd26b46a196a14796e4ed"
           }
         },
         {
-          "client_id": "996859537378-f1i0tc790r4ah9avj8df2mcvnhrtu9q8.apps.googleusercontent.com",
+          "client_id": "236833381634-jru8akdea0h7mkip711vs7n40e5u6a1e.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCuKJKdNYtFYZGCz7UGbOLWNe1mHWnR9vU"
+          "current_key": "AIzaSyCu5l4C3ZFtcFq2SGMm3GtAoAvY5Kh0OUY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "996859537378-f1i0tc790r4ah9avj8df2mcvnhrtu9q8.apps.googleusercontent.com",
+              "client_id": "236833381634-jru8akdea0h7mkip711vs7n40e5u6a1e.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

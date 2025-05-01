@@ -1,5 +1,8 @@
-package com.example.nutritrack.screens.registration.consultant
+package com.example.nutritrack.screens.registration.user
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,12 +25,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,17 +40,64 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutritrack.R
-import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
+import com.example.nutritrack.data.api.ApiService
+import com.example.nutritrack.data.consultant.GoogleAuth
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun ConsultantNicknameScreen(
-    viewModel: ConsultantRegistrationViewModel,
-    onNextClick: () -> Unit,
+fun UserNicknameScreen(
+    viewModel: UserRegistrationViewModel,
+    onRegistrationSuccess: () -> Unit, // Змінюємо onNextClick на onRegistrationSuccess
 ) {
     val nickname = remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        GoogleAuth.initialize(context)
+    }
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            coroutineScope.launch {
+                try {
+                    // Авторизація через Google
+                    val idToken = GoogleAuth.handleSignInResult(result.data)
+                    viewModel.setIdToken(idToken)
+
+                    // Перевірка, чи користувач існує
+                    val userExists = ApiService.checkUserExists(idToken)
+                    if (userExists) {
+                        // Користувач уже існує, показуємо SnackBar
+                        snackbarHostState.showSnackbar(
+                            message = "Помилка: Користувач із цим акаунтом уже зареєстрований",
+                            duration = SnackbarDuration.Long
+                        )
+                    } else {
+                        // Користувача немає, реєструємо його
+                        viewModel.setNickname(nickname.value) // Зберігаємо нікнейм перед реєстрацією
+                        val success = ApiService.registerUser(viewModel.userData.value)
+                        if (success) {
+                            viewModel.clearData()
+                            onRegistrationSuccess()
+                        } else {
+                            snackbarHostState.showSnackbar(
+                                message = "Помилка: Не вдалося зареєструвати користувача",
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("UserNicknameScreen", "Google Sign-In failed: $e")
+                    snackbarHostState.showSnackbar(
+                        message = "Помилка авторизації: $e",
+                        duration = SnackbarDuration.Long
+                    )
+                }
+            }
+        }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -58,8 +110,9 @@ fun ConsultantNicknameScreen(
                 .padding(16.dp)
                 .padding(padding)
         ) {
+            // Прогрес-бар із фіксованою позицією зверху
             Image(
-                painter = painterResource(id = R.drawable.progress_bar_step2),
+                painter = painterResource(id = R.drawable.progress_bar_step6),
                 contentDescription = "Progress bar step 2",
                 modifier = Modifier
                     .size(420.dp)
@@ -67,6 +120,7 @@ fun ConsultantNicknameScreen(
                     .padding(top = 200.dp)
             )
 
+            // Основний вміст (заголовок, підзаголовок, текстове поле, кнопка)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -79,6 +133,7 @@ fun ConsultantNicknameScreen(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.weight(1f)
                 ) {
+                    // Заголовок
                     Text(
                         text = "Вкажіть ваше ім'я",
                         fontSize = 28.sp,
@@ -88,14 +143,16 @@ fun ConsultantNicknameScreen(
                         textAlign = TextAlign.Center
                     )
 
+                    // Підзаголовок
                     Text(
-                        text = "Це ім'я, яке бачитимуть ваші клієнти",
+                        text = "Це ім'я, яке бачитимуть ваші консультанти",
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
                         textAlign = TextAlign.Center
                     )
 
+                    // Текстове поле для введення псевдоніма
                     TextField(
                         value = nickname.value,
                         onValueChange = { nickname.value = it },
@@ -126,11 +183,11 @@ fun ConsultantNicknameScreen(
                     )
                 }
 
+                // Кнопка "Зареєструватись"
                 Button(
                     onClick = {
                         if (nickname.value.isNotEmpty()) {
-                            viewModel.setNickname(nickname.value)
-                            onNextClick()
+                            GoogleAuth.signIn(launcher) // Запускаємо авторизацію через Google
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
@@ -150,7 +207,7 @@ fun ConsultantNicknameScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Продовжити",
+                        text = "Зареєструватись",
                         fontSize = 20.sp,
                         color = Color.White
                     )

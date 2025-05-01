@@ -1,13 +1,18 @@
 package com.example.nutritrack.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
+import com.example.nutritrack.data.user.UserRegistrationViewModel
 import com.example.nutritrack.screens.WelcomeScreen
 
 @Composable
 fun SetupNavGraph(navController: NavHostController) {
+    val consultantViewModel: ConsultantRegistrationViewModel = viewModel()
+    val userViewModel: UserRegistrationViewModel = viewModel()
     NavHost(
         navController = navController,
         startDestination = "welcome_screen"
@@ -24,7 +29,7 @@ fun SetupNavGraph(navController: NavHostController) {
             )
         }
         // Додаємо вкладені графи на верхній рівень
-        userRegistrationNavGraph(navController)
-        consultantRegistrationNavGraph(navController)
+        userRegistrationNavGraph(navController, userViewModel)
+        consultantRegistrationNavGraph(navController, consultantViewModel)
     }
 }
