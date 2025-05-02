@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
 import com.example.nutritrack.screens.ConsultantSuccessScreen
 import com.example.nutritrack.screens.registration.consultant.ConsultantExperienceYearsScreen
@@ -59,13 +60,15 @@ fun NavGraphBuilder.consultantRegistrationNavGraph(
                 viewModel = viewModel,
                 onRegistrationSuccess = {
                     navController.navigate("consultant_success_screen")
-                }
+                },
+                navController = navController
             )
         }
         composable("consultant_success_screen") {
             ConsultantSuccessScreen(
                 onNavigateToMainScreen = {
-                    navController.navigate("consultant_main_screen") {
+                    FirebaseAuthHelper.signOut()
+                    navController.navigate("welcome_screen") {
                         popUpTo("consultant_registration_graph") { inclusive = true }
                     }
                 }

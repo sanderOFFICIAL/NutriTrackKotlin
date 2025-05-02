@@ -28,10 +28,13 @@ fun SetupNavGraph(navController: NavHostController) {
                 onNewUserClick = {
                     navController.navigate("user_registration_graph")
                 },
-                onExistingUserClick = { /* TODO: Додати перехід для "Вже маю акаунт" */ },
                 onConsultantClick = {
                     navController.navigate("consultant_registration_graph")
-                }
+                },
+                onLoginAsUserClick = {
+                    navController.navigate("user_main_screen")
+                },
+                onLoginAsConsultantClick = { navController.navigate("consultant_success_screen") },
             )
         }
         // Додаємо вкладені графи на верхній рівень

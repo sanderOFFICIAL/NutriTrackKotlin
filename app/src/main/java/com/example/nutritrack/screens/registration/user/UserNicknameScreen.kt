@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.GoogleAuth
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 fun UserNicknameScreen(
     viewModel: UserRegistrationViewModel,
     onRegistrationSuccess: () -> Unit, // Змінюємо onNextClick на onRegistrationSuccess
+    navController: NavHostController,
 ) {
     val nickname = remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,12 +71,25 @@ fun UserNicknameScreen(
 
                     // Перевірка, чи користувач існує
                     val userExists = ApiService.checkUserExists(idToken)
-                    if (userExists) {
+                    val consultantExist = ApiService.checkConsultantExists(idToken)
+                    if (consultantExist) {
                         // Користувач уже існує, показуємо SnackBar
                         snackbarHostState.showSnackbar(
-                            message = "Помилка: Користувач із цим акаунтом уже зареєстрований",
-                            duration = SnackbarDuration.Long
+                            message = "Помилка: Ви не можете створити аккаунт, бо на цю пошту зареєстровані як консультант",
+                            duration = SnackbarDuration.Short
                         )
+                        navController.navigate("welcome_screen") {
+                            popUpTo("user_nickname_screen") { inclusive = true }
+                        }
+                    } else if (userExists) {
+                        // Користувач уже існує, показуємо SnackBar
+                        snackbarHostState.showSnackbar(
+                            message = "Помилка: Користувач із цим акаунтом уже зареєстрований, увійдіть в аккаунт",
+                            duration = SnackbarDuration.Short
+                        )
+                        navController.navigate("welcome_screen") {
+                            popUpTo("user_nickname_screen") { inclusive = true }
+                        }
                     } else {
                         // Користувача немає, реєструємо його
                         viewModel.setNickname(nickname.value) // Зберігаємо нікнейм перед реєстрацією
@@ -89,6 +104,7 @@ fun UserNicknameScreen(
                             )
                         }
                     }
+
                 } catch (e: Exception) {
                     Log.e("UserNicknameScreen", "Google Sign-In failed: $e")
                     snackbarHostState.showSnackbar(

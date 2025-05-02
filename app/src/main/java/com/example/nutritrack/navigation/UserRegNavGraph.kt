@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.data.user.UserGoalViewModel
 import com.example.nutritrack.data.user.UserRegistrationViewModel
 import com.example.nutritrack.screens.UserMainScreen
@@ -69,6 +70,7 @@ fun NavGraphBuilder.userRegistrationNavGraph(
                 onRegistrationSuccess = {
                     navController.navigate("user_success_screen")
                 },
+                navController = navController
             )
         }
         composable("user_success_screen") {
@@ -107,7 +109,8 @@ fun NavGraphBuilder.userRegistrationNavGraph(
         composable("user_main_screen") {
             UserMainScreen(
                 onNextClick = {
-                    navController.navigate("user_weeks_screen")
+                    FirebaseAuthHelper.signOut()
+                    navController.navigate("welcome_screen")
                 },
                 onViewGoalClick = {
                     navController.navigate("view_goal_screen")

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.GoogleAuth
@@ -47,6 +48,7 @@ import kotlinx.coroutines.launch
 fun ConsultantMaxClientsScreen(
     onRegistrationSuccess: () -> Unit,
     viewModel: ConsultantRegistrationViewModel,
+    navController: NavHostController,
 ) {
     val maxClientsList = (1..50).toList()
     val selectedMaxClients = remember { mutableStateOf(1) }
@@ -67,13 +69,27 @@ fun ConsultantMaxClientsScreen(
                     viewModel.setIdToken(idToken)
 
                     // Перевірка, чи користувач існує
-                    val userExists = ApiService.checkConsultantExists(idToken)
-                    if (userExists) {
+                    val consultantExist = ApiService.checkConsultantExists(idToken)
+                    val userExist = ApiService.checkUserExists(idToken)
+                    if (userExist) {
                         // Користувач уже існує, показуємо SnackBar
                         snackbarHostState.showSnackbar(
-                            message = "Помилка: Користувач із цим акаунтом уже зареєстрований",
-                            duration = SnackbarDuration.Long
+                            message = "Помилка: Ви не можете створити аккаунт, бо на цю пошту зареєстровані як користувач",
+                            duration = SnackbarDuration.Short
+
                         )
+                        navController.navigate("welcome_screen") {
+                            popUpTo("user_nickname_screen") { inclusive = true }
+                        }
+                    } else if (consultantExist) {
+                        // Користувач уже існує, показуємо SnackBar
+                        snackbarHostState.showSnackbar(
+                            message = "Помилка: Консультант із цим акаунтом уже зареєстрований, увійдіть в аккаунт",
+                            duration = SnackbarDuration.Short
+                        )
+                        navController.navigate("welcome_screen") {
+                            popUpTo("user_nickname_screen") { inclusive = true }
+                        }
                     } else {
                         // Користувача немає, реєструємо його
                         val success = ApiService.registerConsultant(viewModel.consultantData.value)
@@ -87,6 +103,7 @@ fun ConsultantMaxClientsScreen(
                             )
                         }
                     }
+
                 } catch (e: Exception) {
                     Log.e("ConsultantMaxClientsScreen", "Google Sign-In failed: $e")
                     snackbarHostState.showSnackbar(
