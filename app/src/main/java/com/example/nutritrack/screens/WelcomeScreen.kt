@@ -52,21 +52,17 @@ fun WelcomeScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Ініціалізуємо GoogleAuth при першому запуску екрану
     LaunchedEffect(Unit) {
         GoogleAuth.initialize(context)
     }
 
-    // Стани для відображення процесу завантаження, помилок і токена
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var idToken by remember { mutableStateOf<String?>(null) }
 
-    // Стан для управління шторкою
     val sheetState = rememberModalBottomSheetState()
     val showBottomSheet = remember { mutableStateOf(false) }
 
-    // Лаунчер для отримання результатів Google авторизації
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -75,24 +71,22 @@ fun WelcomeScreen(
             try {
                 idToken = GoogleAuth.handleSignInResult(result.data)
                 if (idToken == null) {
-                    errorMessage = "Помилка авторизації: Не вдалося отримати токен"
+                    errorMessage = "Authorization error: Unable to retrieve token"
                 } else {
-                    showBottomSheet.value = true // ✅ відкриваємо тільки після успіху
+                    showBottomSheet.value = true
                 }
             } catch (e: Exception) {
-                errorMessage = "Помилка авторизації: ${e.message}"
+                errorMessage = "Authorization error: ${e.message}"
             } finally {
                 isLoading = false
             }
         }
     }
 
-
-    // Показуємо помилку через Toast лише один раз
     errorMessage?.let { message ->
         LaunchedEffect(message) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            errorMessage = null // Очищаємо після показу
+            errorMessage = null
         }
     }
 
@@ -137,7 +131,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Новий користувач",
+                    text = "New user",
                     fontSize = 21.sp,
                     color = Color.White
                 )
@@ -155,7 +149,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Новий консультант",
+                    text = "New consultant",
                     fontSize = 21.sp,
                     color = Color.White
                 )
@@ -163,7 +157,6 @@ fun WelcomeScreen(
 
             Button(
                 onClick = {
-                    // Запускаємо авторизацію через Google і показуємо шторку
                     GoogleAuth.signIn(launcher)
                 },
                 modifier = Modifier
@@ -176,7 +169,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Вже маю акаунт",
+                    text = "I already have an account",
                     fontSize = 21.sp,
                     color = Color.White
                 )
@@ -184,12 +177,11 @@ fun WelcomeScreen(
         }
     }
 
-    // Шторка для вибору типу акаунту
     if (showBottomSheet.value) {
         ModalBottomSheet(
             onDismissRequest = {
                 showBottomSheet.value = false
-                FirebaseAuth.getInstance().signOut() // Вихід при закритті шторки
+                FirebaseAuth.getInstance().signOut()
             },
             sheetState = sheetState,
             containerColor = Color(0xFF2F4F4F)
@@ -197,11 +189,10 @@ fun WelcomeScreen(
             var bottomSheetLoading by remember { mutableStateOf(false) }
             var bottomSheetError by remember { mutableStateOf<String?>(null) }
 
-            // Показуємо помилку як Toast лише один раз
             bottomSheetError?.let { message ->
                 LaunchedEffect(message) {
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                    bottomSheetError = null // Очищаємо після показу
+                    bottomSheetError = null
                 }
             }
 
@@ -213,7 +204,7 @@ fun WelcomeScreen(
                 verticalArrangement = Arrangement.spacedBy(25.dp)
             ) {
                 Text(
-                    text = "Оберіть тип акаунту",
+                    text = "Select the type of account",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -225,9 +216,8 @@ fun WelcomeScreen(
                         scope.launch {
                             bottomSheetLoading = true
                             try {
-                                // Чекаємо, поки idToken не буде доступним
                                 if (idToken == null) {
-                                    bottomSheetError = "Очікуйте завершення авторизації..."
+                                    bottomSheetError = "Wait for authorization to complete..."
                                     return@launch
                                 }
 
@@ -240,11 +230,11 @@ fun WelcomeScreen(
                                     },
                                     onFailure = { exception ->
                                         bottomSheetError =
-                                            "Користувача не знайдено. Спробуйте увійти як консультант: ${exception.message}"
+                                            "User not found. Try logging in as a consultant: ${exception.message}"
                                     }
                                 )
                             } catch (e: Exception) {
-                                bottomSheetError = "Помилка: ${e.message}"
+                                bottomSheetError = "Error: ${e.message}"
                             } finally {
                                 bottomSheetLoading = false
                             }
@@ -267,7 +257,7 @@ fun WelcomeScreen(
                         )
                     } else {
                         Text(
-                            text = "Увійти як користувач",
+                            text = "Log in as a user",
                             fontSize = 20.sp,
                             color = Color.White
                         )
@@ -279,9 +269,8 @@ fun WelcomeScreen(
                         scope.launch {
                             bottomSheetLoading = true
                             try {
-                                // Чекаємо, поки idToken не буде доступним
                                 if (idToken == null) {
-                                    bottomSheetError = "Очікуйте завершення авторизації..."
+                                    bottomSheetError = "Wait for authorization to complete..."
                                     return@launch
                                 }
 
@@ -294,11 +283,11 @@ fun WelcomeScreen(
                                     },
                                     onFailure = { exception ->
                                         bottomSheetError =
-                                            "Консультанта не знайдено. Спробуйте увійти як користувач: ${exception.message}"
+                                            "Consultant not found. Try logging in as a user: ${exception.message}"
                                     }
                                 )
                             } catch (e: Exception) {
-                                bottomSheetError = "Помилка: ${e.message}"
+                                bottomSheetError = "Error: ${e.message}"
                             } finally {
                                 bottomSheetLoading = false
                             }
@@ -321,7 +310,7 @@ fun WelcomeScreen(
                         )
                     } else {
                         Text(
-                            text = "Увійти як консультант",
+                            text = "Log in as a consultant",
                             fontSize = 20.sp,
                             color = Color.White
                         )

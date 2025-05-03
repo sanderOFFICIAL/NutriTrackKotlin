@@ -80,7 +80,7 @@ fun ConsultantProfileDescriptionScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Вкажіть опис профілю",
+                        text = "Enter a profile description",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -89,7 +89,7 @@ fun ConsultantProfileDescriptionScreen(
                     )
 
                     Text(
-                        text = "Розкажіть про себе, щоб клієнти могли дізнатися більше",
+                        text = "Tell us about yourself so customers can learn more",
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 20.dp),
@@ -99,7 +99,7 @@ fun ConsultantProfileDescriptionScreen(
                     TextField(
                         value = profileDescription.value,
                         onValueChange = { profileDescription.value = it },
-                        label = { Text("Ваш опис профілю", fontSize = 16.sp) },
+                        label = { Text("Your profile description", fontSize = 16.sp) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
@@ -134,7 +134,7 @@ fun ConsultantProfileDescriptionScreen(
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Будь ласка, введіть опис профілю",
+                                    message = "Please enter a profile description",
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -150,7 +150,7 @@ fun ConsultantProfileDescriptionScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Продовжити",
+                        text = "Continue",
                         fontSize = 20.sp,
                         color = Color.White
                     )

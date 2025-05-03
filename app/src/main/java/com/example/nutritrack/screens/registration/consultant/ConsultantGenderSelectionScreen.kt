@@ -37,17 +37,16 @@ fun ConsultantGenderSelectionScreen(
             .background(Color(0xFF64A79B))
             .padding(16.dp)
     ) {
-        // Прогрес-бар із фіксованою позицією зверху
+
         Image(
             painter = painterResource(id = R.drawable.progress_bar_step1),
             contentDescription = "Progress bar step 1",
             modifier = Modifier
                 .size(420.dp)
                 .align(Alignment.TopCenter)
-                .padding(top = 200.dp) // Зменшуємо відступ зверху
+                .padding(top = 200.dp)
         )
 
-        // Основний вміст
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -55,9 +54,8 @@ fun ConsultantGenderSelectionScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Заголовок
             Text(
-                text = "Вкажіть вашу стать",
+                text = "Specify your gender",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -65,16 +63,14 @@ fun ConsultantGenderSelectionScreen(
                 textAlign = TextAlign.Center
             )
 
-            // Підзаголовок
             Text(
-                text = "Ваша стать потрібна для відображення в профілі для клієнтів",
+                text = "Your gender is required to display in the profile for customers",
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 40.dp),
                 textAlign = TextAlign.Center
             )
 
-            // Кнопки
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -96,7 +92,7 @@ fun ConsultantGenderSelectionScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Жінка",
+                        text = "Female",
                         fontSize = 20.sp,
                         color = Color.White
                     )
@@ -116,7 +112,7 @@ fun ConsultantGenderSelectionScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Чоловік",
+                        text = "Male",
                         fontSize = 20.sp,
                         color = Color.White
                     )

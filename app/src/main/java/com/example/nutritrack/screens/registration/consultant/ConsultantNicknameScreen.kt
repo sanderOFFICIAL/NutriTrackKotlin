@@ -80,7 +80,7 @@ fun ConsultantNicknameScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Вкажіть ваше ім'я",
+                        text = "Please provide your name",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -89,7 +89,7 @@ fun ConsultantNicknameScreen(
                     )
 
                     Text(
-                        text = "Це ім'я, яке бачитимуть ваші клієнти",
+                        text = "This is the name your customers will see",
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
@@ -99,7 +99,7 @@ fun ConsultantNicknameScreen(
                     TextField(
                         value = nickname.value,
                         onValueChange = { nickname.value = it },
-                        label = { Text("Ваш псевдонім", fontSize = 14.sp) },
+                        label = { Text("Your name", fontSize = 14.sp) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp)
@@ -134,7 +134,7 @@ fun ConsultantNicknameScreen(
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Будь ласка, введіть нікнейм",
+                                    message = "Please enter a name",
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -150,7 +150,7 @@ fun ConsultantNicknameScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Продовжити",
+                        text = "Continue",
                         fontSize = 20.sp,
                         color = Color.White
                     )

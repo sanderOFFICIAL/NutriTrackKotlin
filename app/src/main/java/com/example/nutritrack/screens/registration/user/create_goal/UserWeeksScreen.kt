@@ -75,7 +75,7 @@ fun UserWeeksScreen(
                 )
 
                 Text(
-                    text = "Вкажіть кількість тижнів",
+                    text = "Specify the number of weeks",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -84,7 +84,7 @@ fun UserWeeksScreen(
                 )
 
                 Text(
-                    text = "Вкажіть кількість тижнів за яку ви хочете досягти цілі",
+                    text = "Specify the number of weeks in which you want to achieve the goal",
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 49.dp),
@@ -114,7 +114,7 @@ fun UserWeeksScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${selectedWeeks.value} тижні",
+                        text = "${selectedWeeks.value} weeks",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -125,10 +125,8 @@ fun UserWeeksScreen(
 
             Button(
                 onClick = {
-                    // Зберігаємо кількість тижнів
                     viewModel.setDurationWeeks(selectedWeeks.value)
 
-                    // Отримуємо idToken із Firebase
                     coroutineScope.launch {
                         try {
                             val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -138,13 +136,11 @@ fun UserWeeksScreen(
                                     Log.d("UserWeeksScreen", "idToken: $idToken")
                                     viewModel.setIdToken(idToken)
 
-                                    // Логування даних перед відправкою
                                     Log.d(
                                         "UserWeeksScreen",
                                         "Goal Data: ${viewModel.userData.value}"
                                     )
 
-                                    // Відправляємо дані на сервер
                                     val success =
                                         ApiService.createUserGoal(viewModel.userData.value)
                                     if (success) {
@@ -152,26 +148,26 @@ fun UserWeeksScreen(
                                         onCreateGoalClick()
                                     } else {
                                         snackbarHostState.showSnackbar(
-                                            message = "Помилка: Не вдалося створити ціль",
+                                            message = "Error: Could not create a target",
                                             duration = SnackbarDuration.Long
                                         )
                                     }
                                 } else {
                                     snackbarHostState.showSnackbar(
-                                        message = "Помилка: Не вдалося отримати idToken",
+                                        message = "Error: Unable to retrieve idToken",
                                         duration = SnackbarDuration.Long
                                     )
                                 }
                             } else {
                                 snackbarHostState.showSnackbar(
-                                    message = "Помилка: Користувач не авторизований",
+                                    message = "Error: User is not authorized",
                                     duration = SnackbarDuration.Long
                                 )
                             }
                         } catch (e: Exception) {
                             Log.e("UserWeeksScreen", "Failed to get idToken: $e")
                             snackbarHostState.showSnackbar(
-                                message = "Помилка: $e",
+                                message = "Error: $e",
                                 duration = SnackbarDuration.Long
                             )
                         }
@@ -185,7 +181,7 @@ fun UserWeeksScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Створити ціль",
+                    text = "Create a goal",
                     fontSize = 20.sp,
                     color = Color.White
                 )

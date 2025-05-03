@@ -42,9 +42,8 @@ fun UserSuccessScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.weight(1f)
             ) {
-                // Заголовок
                 Text(
-                    text = "Дякуємо за реєстрацію!",
+                    text = "Thank you for registering!",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -52,16 +51,13 @@ fun UserSuccessScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Підзаголовок
                 Text(
-                    text = "Ви успішно зареєструвалися як користувач.",
+                    text = "You have successfully registered as a user.",
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
                     textAlign = TextAlign.Center
                 )
-
-                // Іконка успіху (текстовий символ, якщо немає іконки)
                 Text(
                     text = "✔",
                     fontSize = 100.sp,
@@ -70,7 +66,6 @@ fun UserSuccessScreen(
                 )
             }
 
-            // Кнопка "Перейти до головного екрану"
             Button(
                 onClick = { onNavigateToGoalScreen() },
                 modifier = Modifier
@@ -81,7 +76,7 @@ fun UserSuccessScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Створити вашу ціль",
+                    text = "Create your goal",
                     fontSize = 20.sp,
                     color = Color.White
                 )

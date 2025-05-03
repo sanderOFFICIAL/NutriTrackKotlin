@@ -45,24 +45,21 @@ fun UserGoalTypeScreen(
             modifier = Modifier.size(230.dp)
         )
 
-        // Заголовок
         Text(
-            text = "Яка ваша ціль ?",
+            text = "What is your goal?",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.padding(top = 25.dp, bottom = 8.dp)
         )
 
-        // Підзаголовок
         Text(
-            text = "Виберіть тип вашою цілі, щоб ми розрахували все під вас",
+            text = "Choose the type of your goal so that we can calculate everything for you",
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 80.dp),
             textAlign = TextAlign.Center
         )
-        // Кнопки
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,7 +82,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Підтримувати поточну вагу",
+                    text = "Maintain current weight",
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -106,7 +103,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Зменшити вагу",
+                    text = "Lose weight",
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -127,7 +124,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Набрати вагу",
+                    text = "Gain weight",
                     fontSize = 20.sp,
                     color = Color.White
                 )

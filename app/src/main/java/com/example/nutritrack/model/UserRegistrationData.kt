@@ -13,6 +13,6 @@ data class UserRegistrationData(
     val gender: String = "",
     val height: Int = 0,
     val current_weight: Int = 0,
-    val activity_level: Int = 0,
+    val activity_level: Int = 0, //Enum value (0-Sedentary, 1-Light, 2-Moderate, 3-High)
     val birth_year: Int = 0
 )

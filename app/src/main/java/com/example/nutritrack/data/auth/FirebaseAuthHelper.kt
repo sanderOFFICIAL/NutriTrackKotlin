@@ -8,12 +8,10 @@ import kotlinx.coroutines.tasks.await
 object FirebaseAuthHelper {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    // Перевірка, чи користувач авторизований
     fun isUserAuthenticated(): Boolean {
         return auth.currentUser != null
     }
 
-    // Отримання idToken
     suspend fun getIdToken(): String? {
         return try {
             val user = auth.currentUser
@@ -29,12 +27,10 @@ object FirebaseAuthHelper {
         }
     }
 
-    // Отримання UID із idToken
     fun getUid(): String? {
         return auth.currentUser?.uid
     }
 
-    // Вихід із акаунту
     fun signOut() {
         auth.signOut()
     }
@@ -57,7 +53,6 @@ object FirebaseAuthHelper {
         }
     }
 
-    // Перевірка і логін консультанта
     suspend fun loginAsConsultant(): Result<Boolean> {
         return try {
             val idToken = getIdToken()

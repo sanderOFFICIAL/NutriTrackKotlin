@@ -57,7 +57,7 @@ object ApiService {
             .build()
 
         Retrofit.Builder()
-            .baseUrl("http://192.168.0.183:5182") // Заміни на URL твого API
+            .baseUrl("http://192.168.0.183:5182")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -67,20 +67,18 @@ object ApiService {
         retrofit.create(ApiServiceInterface::class.java)
     }
 
-    // Перевірка, чи консультант існує
     suspend fun checkConsultantExists(idToken: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.loginConsultant(LoginRequest(idToken))
-                response.isSuccessful // Якщо 200 — консультант існує
+                response.isSuccessful
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to check consultant: $e")
-                false // Якщо помилка — вважаємо, що консультанта немає
+                false
             }
         }
     }
 
-    // Реєстрація консультанта
     suspend fun registerConsultant(data: ConsultantRegistrationData): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -93,20 +91,18 @@ object ApiService {
         }
     }
 
-    // Перевірка, чи користувач існує
     suspend fun checkUserExists(idToken: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.loginUser(LoginRequest(idToken))
-                response.isSuccessful // Якщо 200 — користувач існує
+                response.isSuccessful
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to check user: $e")
-                false // Якщо помилка — вважаємо, що користувача немає
+                false
             }
         }
     }
-
-    // Реєстрація користувача
+    
     suspend fun registerUser(data: UserRegistrationData): Boolean {
         return withContext(Dispatchers.IO) {
             try {

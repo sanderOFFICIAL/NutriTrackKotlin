@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserGoalData(
     val idToken: String = "",
-    val goal_type: Int = 0, // 0 - підтримувати, 1 - зменшити, 2 - набрати
+    val goal_type: Int = 0, // Enum value (0 - maintain, 1 - decrease, 2 - increase)
     val target_weight: Int = 0,
     val duration_weeks: Int = 0
 )

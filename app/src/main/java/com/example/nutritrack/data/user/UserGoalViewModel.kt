@@ -9,7 +9,6 @@ class UserGoalViewModel @Inject constructor() : ViewModel() {
     private val _userData = mutableStateOf(UserGoalData())
     val userData = _userData
 
-    // Методи для оновлення окремих полів
     fun setIdToken(idToken: String) {
         _userData.value = _userData.value.copy(idToken = idToken)
     }
@@ -26,7 +25,6 @@ class UserGoalViewModel @Inject constructor() : ViewModel() {
         _userData.value = _userData.value.copy(duration_weeks = weeks)
     }
 
-    // Метод для очищення даних після реєстрації
     fun clearData() {
         _userData.value = UserGoalData()
     }

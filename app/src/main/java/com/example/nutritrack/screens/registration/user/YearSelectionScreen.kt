@@ -35,9 +35,8 @@ fun YearSelectionScreen(
     viewModel: UserRegistrationViewModel,
     onNextClick: () -> Unit
 ) {
-    // Список років від 1900 до 2025
     val years = (1900..2025).toList()
-    val selectedYear = remember { mutableStateOf(1996) } // Початковий рік 1996
+    val selectedYear = remember { mutableStateOf(1996) }
 
     Column(
         modifier = Modifier
@@ -61,7 +60,7 @@ fun YearSelectionScreen(
 
             // Заголовок
             Text(
-                text = "Вкажіть ваш рік народження",
+                text = "Specify your year of birth",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -71,14 +70,13 @@ fun YearSelectionScreen(
 
             // Підзаголовок
             Text(
-                text = "Ця інформація використовується для розрахунків",
+                text = "This information is used to calculate",
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
                 textAlign = TextAlign.Center
             )
 
-            // Прямокутник із обраним роком і обробкою прокрутки
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,13 +85,10 @@ fun YearSelectionScreen(
                     .background(Color(0xFF2F4F4F), shape = RoundedCornerShape(8.dp))
                     .pointerInput(Unit) {
                         detectVerticalDragGestures { _, dragAmount ->
-                            // dragAmount > 0 — прокрутка вниз, dragAmount < 0 — прокрутка вгору
                             val currentIndex = years.indexOf(selectedYear.value)
                             val newIndex = if (dragAmount > 0) {
-                                // Прокрутка вниз — зменшуємо рік
                                 (currentIndex - 1).coerceIn(0, years.size - 1)
                             } else {
-                                // Прокрутка вгору — збільшуємо рік
                                 (currentIndex + 1).coerceIn(0, years.size - 1)
                             }
                             selectedYear.value = years[newIndex]
@@ -111,7 +106,6 @@ fun YearSelectionScreen(
             }
         }
 
-        // Кнопка "Продовжити"
         Button(
             onClick = {
                 viewModel.setBirthYear(selectedYear.value)
@@ -127,7 +121,7 @@ fun YearSelectionScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Продовжити",
+                text = "Continue",
                 fontSize = 20.sp,
                 color = Color.White
             )

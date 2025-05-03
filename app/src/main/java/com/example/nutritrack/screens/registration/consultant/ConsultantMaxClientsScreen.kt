@@ -54,7 +54,7 @@ fun ConsultantMaxClientsScreen(
     val selectedMaxClients = remember { mutableStateOf(1) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() } // Замінюємо scaffoldState
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         GoogleAuth.initialize(context)
@@ -64,17 +64,14 @@ fun ConsultantMaxClientsScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             coroutineScope.launch {
                 try {
-                    // Авторизація через Google
                     val idToken = GoogleAuth.handleSignInResult(result.data)
                     viewModel.setIdToken(idToken)
 
-                    // Перевірка, чи користувач існує
                     val consultantExist = ApiService.checkConsultantExists(idToken)
                     val userExist = ApiService.checkUserExists(idToken)
                     if (userExist) {
-                        // Користувач уже існує, показуємо SnackBar
                         snackbarHostState.showSnackbar(
-                            message = "Помилка: Ви не можете створити аккаунт, бо на цю пошту зареєстровані як користувач",
+                            message = "Error: You can't create an account because you're already registered as a user at this email address",
                             duration = SnackbarDuration.Short
 
                         )
@@ -82,23 +79,21 @@ fun ConsultantMaxClientsScreen(
                             popUpTo("user_nickname_screen") { inclusive = true }
                         }
                     } else if (consultantExist) {
-                        // Користувач уже існує, показуємо SnackBar
                         snackbarHostState.showSnackbar(
-                            message = "Помилка: Консультант із цим акаунтом уже зареєстрований, увійдіть в аккаунт",
+                            message = "Error: The consultant with this account is already registered, please log in",
                             duration = SnackbarDuration.Short
                         )
                         navController.navigate("welcome_screen") {
                             popUpTo("user_nickname_screen") { inclusive = true }
                         }
                     } else {
-                        // Користувача немає, реєструємо його
                         val success = ApiService.registerConsultant(viewModel.consultantData.value)
                         if (success) {
                             viewModel.clearData()
                             onRegistrationSuccess()
                         } else {
                             snackbarHostState.showSnackbar(
-                                message = "Помилка: Не вдалося зареєструвати консультанта",
+                                message = "Error: Could not register a consultant",
                                 duration = SnackbarDuration.Long
                             )
                         }
@@ -107,7 +102,7 @@ fun ConsultantMaxClientsScreen(
                 } catch (e: Exception) {
                     Log.e("ConsultantMaxClientsScreen", "Google Sign-In failed: $e")
                     snackbarHostState.showSnackbar(
-                        message = "Помилка авторизації: $e",
+                        message = "Authorization error: $e",
                         duration = SnackbarDuration.Long
                     )
                 }
@@ -115,7 +110,7 @@ fun ConsultantMaxClientsScreen(
         }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }, // Додаємо SnackBarHost
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.fillMaxSize()
     ) { padding ->
         Box(
@@ -147,7 +142,7 @@ fun ConsultantMaxClientsScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Вкажіть кількість клієнтів",
+                        text = "Specify the number of clients",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -156,7 +151,7 @@ fun ConsultantMaxClientsScreen(
                     )
 
                     Text(
-                        text = "Скільки клієнтів ви можете взяти одночасно?",
+                        text = "How many clients can you take on at once?",
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
@@ -187,7 +182,7 @@ fun ConsultantMaxClientsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "${selectedMaxClients.value} клієнтів",
+                            text = "${selectedMaxClients.value} clients",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -209,7 +204,7 @@ fun ConsultantMaxClientsScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Зареєструватись",
+                        text = "Register",
                         fontSize = 20.sp,
                         color = Color.White
                     )

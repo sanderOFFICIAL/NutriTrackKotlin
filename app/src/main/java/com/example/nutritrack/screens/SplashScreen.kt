@@ -30,7 +30,7 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Завантаження...",
+            text = "Loading...",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -38,7 +38,6 @@ fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
-        // Перевірка авторизації та перенаправлення
         val isAuthenticated = FirebaseAuthHelper.isUserAuthenticated()
         if (!isAuthenticated) {
             Log.d("SplashScreen", "User is not authenticated")
@@ -48,7 +47,6 @@ fun SplashScreen(
             return@LaunchedEffect
         }
 
-        // Отримуємо idToken і uid
         val idToken = FirebaseAuthHelper.getIdToken()
         val uid = FirebaseAuthHelper.getUid()
         if (idToken == null || uid == null) {
@@ -59,7 +57,6 @@ fun SplashScreen(
             return@LaunchedEffect
         }
 
-        // Перевірка, чи це консультант
         val isConsultant = withContext(Dispatchers.IO) {
             ApiService.checkConsultantExists(idToken)
         }
@@ -73,7 +70,6 @@ fun SplashScreen(
             return@LaunchedEffect
         }
 
-        // Якщо це не консультант, перевіряємо, чи це користувач
         val userData = withContext(Dispatchers.IO) {
             ApiService.getUserByUid(uid)
         }
@@ -87,7 +83,6 @@ fun SplashScreen(
             return@LaunchedEffect
         }
 
-        // Перевірка наявності цілі
         val goalIds = withContext(Dispatchers.IO) {
             ApiService.getAllUserGoalIds(idToken)
         }
@@ -107,7 +102,6 @@ fun SplashScreen(
     }
 }
 
-// Перевірка, чи є у користувача необхідні дані
 private fun hasRequiredUserData(userData: UserData): Boolean {
     val hasData = userData.gender.isNotEmpty() &&
             userData.height > 0 &&

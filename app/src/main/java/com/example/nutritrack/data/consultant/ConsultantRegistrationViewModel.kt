@@ -6,11 +6,9 @@ import com.example.nutritrack.model.ConsultantRegistrationData
 import javax.inject.Inject
 
 class ConsultantRegistrationViewModel @Inject constructor() : ViewModel() {
-    // Зберігаємо дані консультанта у змінній стану
     private val _consultantData = mutableStateOf(ConsultantRegistrationData())
     val consultantData = _consultantData
 
-    // Методи для оновлення окремих полів
     fun setIdToken(idToken: String) {
         _consultantData.value = _consultantData.value.copy(idToken = idToken)
     }
@@ -39,7 +37,6 @@ class ConsultantRegistrationViewModel @Inject constructor() : ViewModel() {
         _consultantData.value = _consultantData.value.copy(gender = gender)
     }
 
-    // Метод для очищення даних після реєстрації
     fun clearData() {
         _consultantData.value = ConsultantRegistrationData()
     }

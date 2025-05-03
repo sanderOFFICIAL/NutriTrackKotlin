@@ -50,17 +50,14 @@ object GoogleAuth {
     suspend fun handleSignInResult(data: Intent?): String {
         return suspendCancellableCoroutine { continuation ->
             try {
-                // Отримуємо Google ID-токен
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 val account = task.getResult(ApiException::class.java)
                 val googleIdToken = account.idToken
 
-                // Використовуємо Google ID-токен для авторизації в Firebase
                 val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
-                            // Отримуємо Firebase ID-токен
                             auth.currentUser?.getIdToken(true)?.addOnCompleteListener { tokenTask ->
                                 if (tokenTask.isSuccessful) {
                                     val firebaseIdToken = tokenTask.result?.token

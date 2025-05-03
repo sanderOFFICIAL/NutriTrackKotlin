@@ -44,7 +44,7 @@ fun ConsultantSuccessScreen(
             ) {
                 // Заголовок
                 Text(
-                    text = "Дякуємо за реєстрацію!",
+                    text = "Thank you for registering!",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -52,16 +52,14 @@ fun ConsultantSuccessScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Підзаголовок
                 Text(
-                    text = "Ви успішно зареєструвалися як консультант.",
+                    text = "You have successfully registered as a consultant.",
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
                     textAlign = TextAlign.Center
                 )
 
-                // Іконка успіху (текстовий символ, якщо немає іконки)
                 Text(
                     text = "✔",
                     fontSize = 100.sp,
@@ -70,7 +68,6 @@ fun ConsultantSuccessScreen(
                 )
             }
 
-            // Кнопка "Перейти до головного екрану"
             Button(
                 onClick = { onNavigateToMainScreen() },
                 modifier = Modifier
@@ -81,7 +78,7 @@ fun ConsultantSuccessScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Перейти до головного екрану",
+                    text = "Go to the home screen",
                     fontSize = 20.sp,
                     color = Color.White
                 )

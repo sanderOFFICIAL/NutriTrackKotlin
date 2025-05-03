@@ -34,36 +34,32 @@ fun GenderSelectionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF64A79B)) // Такий же фон, як на WelcomeScreen
+            .background(Color(0xFF64A79B))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Іконка (заміни R.drawable.check_icon на свій ресурс)
         Image(
             painter = painterResource(id = R.drawable.progress_bar_step1),
             contentDescription = "Check icon",
             modifier = Modifier.size(230.dp)
         )
 
-        // Заголовок
         Text(
-            text = "Вкажіть вашу стать!",
+            text = "Please specify your gender!",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.padding(top = 25.dp, bottom = 8.dp)
         )
 
-        // Підзаголовок
         Text(
-            text = "Ця інформація допоможе нам підібрати потрібну кількість калоріїв  саме для вас.",
+            text = "This information will help us choose the right amount of calories for you.",
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 80.dp),
             textAlign = TextAlign.Center
         )
-        // Кнопки
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,7 +82,7 @@ fun GenderSelectionScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Жінка",
+                    text = "Female",
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -107,7 +103,7 @@ fun GenderSelectionScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Чоловік",
+                    text = "Male",
                     fontSize = 20.sp,
                     color = Color.White
                 )

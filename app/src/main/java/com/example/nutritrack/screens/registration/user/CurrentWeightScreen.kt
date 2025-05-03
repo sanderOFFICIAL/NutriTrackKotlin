@@ -35,9 +35,8 @@ fun CurrentWeightScreen(
     viewModel: UserRegistrationViewModel,
     onNextClick: () -> Unit,
 ) {
-    // Список ваги від 30 до 200 кг
     val weights = (30..200).toList()
-    val selectedWeight = remember { mutableStateOf(95) } // Початкова вага 95 кг
+    val selectedWeight = remember { mutableStateOf(95) }
 
     Column(
         modifier = Modifier
@@ -52,16 +51,14 @@ fun CurrentWeightScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.weight(1f)
         ) {
-            // Іконка
             Image(
                 painter = painterResource(id = R.drawable.progress_bar_step5),
                 contentDescription = "Check icon",
                 modifier = Modifier.size(230.dp)
             )
 
-            // Заголовок
             Text(
-                text = "Вкажіть вашу вагу",
+                text = "Enter your weight",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -69,16 +66,14 @@ fun CurrentWeightScreen(
                 textAlign = TextAlign.Center
             )
 
-            // Підзаголовок
             Text(
-                text = "Ваша вага допоможе нам підібрати кількість калорій для вас. Не хвилюйтесь ми нікому не скажемо..",
+                text = "Your weight will help us to choose the right amount of calories for you. Don't worry, we won't tell anyone...",
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
                 textAlign = TextAlign.Center
             )
 
-            // Прямокутник із обраною вагою і обробкою прокрутки
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,13 +82,10 @@ fun CurrentWeightScreen(
                     .background(Color(0xFF2F4F4F), shape = RoundedCornerShape(8.dp))
                     .pointerInput(Unit) {
                         detectVerticalDragGestures { _, dragAmount ->
-                            // dragAmount > 0 — прокрутка вниз, dragAmount < 0 — прокрутка вгору
                             val currentIndex = weights.indexOf(selectedWeight.value)
                             val newIndex = if (dragAmount > 0) {
-                                // Прокрутка вниз — зменшуємо вагу
                                 (currentIndex - 1).coerceIn(0, weights.size - 1)
                             } else {
-                                // Прокрутка вгору — збільшуємо вагу
                                 (currentIndex + 1).coerceIn(0, weights.size - 1)
                             }
                             selectedWeight.value = weights[newIndex]
@@ -102,7 +94,7 @@ fun CurrentWeightScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${selectedWeight.value} кг",
+                    text = "${selectedWeight.value} kg",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -111,7 +103,6 @@ fun CurrentWeightScreen(
             }
         }
 
-        // Кнопка "Продовжити"
         Button(
             onClick = {
                 viewModel.setCurrentWeight(selectedWeight.value)
@@ -127,7 +118,7 @@ fun CurrentWeightScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Продовжити",
+                text = "Continue",
                 fontSize = 20.sp,
                 color = Color.White
             )

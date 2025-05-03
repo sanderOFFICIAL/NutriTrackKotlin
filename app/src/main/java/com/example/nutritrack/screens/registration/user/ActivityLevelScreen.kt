@@ -45,7 +45,7 @@ fun ActivityLevelScreen(
         )
 
         Text(
-            text = "Який ваш щоденний рівень активності?",
+            text = "What is your daily activity level?",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -54,7 +54,7 @@ fun ActivityLevelScreen(
         )
 
         Text(
-            text = "Активність впливає на кількість калорій яка потрібна організму",
+            text = "Activity affects the amount of calories the body needs",
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 32.dp),
@@ -86,13 +86,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Сидячий спосіб життя",
+                        text = "Sedentary lifestyle",
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Відсутня фізична активність",
+                        text = "Lack of physical activity",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -118,13 +118,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Легка активність",
+                        text = "Light activity",
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Легкі вправи 1-3 рази на тиждень",
+                        text = "Light exercises 1-3 times a week",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -150,13 +150,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Помірна активність",
+                        text = "Moderate activity",
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Тренування 2-4 рази на тиждень",
+                        text = "Training 2-4 times a week",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -182,13 +182,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Висока активність",
+                        text = "High activity",
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Тренування 6-7 разів на тиждень/фізична робота",
+                        text = "Training 6-7 times a week/physical work",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center

@@ -37,7 +37,6 @@ fun SetupNavGraph(navController: NavHostController) {
                 onLoginAsConsultantClick = { navController.navigate("consultant_success_screen") },
             )
         }
-        // Додаємо вкладені графи на верхній рівень
         userRegistrationNavGraph(navController, userViewModel, userGoalViewModel)
         consultantRegistrationNavGraph(navController, consultantViewModel)
     }

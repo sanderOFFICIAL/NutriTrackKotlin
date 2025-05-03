@@ -9,7 +9,6 @@ class UserRegistrationViewModel @Inject constructor() : ViewModel() {
     private val _userData = mutableStateOf(UserRegistrationData())
     val userData = _userData
 
-    // Методи для оновлення окремих полів
     fun setIdToken(idToken: String) {
         _userData.value = _userData.value.copy(idToken = idToken)
     }
@@ -46,7 +45,6 @@ class UserRegistrationViewModel @Inject constructor() : ViewModel() {
         _userData.value = _userData.value.copy(birth_year = birthYear)
     }
 
-    // Метод для очищення даних після реєстрації
     fun clearData() {
         _userData.value = UserRegistrationData()
     }

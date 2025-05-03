@@ -44,17 +44,16 @@ fun ConsultantExperienceYearsScreen(
             .background(Color(0xFF64A79B))
             .padding(16.dp)
     ) {
-        // Прогрес-бар із фіксованою позицією зверху
+
         Image(
             painter = painterResource(id = R.drawable.progress_bar_step5),
             contentDescription = "Progress bar step 5",
             modifier = Modifier
                 .size(420.dp)
                 .align(Alignment.TopCenter)
-                .padding(top = 200.dp) // Зменшуємо відступ зверху
+                .padding(top = 200.dp)
         )
 
-        // Основний вміст
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -67,9 +66,8 @@ fun ConsultantExperienceYearsScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.weight(1f)
             ) {
-                // Заголовок
                 Text(
-                    text = "Вкажіть ваш досвід",
+                    text = "Specify your experience",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -77,16 +75,13 @@ fun ConsultantExperienceYearsScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Підзаголовок
                 Text(
-                    text = "Скільки років ви працюєте консультантом?",
+                    text = "How many years have you been working as consultant?",
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
                     textAlign = TextAlign.Center
                 )
-
-                // Прямокутник із обраним досвідом
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,7 +106,7 @@ fun ConsultantExperienceYearsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${selectedExperienceYears.value} років",
+                        text = "${selectedExperienceYears.value} years",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -120,7 +115,6 @@ fun ConsultantExperienceYearsScreen(
                 }
             }
 
-            // Кнопка "Продовжити"
             Button(
                 onClick = {
                     viewModel.setExperienceYears(selectedExperienceYears.value)
@@ -136,7 +130,7 @@ fun ConsultantExperienceYearsScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Продовжити",
+                    text = "Continue",
                     fontSize = 20.sp,
                     color = Color.White
                 )

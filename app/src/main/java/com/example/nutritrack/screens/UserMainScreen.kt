@@ -50,7 +50,7 @@ fun UserMainScreen(
                 ) {
                     // Заголовок
                     Text(
-                        text = "Вітаємо!",
+                        text = "Congratulations!",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -58,16 +58,14 @@ fun UserMainScreen(
                         textAlign = TextAlign.Center
                     )
 
-                    // Підзаголовок
                     Text(
-                        text = "Ви на головному екрані. Оберіть дію, щоб продовжити.",
+                        text = "You are now on the home screen. Select an action to continue.",
                         fontSize = 18.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
                         textAlign = TextAlign.Center
                     )
 
-                    // Кнопки для навігації
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -83,7 +81,7 @@ fun UserMainScreen(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
-                                text = "Переглянути ціль",
+                                text = "View target",
                                 fontSize = 20.sp,
                                 color = Color.White
                             )
@@ -98,7 +96,7 @@ fun UserMainScreen(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
-                                text = "Мій профіль",
+                                text = "My profile",
                                 fontSize = 20.sp,
                                 color = Color.White
                             )

@@ -35,7 +35,6 @@ fun HeightSelectionScreen(
     viewModel: UserRegistrationViewModel,
     onNextClick: () -> Unit,
 ) {
-    // Список зросту від 100 до 250 см
     val heights = (100..250).toList()
     val selectedHeight = remember { mutableStateOf(170) } // Початковий зріст 185 см
 
@@ -52,16 +51,14 @@ fun HeightSelectionScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.weight(1f)
         ) {
-            // Іконка
             Image(
                 painter = painterResource(id = R.drawable.progress_bar_step4),
                 contentDescription = "Check icon",
                 modifier = Modifier.size(230.dp)
             )
 
-            // Заголовок
             Text(
-                text = "Вкажіть ваш зріст у сантиметрах",
+                text = "Enter your height in centimeters",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -69,16 +66,14 @@ fun HeightSelectionScreen(
                 textAlign = TextAlign.Center
             )
 
-            // Підзаголовок
             Text(
-                text = "Ваш зріст допоможе нам підібрати кількість калорій для вас",
+                text = "Your height will help us choose the right amount of calories for you",
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
                 textAlign = TextAlign.Center
             )
 
-            // Прямокутник із обраним зростом і обробкою прокрутки
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,13 +82,10 @@ fun HeightSelectionScreen(
                     .background(Color(0xFF2F4F4F), shape = RoundedCornerShape(8.dp))
                     .pointerInput(Unit) {
                         detectVerticalDragGestures { _, dragAmount ->
-                            // dragAmount > 0 — прокрутка вниз, dragAmount < 0 — прокрутка вгору
                             val currentIndex = heights.indexOf(selectedHeight.value)
                             val newIndex = if (dragAmount > 0) {
-                                // Прокрутка вниз — зменшуємо значення
                                 (currentIndex - 1).coerceIn(0, heights.size - 1)
                             } else {
-                                // Прокрутка вгору — збільшуємо значення
                                 (currentIndex + 1).coerceIn(0, heights.size - 1)
                             }
                             selectedHeight.value = heights[newIndex]
@@ -102,7 +94,7 @@ fun HeightSelectionScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${selectedHeight.value} см",
+                    text = "${selectedHeight.value} cm",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -111,7 +103,6 @@ fun HeightSelectionScreen(
             }
         }
 
-        // Кнопка "Продовжити"
         Button(
             onClick = {
                 viewModel.setHeight(selectedHeight.value)
@@ -127,7 +118,7 @@ fun HeightSelectionScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Продовжити",
+                text = "Continue",
                 fontSize = 20.sp,
                 color = Color.White
             )
