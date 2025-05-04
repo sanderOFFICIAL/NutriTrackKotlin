@@ -3,6 +3,7 @@ package com.example.nutritrack.data.api
 import android.util.Log
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
+import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
@@ -17,20 +18,20 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 @Serializable
 data class LoginRequest(val idToken: String)
 
 interface ApiServiceInterface {
-    // Ендпоінти для консультанта
+   
     @POST("api/Auth/login/consultant")
     suspend fun loginConsultant(@Body request: LoginRequest): Response<Void>
 
     @POST("api/Auth/register/consultant")
     suspend fun registerConsultant(@Body data: ConsultantRegistrationData): Response<Void>
 
-    // Ендпоінти для користувача
     @POST("api/Auth/login/user")
     suspend fun loginUser(@Body request: LoginRequest): Response<Void>
 
@@ -45,6 +46,9 @@ interface ApiServiceInterface {
 
     @GET("api/Goal/get-all-user-goal-ids")
     suspend fun getAllUserGoalIds(@Query("idToken") idToken: String): Response<List<GoalIdResponse>>
+
+    @GET("api/Goal/get-specific-goal-by-id/{goalId}")
+    suspend fun getSpecificGoalById(@Path("goalId") goalId: Int): Response<GoalResponse>
 }
 
 object ApiService {
@@ -102,7 +106,7 @@ object ApiService {
             }
         }
     }
-    
+
     suspend fun registerUser(data: UserRegistrationData): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -144,12 +148,12 @@ object ApiService {
         }
     }
 
-    suspend fun getAllUserGoalIds(idToken: String): List<String> {
+    suspend fun getAllUserGoalIds(idToken: String): List<GoalIdResponse> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.getAllUserGoalIds(idToken)
                 if (response.isSuccessful) {
-                    response.body()?.map { it.goal_id } ?: emptyList()
+                    response.body() ?: emptyList()
                 } else {
                     Log.e("ApiService", "Failed to get user goal IDs: ${response.code()}")
                     emptyList()
@@ -157,6 +161,23 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to get user goal IDs: $e")
                 emptyList()
+            }
+        }
+    }
+
+    suspend fun getSpecificGoalById(goalId: Int): GoalResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getSpecificGoalById(goalId)
+                if (response.isSuccessful) {
+                    response.body()
+                } else {
+                    Log.e("ApiService", "Failed to get specific goal by ID: ${response.code()}")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get specific goal by ID: $e")
+                null
             }
         }
     }

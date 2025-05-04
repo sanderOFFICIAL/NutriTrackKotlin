@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.data.consultant.ConsultantRegistrationViewModel
-import com.example.nutritrack.screens.ConsultantSuccessScreen
+import com.example.nutritrack.screens.consultant.ConsultantSuccessScreen
 import com.example.nutritrack.screens.registration.consultant.ConsultantExperienceYearsScreen
 import com.example.nutritrack.screens.registration.consultant.ConsultantGenderSelectionScreen
 import com.example.nutritrack.screens.registration.consultant.ConsultantMaxClientsScreen

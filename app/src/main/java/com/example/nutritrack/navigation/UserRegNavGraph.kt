@@ -8,7 +8,6 @@ import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.data.user.UserGoalViewModel
 import com.example.nutritrack.data.user.UserRegistrationViewModel
 import com.example.nutritrack.screens.UserMainScreen
-import com.example.nutritrack.screens.UserSuccessScreen
 import com.example.nutritrack.screens.registration.user.ActivityLevelScreen
 import com.example.nutritrack.screens.registration.user.CurrentWeightScreen
 import com.example.nutritrack.screens.registration.user.GenderSelectionScreen
@@ -18,6 +17,7 @@ import com.example.nutritrack.screens.registration.user.YearSelectionScreen
 import com.example.nutritrack.screens.registration.user.create_goal.UserDesiredWeightScreen
 import com.example.nutritrack.screens.registration.user.create_goal.UserGoalTypeScreen
 import com.example.nutritrack.screens.registration.user.create_goal.UserWeeksScreen
+import com.example.nutritrack.screens.user.UserSuccessScreen
 
 fun NavGraphBuilder.userRegistrationNavGraph(
     navController: NavHostController,
@@ -114,6 +114,9 @@ fun NavGraphBuilder.userRegistrationNavGraph(
                 },
                 onViewGoalClick = {
                     navController.navigate("view_goal_screen")
+                },
+                onLogoutClick = {
+                    navController.navigate("welcome_screen")
                 },
             )
         }

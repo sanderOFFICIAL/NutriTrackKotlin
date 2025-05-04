@@ -1,4 +1,4 @@
-package com.example.nutritrack.screens
+package com.example.nutritrack.screens.consultant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun UserSuccessScreen(
-    onNavigateToGoalScreen: () -> Unit
+fun ConsultantSuccessScreen(
+    onNavigateToMainScreen: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -42,6 +42,7 @@ fun UserSuccessScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.weight(1f)
             ) {
+                // Заголовок
                 Text(
                     text = "Thank you for registering!",
                     fontSize = 28.sp,
@@ -52,12 +53,13 @@ fun UserSuccessScreen(
                 )
 
                 Text(
-                    text = "You have successfully registered as a user.",
+                    text = "You have successfully registered as a consultant.",
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
                     textAlign = TextAlign.Center
                 )
+
                 Text(
                     text = "✔",
                     fontSize = 100.sp,
@@ -67,7 +69,7 @@ fun UserSuccessScreen(
             }
 
             Button(
-                onClick = { onNavigateToGoalScreen() },
+                onClick = { onNavigateToMainScreen() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
@@ -76,7 +78,7 @@ fun UserSuccessScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Create your goal",
+                    text = "Go to the home screen",
                     fontSize = 20.sp,
                     color = Color.White
                 )
