@@ -5,9 +5,11 @@ import com.example.nutritrack.data.user.UpdateUserCurrentWeightRequest
 import com.example.nutritrack.data.user.UpdateUserNicknameRequest
 import com.example.nutritrack.data.user.UpdateUserProfileDescriptionRequest
 import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
+import com.example.nutritrack.model.AddStreakRequest
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
+import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
@@ -73,6 +75,12 @@ interface ApiServiceInterface {
         @Path("goalId") goalId: Int,
         @Query("idToken") idToken: String
     ): Response<Void>
+
+    @POST("api/Streak/add-streak")
+    suspend fun addStreak(@Body request: AddStreakRequest): Response<Void>
+
+    @PUT("api/Streak/update-streak")
+    suspend fun updateStreak(@Body request: UpdateStreakRequest): Response<Void>
 }
 
 object ApiService {
@@ -290,6 +298,42 @@ object ApiService {
                 }
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to delete goal: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun addStreak(idToken: String, currentStreak: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = AddStreakRequest(idToken, currentStreak)
+                val response = apiService.addStreak(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to add streak: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to add streak: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateStreak(idToken: String, currentStreak: Int, isActive: Boolean): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateStreakRequest(idToken, currentStreak, isActive)
+                val response = apiService.updateStreak(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update streak: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update streak: $e")
                 false
             }
         }

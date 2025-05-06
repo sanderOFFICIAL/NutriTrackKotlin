@@ -1,5 +1,8 @@
 package com.example.nutritrack.screens
 
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,7 +56,11 @@ import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.GoalResponse
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserMainScreen(
@@ -62,8 +70,27 @@ fun UserMainScreen(
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var streak by remember { mutableStateOf(0) }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("NutriTrackPrefs", Context.MODE_PRIVATE)
+
+    fun saveLastLoginDate(date: String) {
+        sharedPreferences.edit().putString("lastLoginDate", date).apply()
+    }
+
+    fun getLastLoginDate(): String? {
+        return sharedPreferences.getString("lastLoginDate", null)
+    }
+
+    fun saveStreak(value: Int) {
+        sharedPreferences.edit().putInt("currentStreak", value).apply()
+    }
+
+    fun getStreak(): Int {
+        return sharedPreferences.getInt("currentStreak", 0)
+    }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -76,6 +103,49 @@ fun UserMainScreen(
                     errorMessage = "Authorization error: IdToken not found"
                     return@launch
                 }
+
+                val currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                val lastLoginDateStr = getLastLoginDate()
+                var currentStreak = getStreak()
+
+                if (lastLoginDateStr == null) {
+                    currentStreak = 1
+                    val success = ApiService.addStreak(idToken, currentStreak)
+                    if (success) {
+                        saveStreak(currentStreak)
+                        saveLastLoginDate(currentDate)
+                    }
+                } else {
+                    val lastLoginDate =
+                        LocalDate.parse(lastLoginDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
+                    val daysDifference =
+                        ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
+
+                    when {
+                        daysDifference == 0 -> {
+                            currentStreak = getStreak()
+                        }
+
+                        daysDifference == 1 -> {
+                            currentStreak = getStreak() + 1
+                            val success = ApiService.updateStreak(idToken, currentStreak, true)
+                            if (success) {
+                                saveStreak(currentStreak)
+                                saveLastLoginDate(currentDate)
+                            }
+                        }
+
+                        daysDifference >= 2 -> {
+                            currentStreak = 0
+                            val success = ApiService.updateStreak(idToken, currentStreak, false)
+                            if (success) {
+                                saveStreak(currentStreak)
+                                saveLastLoginDate(currentDate)
+                            }
+                        }
+                    }
+                }
+                streak = currentStreak
 
                 val goalIds = ApiService.getAllUserGoalIds(idToken)
                 if (goalIds.isEmpty()) {
@@ -126,7 +196,7 @@ fun UserMainScreen(
                 },
                 actions = {
                     Text(
-                        text = "0",
+                        text = streak.toString(),
                         fontSize = 31.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
