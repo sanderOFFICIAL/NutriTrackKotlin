@@ -1,6 +1,10 @@
 package com.example.nutritrack.data.api
 
 import android.util.Log
+import com.example.nutritrack.data.user.UpdateUserCurrentWeightRequest
+import com.example.nutritrack.data.user.UpdateUserNicknameRequest
+import com.example.nutritrack.data.user.UpdateUserProfileDescriptionRequest
+import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
@@ -18,6 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -25,7 +30,7 @@ import retrofit2.http.Query
 data class LoginRequest(val idToken: String)
 
 interface ApiServiceInterface {
-   
+
     @POST("api/Auth/login/consultant")
     suspend fun loginConsultant(@Body request: LoginRequest): Response<Void>
 
@@ -49,6 +54,18 @@ interface ApiServiceInterface {
 
     @GET("api/Goal/get-specific-goal-by-id/{goalId}")
     suspend fun getSpecificGoalById(@Path("goalId") goalId: Int): Response<GoalResponse>
+
+    @PUT("api/User/update-profile-picture")
+    suspend fun updateProfilePicture(@Body request: UpdateUserProfilePictureRequest): Response<Void>
+
+    @PUT("api/User/update-nickname")
+    suspend fun updateNickname(@Body request: UpdateUserNicknameRequest): Response<Void>
+
+    @PUT("api/User/update-profile-description")
+    suspend fun updateProfileDescription(@Body request: UpdateUserProfileDescriptionRequest): Response<Void>
+
+    @PUT("api/User/update-current-weight")
+    suspend fun updateCurrentWeight(@Body request: UpdateUserCurrentWeightRequest): Response<Void>
 }
 
 object ApiService {
@@ -182,4 +199,75 @@ object ApiService {
         }
     }
 
+    suspend fun updateProfilePicture(idToken: String, profilePictureUrl: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateUserProfilePictureRequest(idToken, profilePictureUrl)
+                val response = apiService.updateProfilePicture(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update profile picture: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update profile picture: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateNickname(idToken: String, newNickname: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateUserNicknameRequest(idToken, newNickname)
+                val response = apiService.updateNickname(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update nickname: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update nickname: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateProfileDescription(idToken: String, newDescription: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateUserProfileDescriptionRequest(idToken, newDescription)
+                val response = apiService.updateProfileDescription(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update profile description: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update profile description: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateCurrentWeight(idToken: String, newWeight: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateUserCurrentWeightRequest(idToken, newWeight)
+                val response = apiService.updateCurrentWeight(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update current weight: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update current weight: $e")
+                false
+            }
+        }
+    }
 }

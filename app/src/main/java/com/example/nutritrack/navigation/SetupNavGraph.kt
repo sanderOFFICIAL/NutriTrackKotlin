@@ -32,12 +32,15 @@ fun SetupNavGraph(navController: NavHostController) {
                     navController.navigate("consultant_registration_graph")
                 },
                 onLoginAsUserClick = {
-                    navController.navigate("user_main_screen")
+                    navController.navigate("user_main_graph") {
+                        popUpTo("welcome_screen") { inclusive = true }
+                    }
                 },
                 onLoginAsConsultantClick = { navController.navigate("consultant_success_screen") },
             )
         }
         userRegistrationNavGraph(navController, userViewModel, userGoalViewModel)
+        userMainNavGraph(navController)
         consultantRegistrationNavGraph(navController, consultantViewModel)
     }
 }

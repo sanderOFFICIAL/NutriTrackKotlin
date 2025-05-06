@@ -56,9 +56,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserMainScreen(
-    onViewGoalClick: () -> Unit,
-    onNextClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -126,6 +125,12 @@ fun UserMainScreen(
                     }
                 },
                 actions = {
+                    Text(
+                        text = "0",
+                        fontSize = 31.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                     IconButton(onClick = { /* TODO: Дія для іконки вогника */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_flame),
@@ -208,7 +213,9 @@ fun UserMainScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { onNextClick() },
+                    onClick = {
+                        onProfileClick()
+                    },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_profile),
@@ -267,7 +274,6 @@ fun UserMainScreen(
                     textAlign = TextAlign.Center
                 )
             } else if (goalData != null) {
-                // Секція "Сьогодні"
                 Text(
                     text = "Today.",
                     fontSize = 22.sp,

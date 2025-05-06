@@ -4,10 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.data.user.UserGoalViewModel
 import com.example.nutritrack.data.user.UserRegistrationViewModel
-import com.example.nutritrack.screens.UserMainScreen
 import com.example.nutritrack.screens.registration.user.ActivityLevelScreen
 import com.example.nutritrack.screens.registration.user.CurrentWeightScreen
 import com.example.nutritrack.screens.registration.user.GenderSelectionScreen
@@ -100,23 +98,9 @@ fun NavGraphBuilder.userRegistrationNavGraph(
             UserWeeksScreen(
                 viewModel = goalViewModel,
                 onCreateGoalClick = {
-                    navController.navigate("user_main_screen") {
+                    navController.navigate("user_main_graph") {
                         popUpTo("user_registration_graph") { inclusive = true }
                     }
-                },
-            )
-        }
-        composable("user_main_screen") {
-            UserMainScreen(
-                onNextClick = {
-                    FirebaseAuthHelper.signOut()
-                    navController.navigate("welcome_screen")
-                },
-                onViewGoalClick = {
-                    navController.navigate("view_goal_screen")
-                },
-                onLogoutClick = {
-                    navController.navigate("welcome_screen")
                 },
             )
         }
