@@ -11,3 +11,10 @@ data class UserGoalData(
     val target_weight: Int = 0,
     val duration_weeks: Int = 0
 )
+
+@Keep
+@Serializable
+data class DeleteGoalRequest(
+    val goalId: Int = 0,
+    val idToken: String = "",
+)

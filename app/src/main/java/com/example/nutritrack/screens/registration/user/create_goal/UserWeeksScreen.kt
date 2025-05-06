@@ -141,6 +141,22 @@ fun UserWeeksScreen(
                                         "Goal Data: ${viewModel.userData.value}"
                                     )
 
+                                    // Перевіряємо та видаляємо стару ціль, якщо вона існує
+                                    val goalIds = ApiService.getAllUserGoalIds(idToken)
+                                    if (goalIds.isNotEmpty()) {
+                                        val oldGoalId = goalIds.first().goalId
+                                        val deleteSuccess =
+                                            ApiService.deleteGoal(oldGoalId, idToken)
+                                        if (!deleteSuccess) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Error: Could not delete old goal",
+                                                duration = SnackbarDuration.Long
+                                            )
+                                            return@launch
+                                        }
+                                    }
+
+                                    // Створюємо нову ціль
                                     val success =
                                         ApiService.createUserGoal(viewModel.userData.value)
                                     if (success) {

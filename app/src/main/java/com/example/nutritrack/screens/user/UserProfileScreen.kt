@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -57,20 +58,20 @@ import java.util.UUID
 
 @Composable
 fun UserProfileScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onSuccessScreenClick: () -> Unit // Callback для переходу на екран створення нової цілі
 ) {
     var nickname by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var userData by remember { mutableStateOf<UserData?>(null) }
-
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploading by remember { mutableStateOf(false) }
     var uploadError by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
+    var showGoalAchieved by remember { mutableStateOf(false) } // Стан для показу екрану досягнення цілі
 
     val scope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -132,6 +133,7 @@ fun UserProfileScreen(
         }
     }
 
+    // Основний контент профілю
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -165,15 +167,11 @@ fun UserProfileScreen(
                     .size(160.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.3f))
-                    .clickable(
-                        onClick = {
-                            pickImageLauncher.launch("image/*")
-                        },
-                        onClickLabel = "Change profile picture"
-                    ),
+                    .clickable {
+                        pickImageLauncher.launch("image/*")
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                // Фото або заглушка
                 if (profileImageUri != null) {
                     AsyncImage(
                         model = profileImageUri,
@@ -198,6 +196,7 @@ fun UserProfileScreen(
                         tint = Color.White
                     )
                 }
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -206,14 +205,14 @@ fun UserProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Click to change the photo",
+                        text = "Натисніть, щоб змінити фото",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .align(Alignment.Center),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -406,6 +405,21 @@ fun UserProfileScreen(
                                 if (!weightSuccess) {
                                     success = false
                                     uploadError = "Failed to update weight"
+                                } else {
+                                    // Перевірка, чи досягнута цільова вага з урахуванням зазору ±2 кг
+                                    val goalIds = ApiService.getAllUserGoalIds(idToken)
+                                    if (goalIds.isNotEmpty()) {
+                                        val goalId = goalIds.first().goalId
+                                        val goal = ApiService.getSpecificGoalById(goalId)
+                                        if (goal != null) {
+                                            val targetWeight = goal.targetWeight
+                                            val weightRange = (targetWeight - 2)..(targetWeight + 2)
+                                            if (newWeight in weightRange) {
+                                                showGoalAchieved =
+                                                    true // Показуємо екран досягнення
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
@@ -437,6 +451,81 @@ fun UserProfileScreen(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Екран "Ви досягли потрібної вам ваги" з автоматичним видаленням цілі
+        if (showGoalAchieved) {
+            LaunchedEffect(showGoalAchieved) {
+                val idToken = FirebaseAuthHelper.getIdToken()
+                if (idToken != null) {
+                    val goalIds = ApiService.getAllUserGoalIds(idToken)
+                    if (goalIds.isNotEmpty()) {
+                        val goalId = goalIds.first().goalId
+                        val deleteSuccess = ApiService.deleteGoal(goalId, idToken)
+                        if (!deleteSuccess) {
+                            uploadError = "Failed to delete goal"
+                        }
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.8f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF2F4F4F)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = "Congratulations!",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "You have reached the weight you want! Your goal will be deleted create a new one.",
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                        Button(
+                            onClick = {
+                                onSuccessScreenClick() // Переходимо на екран створення нової цілі
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF64A79B)
+                            )
+                        ) {
+                            Text(
+                                text = "Create new goal",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

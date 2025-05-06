@@ -20,6 +20,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -66,6 +67,12 @@ interface ApiServiceInterface {
 
     @PUT("api/User/update-current-weight")
     suspend fun updateCurrentWeight(@Body request: UpdateUserCurrentWeightRequest): Response<Void>
+
+    @DELETE("api/Goal/delete-goal/{goalId}")
+    suspend fun deleteGoal(
+        @Path("goalId") goalId: Int,
+        @Query("idToken") idToken: String
+    ): Response<Void>
 }
 
 object ApiService {
@@ -266,6 +273,23 @@ object ApiService {
                 }
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to update current weight: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun deleteGoal(goalId: Int, idToken: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.deleteGoal(goalId, idToken)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to delete goal: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to delete goal: $e")
                 false
             }
         }

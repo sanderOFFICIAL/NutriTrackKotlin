@@ -30,6 +30,9 @@ fun NavGraphBuilder.userMainNavGraph(
             UserProfileScreen(
                 onBackClick = {
                     navController.navigateUp()
+                },
+                onSuccessScreenClick = {
+                    navController.navigate("user_success_screen")
                 }
             )
         }
