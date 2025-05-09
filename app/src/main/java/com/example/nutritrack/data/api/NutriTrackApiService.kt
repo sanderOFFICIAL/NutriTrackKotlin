@@ -5,10 +5,12 @@ import com.example.nutritrack.data.user.UpdateUserCurrentWeightRequest
 import com.example.nutritrack.data.user.UpdateUserNicknameRequest
 import com.example.nutritrack.data.user.UpdateUserProfileDescriptionRequest
 import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
+import com.example.nutritrack.model.AddMealRequest
 import com.example.nutritrack.model.AddStreakRequest
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
+import com.example.nutritrack.model.MealEntry
 import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
@@ -81,6 +83,12 @@ interface ApiServiceInterface {
 
     @PUT("api/Streak/update-streak")
     suspend fun updateStreak(@Body request: UpdateStreakRequest): Response<Void>
+
+    @POST("api/Meal/add-meal")
+    suspend fun addMeal(@Body request: AddMealRequest): Response<Void>
+
+    @GET("api/Meal/get-all-meals")
+    suspend fun getAllMeals(@Query("idToken") idToken: String): List<MealEntry>
 }
 
 object ApiService {
@@ -335,6 +343,42 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to update streak: $e")
                 false
+            }
+        }
+    }
+
+    suspend fun addMeal(request: AddMealRequest): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.addMeal(request)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Meal added successfully")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to add meal: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to add meal: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun getAllMeals(idToken: String): List<MealEntry> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAllMeals(idToken)
+                if (response.isNotEmpty()) {
+                    Log.d("ApiService", "Meals retrieved successfully: ${response.size} entries")
+                    response
+                } else {
+                    Log.w("ApiService", "No meals found")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get meals: $e")
+                emptyList()
             }
         }
     }

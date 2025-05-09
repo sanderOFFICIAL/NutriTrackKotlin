@@ -6,8 +6,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.nutritrack.screens.UserMainScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
+import com.example.nutritrack.screens.user.UserMainScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
 
 @RequiresApi(Build.VERSION_CODES.O)

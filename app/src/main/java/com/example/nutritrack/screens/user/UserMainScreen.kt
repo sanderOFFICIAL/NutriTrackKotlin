@@ -1,8 +1,13 @@
-package com.example.nutritrack.screens
+package com.example.nutritrack.screens.user
 
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -26,7 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -45,6 +49,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +61,7 @@ import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.GoalResponse
+import com.example.nutritrack.model.MealEntry
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -66,16 +73,20 @@ import java.time.temporal.ChronoUnit
 fun UserMainScreen(
     onLogoutClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onAddFoodClick: (String) -> Unit // Додаємо callback для переходу на екран пошуку
+    onAddFoodClick: (String) -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
+    var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var streak by remember { mutableStateOf(0) }
 
+    val caloriesAnimationProgress = remember { Animatable(0f) }
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("NutriTrackPrefs", Context.MODE_PRIVATE)
+    val currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 
     fun saveLastLoginDate(date: String) {
         sharedPreferences.edit().putString("lastLoginDate", date).apply()
@@ -105,7 +116,6 @@ fun UserMainScreen(
                     return@launch
                 }
 
-                val currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                 val lastLoginDateStr = getLastLoginDate()
                 var currentStreak = getStreak()
 
@@ -123,10 +133,7 @@ fun UserMainScreen(
                         ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
 
                     when {
-                        daysDifference == 0 -> {
-                            currentStreak = getStreak()
-                        }
-
+                        daysDifference == 0 -> currentStreak = getStreak()
                         daysDifference == 1 -> {
                             currentStreak = getStreak() + 1
                             val success = ApiService.updateStreak(idToken, currentStreak, true)
@@ -155,13 +162,26 @@ fun UserMainScreen(
                 }
 
                 val goalId = goalIds.first().goalId
-
                 val goal = ApiService.getSpecificGoalById(goalId)
                 if (goal == null) {
                     errorMessage = "Unable to obtain target details"
                     return@launch
                 }
                 goalData = goal
+
+                val meals = ApiService.getAllMeals(idToken)
+                mealEntries = meals.filter {
+                    val entryDate = LocalDate.parse(
+                        it.entry_date.split("T")[0],
+                        DateTimeFormatter.ISO_LOCAL_DATE
+                    )
+                    entryDate.isEqual(LocalDate.now())
+                }
+
+                caloriesAnimationProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(100, easing = LinearEasing)
+                )
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
             } finally {
@@ -202,7 +222,7 @@ fun UserMainScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-                    IconButton(onClick = { /* TODO: Дія для іконки вогника */ }) {
+                    IconButton(onClick = { /* TODO: Action for flame icon */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_flame),
                             contentDescription = "Fire",
@@ -210,7 +230,7 @@ fun UserMainScreen(
                             tint = Color.White
                         )
                     }
-                    IconButton(onClick = { /* TODO: Дія для календаря */ }) {
+                    IconButton(onClick = { /* TODO: Action for calendar */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_calendar),
                             contentDescription = "Calendar",
@@ -232,7 +252,7 @@ fun UserMainScreen(
             ) {
                 NavigationBarItem(
                     selected = true,
-                    onClick = { /* TODO: Дія для "Записник" */ },
+                    onClick = { /* TODO: Action for "Notebook" */ },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_notebook),
@@ -258,7 +278,7 @@ fun UserMainScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* TODO: Дія для "Активність" */ },
+                    onClick = { /* TODO: Action for "Activity" */ },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_activity),
@@ -284,9 +304,7 @@ fun UserMainScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {
-                        onProfileClick()
-                    },
+                    onClick = { onProfileClick() },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_profile),
@@ -346,7 +364,7 @@ fun UserMainScreen(
                 )
             } else if (goalData != null) {
                 Text(
-                    text = "Today.",
+                    text = "Today",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -360,32 +378,57 @@ fun UserMainScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+                val totalConsumedCalories = mealEntries.sumOf { it.calories }
+                val totalGoalCalories = goalData!!.dailyCalories.toInt()
+                val progressTarget =
+                    (totalConsumedCalories.toFloat() / totalGoalCalories).coerceIn(0f, 1f)
+                val progress by animateFloatAsState(
+                    targetValue = progressTarget * caloriesAnimationProgress.value,
+                    animationSpec = tween(durationMillis = 100),
+                    label = "Calories Progress Animation"
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(175.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        progress = { 0f },
-                        modifier = Modifier
-                            .size(175.dp)
-                            .clip(CircleShape),
-                        color = Color.White.copy(alpha = 0.3f),
-                        strokeWidth = 11.dp,
-                        trackColor = Color.White
-                    )
+                    Canvas(modifier = Modifier.size(175.dp)) {
+                        val strokeWidth = 12.dp.toPx()
+                        val diameter = size.minDimension
+                        val radius = (diameter / 2) - (strokeWidth / 2)
+                        val startAngle = -90f
+                        val sweepAngle = 360f
+
+                        drawArc(
+                            color = Color.White.copy(alpha = 0.3f),
+                            startAngle = startAngle,
+                            sweepAngle = sweepAngle,
+                            useCenter = false,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        )
+
+                        drawArc(
+                            color = Color.White,
+                            startAngle = startAngle,
+                            sweepAngle = sweepAngle * progress,
+                            useCenter = false,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        )
+                    }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = goalData!!.dailyCalories.toInt().toString(),
+                            text = totalConsumedCalories.toInt().toString(),
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "Consumed: 0\nBurned: 0",
+                            text = "Consumed: $totalConsumedCalories\nBurned: 0",
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -393,22 +436,55 @@ fun UserMainScreen(
                     }
                 }
 
+                val totalProtein = mealEntries.sumOf { it.protein }
+                val totalFats = mealEntries.sumOf { it.fats }
+                val totalCarbs = mealEntries.sumOf { it.carbs }
+
+                val proteinProgressTarget =
+                    (totalProtein / goalData!!.dailyProtein).toFloat().coerceIn(0f, 1f)
+                val fatsProgressTarget =
+                    (totalFats / goalData!!.dailyFats).toFloat().coerceIn(0f, 1f)
+                val carbsProgressTarget =
+                    (totalCarbs / goalData!!.dailyCarbs).toFloat().coerceIn(0f, 1f)
+
+                val proteinProgress by animateFloatAsState(
+                    targetValue = proteinProgressTarget * caloriesAnimationProgress.value,
+                    animationSpec = tween(durationMillis = 100),
+                    label = "Protein Progress Animation"
+                )
+                val fatsProgress by animateFloatAsState(
+                    targetValue = fatsProgressTarget * caloriesAnimationProgress.value,
+                    animationSpec = tween(durationMillis = 100),
+                    label = "Fats Progress Animation"
+                )
+                val carbsProgress by animateFloatAsState(
+                    targetValue = carbsProgressTarget * caloriesAnimationProgress.value,
+                    animationSpec = tween(durationMillis = 100),
+                    label = "Carbs Progress Animation"
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LinearProgressIndicator(
-                            progress = { 0f },
+                        Box(
                             modifier = Modifier
                                 .width(80.dp)
                                 .height(10.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = Color.White,
-                            trackColor = Color.White.copy(alpha = 0.3f)
-                        )
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.3f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(80.dp * proteinProgress)
+                                    .background(Color.White)
+                            )
+                        }
+
                         Text(
-                            text = "Proteins\n0/${goalData!!.dailyProtein.toInt()}",
+                            text = "Proteins\n${totalProtein.toInt()}/${goalData!!.dailyProtein.toInt()}",
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -416,17 +492,23 @@ fun UserMainScreen(
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LinearProgressIndicator(
-                            progress = { 0f },
+                        Box(
                             modifier = Modifier
                                 .width(80.dp)
                                 .height(10.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = Color.White,
-                            trackColor = Color.White.copy(alpha = 0.3f)
-                        )
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.3f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(80.dp * fatsProgress)
+                                    .background(Color.White)
+                            )
+                        }
+
                         Text(
-                            text = "Fats\n0/${goalData!!.dailyFats.toInt()}",
+                            text = "Fats\n${totalFats.toInt()}/${goalData!!.dailyFats.toInt()}",
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -434,17 +516,23 @@ fun UserMainScreen(
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LinearProgressIndicator(
-                            progress = { 0f },
+                        Box(
                             modifier = Modifier
                                 .width(80.dp)
                                 .height(10.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = Color.White,
-                            trackColor = Color.White.copy(alpha = 0.3f)
-                        )
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.3f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(80.dp * carbsProgress)
+                                    .background(Color.White)
+                            )
+                        }
+
                         Text(
-                            text = "Carbs\n0/${goalData!!.dailyCarbs.toInt()}",
+                            text = "Carbs\n${totalCarbs.toInt()}/${goalData!!.dailyCarbs.toInt()}",
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -461,19 +549,31 @@ fun UserMainScreen(
                     modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
                 )
 
+                val mealCalories = mealEntries.groupBy { it.meal_type }
+                    .mapValues { it.value.sumOf { meal -> meal.calories } }
+                val breakfastCalories = mealCalories["breakfast"] ?: 0
+                val lunchCalories = mealCalories["lunch"] ?: 0
+                val dinnerCalories = mealCalories["dinner"] ?: 0
+                val snackCalories = mealCalories["snack"] ?: 0
+
                 val totalCalories = goalData!!.dailyCalories
-                val breakfastCalories = (totalCalories * 0.3).toInt() // 30%
-                val lunchCalories = (totalCalories * 0.35).toInt()    // 35%
-                val dinnerCalories = (totalCalories * 0.25).toInt()    // 25%
-                val snackCalories = (totalCalories * 0.1).toInt()      // 10%
+                val breakfastGoal = (totalCalories * 0.3).toInt()
+                val lunchGoal = (totalCalories * 0.35).toInt()
+                val dinnerGoal = (totalCalories * 0.25).toInt()
+                val snackGoal = (totalCalories * 0.1).toInt()
 
                 val meals = listOf(
-                    Triple("Breakfast", R.drawable.ic_breakfast, breakfastCalories),
-                    Triple("Lunch", R.drawable.ic_lunch, lunchCalories),
-                    Triple("Dinner", R.drawable.ic_dinner, dinnerCalories),
-                    Triple("Snack", R.drawable.ic_snack, snackCalories)
+                    Triple(
+                        "Breakfast",
+                        R.drawable.ic_breakfast,
+                        breakfastCalories to breakfastGoal
+                    ),
+                    Triple("Lunch", R.drawable.ic_lunch, lunchCalories to lunchGoal),
+                    Triple("Dinner", R.drawable.ic_dinner, dinnerCalories to dinnerGoal),
+                    Triple("Snack", R.drawable.ic_snack, snackCalories to snackGoal)
                 )
-                meals.forEach { (meal, iconRes, calories) ->
+                meals.forEach { (meal, iconRes, caloriesPair) ->
+                    val (consumed, goal) = caloriesPair
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -505,13 +605,13 @@ fun UserMainScreen(
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "0/$calories cal",
+                                    text = "${consumed.toInt()}/$goal cal",
                                     fontSize = 14.sp,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )
                             }
                             IconButton(
-                                onClick = { onAddFoodClick(meal) } // Виклик екрана пошуку з типом їжі
+                                onClick = { onAddFoodClick(meal.lowercase()) }
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_add),

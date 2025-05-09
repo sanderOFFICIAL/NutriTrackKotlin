@@ -51,8 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.nutritrack.R
+import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.api.FoodItem
 import com.example.nutritrack.data.api.UsdaFoodDataApi
+import com.example.nutritrack.data.auth.FirebaseAuthHelper
+import com.example.nutritrack.model.AddMealRequest
+import com.example.nutritrack.model.ProductData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -321,8 +325,37 @@ fun FoodSearchScreen(
             food = detailedFood!!,
             onDismiss = { selectedFoodId = null },
             onConfirm = { weightedFood ->
-                onFoodAdded(weightedFood)
-                selectedFoodId = null
+                scope.launch {
+                    val idToken = FirebaseAuthHelper.getIdToken() ?: ""
+                    if (idToken.isNotEmpty()) {
+                        val quantityGrams =
+                            weightedFood.servingDescription.replace("[^0-9]".toRegex(), "")
+                                .toIntOrNull() ?: 0
+                        val productData = ProductData(
+                            product_name = weightedFood.name,
+                            quantity_grams = quantityGrams,
+                            calories = weightedFood.calories,
+                            protein = weightedFood.protein,
+                            carbs = weightedFood.carbs,
+                            fats = weightedFood.fat
+                        )
+                        val request = AddMealRequest(
+                            idToken = idToken,
+                            meal_type = mealType.lowercase(),
+                            products = listOf(productData)
+                        )
+                        val success = ApiService.addMeal(request)
+                        if (success) {
+                            Log.d("FoodSearchScreen", "Meal saved to DB successfully")
+                            onFoodAdded(weightedFood) // Повідомлення про додавання
+                        } else {
+                            Log.e("FoodSearchScreen", "Failed to save meal to DB")
+                        }
+                    } else {
+                        Log.e("FoodSearchScreen", "IdToken not found")
+                    }
+                    selectedFoodId = null
+                }
             }
         )
     }
@@ -339,7 +372,6 @@ fun FoodDetailsDialog(
     var calculatedFood by remember { mutableStateOf(food) }
     val focusManager = LocalFocusManager.current
 
-    // Update nutrients in real-time based on weight input
     LaunchedEffect(weightInput) {
         val weight = weightInput.toFloatOrNull() ?: 0f
         calculatedFood = if (weight > 0) {
@@ -477,9 +509,15 @@ fun FoodDetailsDialog(
 
                     Button(
                         onClick = {
-                            onConfirm(calculatedFood)
+                            val quantityGrams =
+                                weightInput.toIntOrNull() ?: 0 // Беремо вагу з введення
+                            if (quantityGrams > 0) {
+                                val adjustedFood =
+                                    calculatedFood.copy(servingDescription = "$quantityGrams g")
+                                onConfirm(adjustedFood)
+                            }
                         },
-                        enabled = weightInput.toFloatOrNull() ?: 0f > 0,
+                        enabled = weightInput.toIntOrNull() ?: 0 > 0,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64A79B)),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
