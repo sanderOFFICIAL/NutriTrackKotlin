@@ -65,7 +65,8 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun UserMainScreen(
     onLogoutClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onAddFoodClick: (String) -> Unit // Додаємо callback для переходу на екран пошуку
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -509,7 +510,9 @@ fun UserMainScreen(
                                     color = Color.White.copy(alpha = 0.7f)
                                 )
                             }
-                            IconButton(onClick = { /* TODO: Дія для додавання їжі */ }) {
+                            IconButton(
+                                onClick = { onAddFoodClick(meal) } // Виклик екрана пошуку з типом їжі
+                            ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_add),
                                     contentDescription = "Add",

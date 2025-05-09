@@ -71,4 +71,10 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.10.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.ktor:ktor-client-core:2.3.11")
+    implementation("io.ktor:ktor-client-cio:2.3.11")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.github.scribejava:scribejava-apis:8.3.3")
+    implementation("org.json:json:20231013")
 }

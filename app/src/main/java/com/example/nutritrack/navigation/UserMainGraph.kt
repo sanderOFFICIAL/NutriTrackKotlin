@@ -1,12 +1,16 @@
 package com.example.nutritrack.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.nutritrack.screens.UserMainScreen
+import com.example.nutritrack.screens.user.FoodSearchScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun NavGraphBuilder.userMainNavGraph(
     navController: NavHostController
 ) {
@@ -23,6 +27,9 @@ fun NavGraphBuilder.userMainNavGraph(
                 },
                 onProfileClick = {
                     navController.navigate("user_profile_screen")
+                },
+                onAddFoodClick = { mealType ->
+                    navController.navigate("food_search_screen/$mealType")
                 }
             )
         }
@@ -36,5 +43,19 @@ fun NavGraphBuilder.userMainNavGraph(
                 }
             )
         }
+    }
+    composable("food_search_screen/{mealType}") { backStackEntry ->
+        val mealType = backStackEntry.arguments?.getString("mealType") ?: ""
+        FoodSearchScreen(
+            mealType = mealType,
+            onBackClick = {
+                navController.navigateUp()
+            },
+            onFoodAdded = { consumedFood ->
+                // TODO: Save consumedFood to backend or local storage
+                // For now, we'll just navigate back
+                navController.navigateUp()
+            }
+        )
     }
 }
