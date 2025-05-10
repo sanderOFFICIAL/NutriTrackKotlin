@@ -1,6 +1,10 @@
 package com.example.nutritrack.screens.user
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,14 +15,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,16 +66,18 @@ import com.example.nutritrack.data.api.UsdaFoodDataApi
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.AddMealRequest
 import com.example.nutritrack.model.ProductData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodSearchScreen(
     mealType: String,
     onBackClick: () -> Unit,
-    onFoodAdded: (FoodItem) -> Unit
+    onFoodAdded: (Boolean) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var foodItems by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
@@ -77,6 +88,8 @@ fun FoodSearchScreen(
     var isLoadingDetails by remember { mutableStateOf(false) }
     var showErrorDialog by remember { mutableStateOf(false) }
     var debouncedQuery by remember { mutableStateOf("") }
+    var addedProducts by remember { mutableStateOf<List<ProductData>>(emptyList()) }
+    var showAddedProductsDialog by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -157,6 +170,24 @@ fun FoodSearchScreen(
                     .weight(1f)
                     .wrapContentWidth(Alignment.CenterHorizontally)
             )
+            if (addedProducts.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color(0xFF2F4F4F), shape = CircleShape)
+                        .clickable { showAddedProductsDialog = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = addedProducts.size.toString(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(40.dp))
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -265,6 +296,138 @@ fun FoodSearchScreen(
         }
     }
 
+    if (showAddedProductsDialog && addedProducts.isNotEmpty()) {
+        Dialog(onDismissRequest = { showAddedProductsDialog = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 700.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF2F4F4F))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Added Products (${addedProducts.size})",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    LazyColumn(
+                        modifier = Modifier
+                            .heightIn(max = 400.dp)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(addedProducts) { product ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF64A79B))
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${product.product_name} (${product.quantity_grams} g)",
+                                        fontSize = 14.sp,
+                                        color = Color.White
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            addedProducts = addedProducts - product
+                                            if (addedProducts.isEmpty()) {
+                                                showAddedProductsDialog = false
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_delete),
+                                            contentDescription = "Delete",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(
+                            onClick = { showAddedProductsDialog = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAAAAAA)),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .padding(horizontal = 8.dp)
+                        ) {
+                            Text("Close", color = Color.White, fontSize = 16.sp)
+                        }
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    val idToken = FirebaseAuthHelper.getIdToken() ?: ""
+                                    if (idToken.isNotEmpty() && addedProducts.isNotEmpty()) {
+                                        val request = AddMealRequest(
+                                            idToken = idToken,
+                                            meal_type = mealType.lowercase(),
+                                            products = addedProducts
+                                        )
+                                        val success = ApiService.addMeal(request)
+                                        if (success) {
+                                            Log.d(
+                                                "FoodSearchScreen",
+                                                "All meals saved to DB successfully"
+                                            )
+                                            withContext(Dispatchers.Main) {
+                                                onFoodAdded(true)
+                                                showAddedProductsDialog = false
+                                                addedProducts = emptyList()
+                                            }
+                                        } else {
+                                            Log.e("FoodSearchScreen", "Failed to save meals to DB")
+                                            onFoodAdded(false)
+                                        }
+                                    } else {
+                                        Log.e(
+                                            "FoodSearchScreen",
+                                            "IdToken not found or no products to save"
+                                        )
+                                        onFoodAdded(false)
+                                    }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64A79B)),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .padding(horizontal = 8.dp)
+                        ) {
+                            Text("Save All", color = Color.White, fontSize = 16.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if (isLoadingDetails) {
         Dialog(onDismissRequest = { selectedFoodId = null }) {
             Box(
@@ -325,37 +488,19 @@ fun FoodSearchScreen(
             food = detailedFood!!,
             onDismiss = { selectedFoodId = null },
             onConfirm = { weightedFood ->
-                scope.launch {
-                    val idToken = FirebaseAuthHelper.getIdToken() ?: ""
-                    if (idToken.isNotEmpty()) {
-                        val quantityGrams =
-                            weightedFood.servingDescription.replace("[^0-9]".toRegex(), "")
-                                .toIntOrNull() ?: 0
-                        val productData = ProductData(
-                            product_name = weightedFood.name,
-                            quantity_grams = quantityGrams,
-                            calories = weightedFood.calories,
-                            protein = weightedFood.protein,
-                            carbs = weightedFood.carbs,
-                            fats = weightedFood.fat
-                        )
-                        val request = AddMealRequest(
-                            idToken = idToken,
-                            meal_type = mealType.lowercase(),
-                            products = listOf(productData)
-                        )
-                        val success = ApiService.addMeal(request)
-                        if (success) {
-                            Log.d("FoodSearchScreen", "Meal saved to DB successfully")
-                            onFoodAdded(weightedFood) // Повідомлення про додавання
-                        } else {
-                            Log.e("FoodSearchScreen", "Failed to save meal to DB")
-                        }
-                    } else {
-                        Log.e("FoodSearchScreen", "IdToken not found")
-                    }
-                    selectedFoodId = null
-                }
+                val quantityGrams =
+                    weightedFood.servingDescription.replace("[^0-9]".toRegex(), "").toIntOrNull()
+                        ?: 0
+                val productData = ProductData(
+                    product_name = weightedFood.name,
+                    quantity_grams = quantityGrams,
+                    calories = weightedFood.calories,
+                    protein = weightedFood.protein,
+                    carbs = weightedFood.carbs,
+                    fats = weightedFood.fat
+                )
+                addedProducts = addedProducts + productData
+                selectedFoodId = null
             }
         )
     }
@@ -370,7 +515,11 @@ fun FoodDetailsDialog(
 ) {
     var weightInput by remember { mutableStateOf("") }
     var calculatedFood by remember { mutableStateOf(food) }
+    var isIngredientsExpanded by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
+    val configuration = LocalConfiguration.current
+    val maxHeight = configuration.screenHeightDp.dp * 0.8f
 
     LaunchedEffect(weightInput) {
         val weight = weightInput.toFloatOrNull() ?: 0f
@@ -385,6 +534,7 @@ fun FoodDetailsDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = maxHeight)
                 .padding(16.dp),
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2F4F4F))
@@ -392,7 +542,8 @@ fun FoodDetailsDialog(
             Column(
                 modifier = Modifier
                     .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -405,14 +556,54 @@ fun FoodDetailsDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (food.description.isNotBlank()) {
-                    Text(
-                        text = food.description,
-                        fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                        textAlign = TextAlign.Center
-                    )
+                val previewLength = 61
+                val ingredientsSection = food.description.split("•")
+                    .map { it.trim() }
+                    .firstOrNull { it.contains("Ingredients:", ignoreCase = true) }
+                    ?.trim()
+
+                if (!ingredientsSection.isNullOrBlank()) {
+                    AnimatedVisibility(
+                        visible = isIngredientsExpanded,
+                        enter = expandVertically(animationSpec = tween(durationMillis = 300)),
+                        exit = shrinkVertically(animationSpec = tween(durationMillis = 300))
+                    ) {
+                        Text(
+                            text = ingredientsSection,
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+
+                    if (!isIngredientsExpanded && ingredientsSection.length > previewLength) {
+                        Text(
+                            text = ingredientsSection.take(previewLength) + "...",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isIngredientsExpanded = !isIngredientsExpanded }
+                            .padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isIngredientsExpanded) R.drawable.ic_arrows else R.drawable.ic_arrows
+                            ),
+                            contentDescription = if (isIngredientsExpanded) "Show less" else "Show more",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
@@ -509,8 +700,7 @@ fun FoodDetailsDialog(
 
                     Button(
                         onClick = {
-                            val quantityGrams =
-                                weightInput.toIntOrNull() ?: 0 // Беремо вагу з введення
+                            val quantityGrams = weightInput.toIntOrNull() ?: 0
                             if (quantityGrams > 0) {
                                 val adjustedFood =
                                     calculatedFood.copy(servingDescription = "$quantityGrams g")
