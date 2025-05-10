@@ -23,8 +23,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -56,10 +60,13 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     onBackClick: () -> Unit,
-    onSuccessScreenClick: () -> Unit // Callback для переходу на екран створення нової цілі
+    onSuccessScreenClick: () -> Unit,
+    onNotebookClick: () -> Unit,
+    onActivityClick: () -> Unit
 ) {
     var nickname by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -69,7 +76,7 @@ fun UserProfileScreen(
     var isUploading by remember { mutableStateOf(false) }
     var uploadError by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
-    var showGoalAchieved by remember { mutableStateOf(false) } // Стан для показу екрану досягнення цілі
+    var showGoalAchieved by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -133,327 +140,403 @@ fun UserProfileScreen(
         }
     }
 
-    // Основний контент профілю
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF64A79B))
-            .padding(16.dp)
-    ) {
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .size(65.dp)
-                .padding(top = 16.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_back),
-                contentDescription = "Back",
-                tint = Color.White
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .width(325.dp)
-                .padding(top = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.3f))
-                    .clickable {
-                        pickImageLauncher.launch("image/*")
-                    },
-                contentAlignment = Alignment.Center
+    Scaffold(
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color(0xFF2F4F4F),
+                modifier = Modifier.height(102.dp)
             ) {
-                if (profileImageUri != null) {
-                    AsyncImage(
-                        model = profileImageUri,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(160.dp)
-                            .clip(CircleShape)
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { onNotebookClick() },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_notebook),
+                            contentDescription = "Notebook",
+                            modifier = Modifier.size(35.dp),
+                            tint = Color.White
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = "Notebook",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.White,
+                        unselectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
+                        unselectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF64A79B)
                     )
-                } else if (userData?.profile_picture?.isNotEmpty() == true) {
-                    AsyncImage(
-                        model = userData!!.profile_picture,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(160.dp)
-                            .clip(CircleShape)
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { onActivityClick() },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_activity),
+                            contentDescription = "Activity",
+                            modifier = Modifier.size(35.dp),
+                            tint = Color.White
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = "Activity",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.White,
+                        unselectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
+                        unselectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF64A79B)
                     )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_profile),
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(110.dp),
-                        tint = Color.White
+                )
+                NavigationBarItem(
+                    selected = true,
+                    onClick = { /* Already on profile screen */ },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "Profile",
+                            modifier = Modifier.size(35.dp),
+                            tint = Color.White
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = "Profile",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.White,
+                        unselectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
+                        unselectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF64A79B)
                     )
-                }
+                )
+            }
+        }
+    ) { padding ->
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF64A79B))
+                .padding(top = 75.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(160.dp)
                         .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.5f)),
+                        .background(Color.White.copy(alpha = 0.3f))
+                        .clickable {
+                            pickImageLauncher.launch("image/*")
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Натисніть, щоб змінити фото",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
+                    if (profileImageUri != null) {
+                        AsyncImage(
+                            model = profileImageUri,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(160.dp)
+                                .clip(CircleShape)
+                        )
+                    } else if (userData?.profile_picture?.isNotEmpty() == true) {
+                        AsyncImage(
+                            model = userData!!.profile_picture,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(160.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier.size(110.dp),
+                            tint = Color.White
+                        )
+                    }
+
+                    Box(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .align(Alignment.Center),
-                        textAlign = TextAlign.Center
-                    )
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Натисніть, щоб змінити фото",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .align(Alignment.Center),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                 }
 
-                if (isUploading) {
-                    CircularProgressIndicator(
+                if (uploadError != null) {
+                    Text(
+                        text = uploadError ?: "Unknown error",
+                        fontSize = 16.sp,
+                        color = Color.Red,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+                if (successMessage != null) {
+                    Text(
+                        text = successMessage ?: "",
+                        fontSize = 16.sp,
                         color = Color.White,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
-            }
 
-            if (uploadError != null) {
                 Text(
-                    text = uploadError ?: "Unknown error",
+                    text = "Nickname:",
                     fontSize = 16.sp,
-                    color = Color.Red,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-            if (successMessage != null) {
-                Text(
-                    text = successMessage ?: "",
-                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.Start)
                 )
-            }
-
-            Text(
-                text = "Nickname:",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF2F4F4F)
-                )
-            ) {
-                TextField(
-                    value = nickname,
-                    onValueChange = { nickname = it },
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent),
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 16.sp
-                    ),
-                    placeholder = {
-                        Text(
-                            text = "Enter your nickname",
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontSize = 16.sp
-                        )
-                    },
-                    singleLine = true,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = Color.White
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF2F4F4F)
                     )
-                )
-            }
+                ) {
+                    TextField(
+                        value = nickname,
+                        onValueChange = { nickname = it },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                        textStyle = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp
+                        ),
+                        placeholder = {
+                            Text(
+                                text = "Enter your nickname",
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = Color.White
+                        )
+                    )
+                }
 
-            Text(
-                text = "Bio:",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF2F4F4F)
+                Text(
+                    text = "Bio:",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Start)
                 )
-            ) {
-                TextField(
-                    value = description,
-                    onValueChange = { description = it },
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent),
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 16.sp
-                    ),
-                    placeholder = {
-                        Text(
-                            text = "Enter your bio",
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontSize = 16.sp
-                        )
-                    },
-                    singleLine = false,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = Color.White
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF2F4F4F)
                     )
-                )
-            }
+                ) {
+                    TextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                        textStyle = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp
+                        ),
+                        placeholder = {
+                            Text(
+                                text = "Enter your bio",
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = false,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = Color.White
+                        )
+                    )
+                }
 
-            Text(
-                text = "Weight:",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF2F4F4F)
+                Text(
+                    text = "Weight:",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Start)
                 )
-            ) {
-                TextField(
-                    value = weight,
-                    onValueChange = { weight = it },
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent),
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 16.sp
-                    ),
-                    placeholder = {
-                        Text(
-                            text = "Enter your weight (kg)",
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontSize = 16.sp
-                        )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = Color.White
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF2F4F4F)
                     )
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = {
-                    scope.launch {
-                        val idToken = FirebaseAuthHelper.getIdToken()
-                        if (idToken != null) {
-                            var success = true
+                ) {
+                    TextField(
+                        value = weight,
+                        onValueChange = { weight = it },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                        textStyle = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp
+                        ),
+                        placeholder = {
+                            Text(
+                                text = "Enter your weight (kg)",
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = Color.White
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val idToken = FirebaseAuthHelper.getIdToken()
+                            if (idToken != null) {
+                                var success = true
 
-                            if (nickname != userData?.nickname) {
-                                val nicknameSuccess = ApiService.updateNickname(idToken, nickname)
-                                if (!nicknameSuccess) {
-                                    success = false
-                                    uploadError = "Failed to update nickname"
+                                if (nickname != userData?.nickname) {
+                                    val nicknameSuccess =
+                                        ApiService.updateNickname(idToken, nickname)
+                                    if (!nicknameSuccess) {
+                                        success = false
+                                        uploadError = "Failed to update nickname"
+                                    }
                                 }
-                            }
 
-                            if (description != userData?.profile_description) {
-                                val descriptionSuccess =
-                                    ApiService.updateProfileDescription(idToken, description)
-                                if (!descriptionSuccess) {
-                                    success = false
-                                    uploadError = "Failed to update profile description"
+                                if (description != userData?.profile_description) {
+                                    val descriptionSuccess =
+                                        ApiService.updateProfileDescription(idToken, description)
+                                    if (!descriptionSuccess) {
+                                        success = false
+                                        uploadError = "Failed to update profile description"
+                                    }
                                 }
-                            }
 
-                            val newWeight = weight.toIntOrNull() ?: userData?.current_weight ?: 0
-                            if (newWeight != userData?.current_weight) {
-                                val weightSuccess =
-                                    ApiService.updateCurrentWeight(idToken, newWeight)
-                                if (!weightSuccess) {
-                                    success = false
-                                    uploadError = "Failed to update weight"
-                                } else {
-                                    // Перевірка, чи досягнута цільова вага з урахуванням зазору ±2 кг
-                                    val goalIds = ApiService.getAllUserGoalIds(idToken)
-                                    if (goalIds.isNotEmpty()) {
-                                        val goalId = goalIds.first().goalId
-                                        val goal = ApiService.getSpecificGoalById(goalId)
-                                        if (goal != null) {
-                                            val targetWeight = goal.targetWeight
-                                            val weightRange = (targetWeight - 2)..(targetWeight + 2)
-                                            if (newWeight in weightRange) {
-                                                showGoalAchieved =
-                                                    true // Показуємо екран досягнення
+                                val newWeight =
+                                    weight.toIntOrNull() ?: userData?.current_weight ?: 0
+                                if (newWeight != userData?.current_weight) {
+                                    val weightSuccess =
+                                        ApiService.updateCurrentWeight(idToken, newWeight)
+                                    if (!weightSuccess) {
+                                        success = false
+                                        uploadError = "Failed to update weight"
+                                    } else {
+                                        // Перевірка, чи досягнута цільова вага з урахуванням зазору ±2 кг
+                                        val goalIds = ApiService.getAllUserGoalIds(idToken)
+                                        if (goalIds.isNotEmpty()) {
+                                            val goalId = goalIds.first().goalId
+                                            val goal = ApiService.getSpecificGoalById(goalId)
+                                            if (goal != null) {
+                                                val targetWeight = goal.targetWeight
+                                                val weightRange =
+                                                    (targetWeight - 2)..(targetWeight + 2)
+                                                if (newWeight in weightRange) {
+                                                    showGoalAchieved =
+                                                        true // Показуємо екран досягнення
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            if (success) {
-                                val uid = FirebaseAuthHelper.getUid()
-                                if (uid != null) {
-                                    userData = ApiService.getUserByUid(uid)
-                                    successMessage = "Profile updated successfully"
+                                if (success) {
+                                    val uid = FirebaseAuthHelper.getUid()
+                                    if (uid != null) {
+                                        userData = ApiService.getUserByUid(uid)
+                                        successMessage = "Profile updated successfully"
+                                    }
                                 }
+                            } else {
+                                uploadError = "Failed to get idToken"
                             }
-                        } else {
-                            uploadError = "Failed to get idToken"
                         }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F4F4F)
-                )
-            ) {
-                Text(
-                    text = "Save Changes",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2F4F4F)
+                    )
+                ) {
+                    Text(
+                        text = "Save Changes",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Екран "Ви досягли потрібної вам ваги" з автоматичним видаленням цілі
+        // Overlay for goal achievement
         if (showGoalAchieved) {
             LaunchedEffect(showGoalAchieved) {
                 val idToken = FirebaseAuthHelper.getIdToken()

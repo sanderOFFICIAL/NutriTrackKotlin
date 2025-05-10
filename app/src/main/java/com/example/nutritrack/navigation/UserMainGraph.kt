@@ -4,9 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.nutritrack.screens.user.FoodSearchScreen
+import com.example.nutritrack.screens.user.MealDetailsScreen
 import com.example.nutritrack.screens.user.UserMainScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
 
@@ -30,7 +33,21 @@ fun NavGraphBuilder.userMainNavGraph(
                 },
                 onAddFoodClick = { mealType ->
                     navController.navigate("food_search_screen/$mealType")
+                },
+                onViewMealDetails = { mealType ->
+                    navController.navigate("meal_details_screen/$mealType")
                 }
+            )
+        }
+
+        composable(
+            "meal_details_screen/{mealType}",
+            arguments = listOf(navArgument("mealType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val mealType = backStackEntry.arguments?.getString("mealType") ?: ""
+            MealDetailsScreen(
+                mealType = mealType,
+                onBackClick = { navController.popBackStack() }
             )
         }
         composable("user_profile_screen") {
@@ -40,6 +57,14 @@ fun NavGraphBuilder.userMainNavGraph(
                 },
                 onSuccessScreenClick = {
                     navController.navigate("user_success_screen")
+                },
+                onNotebookClick = {
+                    navController.navigate("user_main_screen") {
+                        popUpTo("user_main_graph") { inclusive = true }
+                    }
+                },
+                onActivityClick = {
+
                 }
             )
         }

@@ -89,6 +89,12 @@ interface ApiServiceInterface {
 
     @GET("api/Meal/get-all-meals")
     suspend fun getAllMeals(@Query("idToken") idToken: String): List<MealEntry>
+
+    @DELETE("api/Meal/delete-meal")
+    suspend fun deleteMeal(
+        @Query("idToken") idToken: String,
+        @Query("entryId") entryId: Int
+    ): Response<Void>
 }
 
 object ApiService {
@@ -379,6 +385,24 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to get meals: $e")
                 emptyList()
+            }
+        }
+    }
+
+    suspend fun deleteMeal(idToken: String, entryId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.deleteMeal(idToken, entryId)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Meal deleted successfully: entryId=$entryId")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to delete meal: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to delete meal: $e")
+                false
             }
         }
     }

@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,7 +74,8 @@ import java.time.temporal.ChronoUnit
 fun UserMainScreen(
     onLogoutClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onAddFoodClick: (String) -> Unit
+    onAddFoodClick: (String) -> Unit,
+    onViewMealDetails: (String) -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -104,7 +106,6 @@ fun UserMainScreen(
         return sharedPreferences.getInt("currentStreak", 0)
     }
 
-    // Оновлення стріка і синхронізація з БД при кожному вході
     LaunchedEffect(Unit) {
         scope.launch {
             try {
@@ -121,7 +122,6 @@ fun UserMainScreen(
                 var currentStreak = getStreak()
 
                 if (lastLoginDateStr == null) {
-                    // Перший вхід
                     currentStreak = 1
                     val success = ApiService.addStreak(idToken, currentStreak)
                     if (success) {
@@ -135,13 +135,8 @@ fun UserMainScreen(
                         ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
 
                     when {
-                        daysDifference == 0 -> {
-                            // Користувач заходить у той самий день, стрік не змінюється
-                            currentStreak = getStreak()
-                        }
-
+                        daysDifference == 0 -> currentStreak = getStreak()
                         daysDifference == 1 -> {
-                            // Користувач заходить наступного дня, збільшуємо стрік
                             currentStreak = getStreak() + 1
                             val success = ApiService.updateStreak(idToken, currentStreak, true)
                             if (success) {
@@ -151,7 +146,6 @@ fun UserMainScreen(
                         }
 
                         daysDifference >= 2 -> {
-                            // Користувач не заходив 2+ днів, скидаємо стрік до 0
                             currentStreak = 0
                             val success = ApiService.updateStreak(idToken, currentStreak, false)
                             if (success) {
@@ -388,6 +382,7 @@ fun UserMainScreen(
 
                 val totalConsumedCalories = mealEntries.sumOf { it.calories }
                 val totalGoalCalories = goalData!!.dailyCalories.toInt()
+                val remainingCalories = totalGoalCalories - totalConsumedCalories.toInt()
                 val progressTarget =
                     (totalConsumedCalories.toFloat() / totalGoalCalories).coerceIn(0f, 1f)
                 val progress by animateFloatAsState(
@@ -430,13 +425,21 @@ fun UserMainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = totalConsumedCalories.toInt().toString(),
+                            text = if (totalConsumedCalories.toInt() == 0) {
+                                totalGoalCalories.toString() // Show goal when nothing consumed
+                            } else {
+                                remainingCalories.toString() // Show remaining calories when food is consumed
+                            },
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "Consumed: $totalConsumedCalories\nBurned: 0",
+                            text = if (totalConsumedCalories.toInt() == 0) {
+                                "Daily Goal: $totalGoalCalories\nRemaining: $totalGoalCalories"
+                            } else {
+                                "Consumed: $totalConsumedCalories\nRemaining: $remainingCalories"
+                            },
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -585,7 +588,8 @@ fun UserMainScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(60.dp),
+                            .height(60.dp)
+                            .clickable { onViewMealDetails(meal.lowercase()) },
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFF2F4F4F)
