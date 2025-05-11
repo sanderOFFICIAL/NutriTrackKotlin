@@ -75,7 +75,7 @@ fun UserMainScreen(
     onLogoutClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
-    onViewMealDetails: (String) -> Unit,
+    onViewMealDetails: (String, String) -> Unit, // Додаємо дату до параметрів
     onCalendarClick: () -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
@@ -590,7 +590,12 @@ fun UserMainScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(60.dp)
-                            .clickable { onViewMealDetails(meal.lowercase()) },
+                            .clickable {
+                                onViewMealDetails(
+                                    meal.lowercase(),
+                                    currentDate
+                                )
+                            }, // Передаємо поточну дату
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFF2F4F4F)

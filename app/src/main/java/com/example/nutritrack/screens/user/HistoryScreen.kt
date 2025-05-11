@@ -31,9 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -72,7 +69,7 @@ fun HistoryScreen(
     selectedDate: String,
     onBackClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
-    onViewMealDetails: (String) -> Unit
+    onViewMealDetails: (String, String) -> Unit // Додаємо дату до параметрів
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -161,91 +158,6 @@ fun HistoryScreen(
                 modifier = Modifier.height(75.dp)
             )
         },
-        bottomBar = {
-            NavigationBar(
-                containerColor = Color(0xFF2F4F4F),
-                modifier = Modifier.height(102.dp)
-            ) {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { /* TODO: Action for "Notebook" */ },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_notebook),
-                            contentDescription = "Notebook",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Notebook",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { /* TODO: Action for "Activity" */ },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_activity),
-                            contentDescription = "Activity",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Activity",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { /* TODO: Action for "Profile" */ },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_profile),
-                            contentDescription = "Profile",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Profile",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-            }
-        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -484,8 +396,8 @@ fun HistoryScreen(
 
                 val totalCalories = goalData!!.dailyCalories
                 val breakfastGoal = (totalCalories * 0.3).toInt()
-                val lunchGoal = (totalCalories * 0.35).toInt()
-                val dinnerGoal = (totalCalories * 0.25).toInt()
+                val lunchGoal = (totalCalories * 0.3).toInt()
+                val dinnerGoal = (totalCalories * 0.3).toInt()
                 val snackGoal = (totalCalories * 0.1).toInt()
 
                 val meals = listOf(
@@ -504,7 +416,12 @@ fun HistoryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(60.dp)
-                            .clickable { onViewMealDetails(meal.lowercase()) },
+                            .clickable {
+                                onViewMealDetails(
+                                    meal.lowercase(),
+                                    selectedDate
+                                )
+                            }, // Передаємо дату з HistoryScreen
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFF2F4F4F)

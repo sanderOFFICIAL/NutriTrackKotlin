@@ -54,6 +54,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MealDetailsScreen(
     mealType: String,
+    selectedDate: String, // Додаємо параметр для дати
     onBackClick: () -> Unit
 ) {
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -74,10 +75,11 @@ fun MealDetailsScreen(
             }
 
             val meals = ApiService.getAllMeals(idToken)
+            val targetDate = LocalDate.parse(selectedDate, DateTimeFormatter.ISO_LOCAL_DATE)
             mealEntries = meals.filter {
                 val entryDate =
                     LocalDate.parse(it.entry_date.split("T")[0], DateTimeFormatter.ISO_LOCAL_DATE)
-                entryDate.isEqual(LocalDate.now()) && it.meal_type == mealType
+                entryDate.isEqual(targetDate) && it.meal_type == mealType
             }
         } catch (e: Exception) {
             errorMessage = "Error: ${e.message}"
@@ -86,7 +88,7 @@ fun MealDetailsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(selectedDate) { // Оновлюємо залежність, щоб реагувати на зміну дати
         scope.launch {
             loadMeals()
         }
@@ -163,7 +165,7 @@ fun MealDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No products added today for $mealType",
+                        text = "No products added on $selectedDate for $mealType",
                         color = Color.White,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,

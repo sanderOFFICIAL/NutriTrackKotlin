@@ -36,8 +36,8 @@ fun NavGraphBuilder.userMainNavGraph(
                 onAddFoodClick = { mealType ->
                     navController.navigate("food_search_screen/$mealType")
                 },
-                onViewMealDetails = { mealType ->
-                    navController.navigate("meal_details_screen/$mealType")
+                onViewMealDetails = { mealType, selectedDate ->
+                    navController.navigate("meal_details_screen/$mealType/$selectedDate")
                 },
                 onCalendarClick = {
                     navController.navigate("date_picker_screen")
@@ -46,15 +46,21 @@ fun NavGraphBuilder.userMainNavGraph(
         }
 
         composable(
-            "meal_details_screen/{mealType}",
-            arguments = listOf(navArgument("mealType") { type = NavType.StringType })
+            "meal_details_screen/{mealType}/{selectedDate}",
+            arguments = listOf(
+                navArgument("mealType") { type = NavType.StringType },
+                navArgument("selectedDate") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val mealType = backStackEntry.arguments?.getString("mealType") ?: ""
+            val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
             MealDetailsScreen(
                 mealType = mealType,
+                selectedDate = selectedDate,
                 onBackClick = { navController.popBackStack() }
             )
         }
+
         composable("user_profile_screen") {
             UserProfileScreen(
                 onBackClick = {
@@ -69,11 +75,12 @@ fun NavGraphBuilder.userMainNavGraph(
                     }
                 },
                 onActivityClick = {
-
+                    // TODO: Navigate to Activity screen if needed
                 }
             )
         }
     }
+
     composable("food_search_screen/{mealType}") { backStackEntry ->
         val mealType = backStackEntry.arguments?.getString("mealType") ?: ""
         FoodSearchScreen(
@@ -82,26 +89,24 @@ fun NavGraphBuilder.userMainNavGraph(
                 navController.navigateUp()
             },
             onFoodAdded = { consumedFood ->
-                // TODO: Save consumedFood to backend or local storage
-                // For now, we'll just navigate back
                 navController.navigateUp()
             }
         )
     }
+
     composable("date_picker_screen") {
         DatePickerScreen(
             onDateSelected = { selectedDate ->
                 navController.navigate("history_screen/$selectedDate") {
                     popUpTo("date_picker_screen") {
                         inclusive = true
-                    } // Закриваємо DatePickerScreen
+                    }
                 }
             },
             onBackClick = { navController.popBackStack() }
         )
     }
 
-    // Додаємо екран історії за вибраний день
     composable(
         "history_screen/{selectedDate}",
         arguments = listOf(navArgument("selectedDate") { type = NavType.StringType })
@@ -113,8 +118,8 @@ fun NavGraphBuilder.userMainNavGraph(
             onAddFoodClick = { mealType ->
                 navController.navigate("food_search_screen/$mealType")
             },
-            onViewMealDetails = { mealType ->
-                navController.navigate("meal_details_screen/$mealType")
+            onViewMealDetails = { mealType, date ->
+                navController.navigate("meal_details_screen/$mealType/$date")
             }
         )
     }
