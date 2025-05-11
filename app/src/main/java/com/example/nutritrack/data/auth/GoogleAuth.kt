@@ -32,19 +32,21 @@ object GoogleAuth {
     }
 
     fun signIn(launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>) {
-        val pendingIntent: PendingIntent = googleSignInClient.signInIntent
-            .let { intent ->
-                PendingIntent.getActivity(
-                    appContext,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+        googleSignInClient.signOut().addOnCompleteListener {
+            val pendingIntent: PendingIntent = googleSignInClient.signInIntent
+                .let { intent ->
+                    PendingIntent.getActivity(
+                        appContext,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                }
 
-        val intentSender: IntentSender = pendingIntent.intentSender
-        val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
-        launcher.launch(intentSenderRequest)
+            val intentSender: IntentSender = pendingIntent.intentSender
+            val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
+            launcher.launch(intentSenderRequest)
+        }
     }
 
     suspend fun handleSignInResult(data: Intent?): String {

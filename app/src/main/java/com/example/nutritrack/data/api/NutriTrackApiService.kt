@@ -7,6 +7,7 @@ import com.example.nutritrack.data.user.UpdateUserProfileDescriptionRequest
 import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
 import com.example.nutritrack.model.AddMealRequest
 import com.example.nutritrack.model.AddStreakRequest
+import com.example.nutritrack.model.Consultant
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
@@ -95,6 +96,9 @@ interface ApiServiceInterface {
         @Query("idToken") idToken: String,
         @Query("entryId") entryId: Int
     ): Response<Void>
+
+    @GET("api/Consultant/get-all-consultants")
+    suspend fun getAllConsultants(@Query("idToken") idToken: String): List<Consultant>
 }
 
 object ApiService {
@@ -403,6 +407,27 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to delete meal: $e")
                 false
+            }
+        }
+    }
+
+    suspend fun getAllConsultants(idToken: String): List<Consultant> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAllConsultants(idToken)
+                if (response.isNotEmpty()) {
+                    Log.d(
+                        "ApiService",
+                        "Consultants retrieved successfully: ${response.size} entries"
+                    )
+                    response
+                } else {
+                    Log.w("ApiService", "No consultants found")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get consultants: $e")
+                emptyList()
             }
         }
     }

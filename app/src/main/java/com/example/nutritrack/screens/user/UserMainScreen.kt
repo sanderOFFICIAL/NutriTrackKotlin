@@ -79,7 +79,8 @@ fun UserMainScreen(
     onProfileClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
     onViewMealDetails: (String, String) -> Unit, // Додаємо дату до параметрів
-    onCalendarClick: () -> Unit
+    onCalendarClick: () -> Unit,
+    onConsultantsClick: () -> Unit,
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -329,18 +330,18 @@ fun UserMainScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* TODO: Action for "Activity" */ },
+                    onClick = { onConsultantsClick() },
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_activity),
-                            contentDescription = "Activity",
+                            painter = painterResource(id = R.drawable.ic_communication),
+                            contentDescription = "Consultants",
                             modifier = Modifier.size(35.dp),
                             tint = Color.White
                         )
                     },
                     label = {
                         Text(
-                            text = "Activity",
+                            text = "Consultants",
                             color = Color.White,
                             fontSize = 12.sp
                         )

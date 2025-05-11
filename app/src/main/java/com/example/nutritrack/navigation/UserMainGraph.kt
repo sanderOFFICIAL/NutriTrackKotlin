@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
+import com.example.nutritrack.screens.user.ConsultantsScreen
 import com.example.nutritrack.screens.user.DatePickerScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
 import com.example.nutritrack.screens.user.HistoryScreen
@@ -43,7 +44,10 @@ fun NavGraphBuilder.userMainNavGraph(
                 },
                 onCalendarClick = {
                     navController.navigate("date_picker_screen")
-                }
+                },
+                onConsultantsClick = {
+                    navController.navigate("consultants_screen")
+                },
             )
         }
 
@@ -76,8 +80,8 @@ fun NavGraphBuilder.userMainNavGraph(
                         popUpTo("user_main_graph") { inclusive = true }
                     }
                 },
-                onActivityClick = {
-                    // TODO: Navigate to Activity screen if needed
+                onConsultantsClick = {
+                    navController.navigate("consultants_screen")
                 }
             )
         }
@@ -122,6 +126,19 @@ fun NavGraphBuilder.userMainNavGraph(
             },
             onViewMealDetails = { mealType, date ->
                 navController.navigate("meal_details_screen/$mealType/$date")
+            }
+        )
+    }
+    composable("consultants_screen") {
+        ConsultantsScreen(
+            onBackClick = { navController.popBackStack() },
+            onNotebookClick = {
+                navController.navigate("user_main_screen") {
+                    popUpTo("user_main_graph") { inclusive = true }
+                }
+            },
+            onProfileClick = {
+                navController.navigate("user_profile_screen")
             }
         )
     }

@@ -24,7 +24,7 @@ data class GoalResponse(
     @SerializedName("start_date") val startDate: String,
     @SerializedName("is_approved_by_consultant") val isApprovedByConsultant: Boolean,
     @SerializedName("user") val user: User?,
-    @SerializedName("consultant") val consultant: Consultant?,
+    @SerializedName("consultant") val consultant: ConsultantUserGoal?,
     @SerializedName("warning") val warning: String?
 )
 
@@ -34,6 +34,6 @@ data class User(
     @SerializedName("profile_picture") val profilePicture: String
 )
 
-data class Consultant(
+data class ConsultantUserGoal(
     @SerializedName("consultant_uid") val consultantUid: String? = null
 )

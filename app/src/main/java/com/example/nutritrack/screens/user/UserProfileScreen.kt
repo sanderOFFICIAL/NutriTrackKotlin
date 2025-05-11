@@ -66,7 +66,7 @@ fun UserProfileScreen(
     onBackClick: () -> Unit,
     onSuccessScreenClick: () -> Unit,
     onNotebookClick: () -> Unit,
-    onActivityClick: () -> Unit
+    onConsultantsClick: () -> Unit
 ) {
     var nickname by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -174,18 +174,18 @@ fun UserProfileScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { onActivityClick() },
+                    onClick = { onConsultantsClick() },
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_activity),
-                            contentDescription = "Activity",
+                            painter = painterResource(id = R.drawable.ic_communication),
+                            contentDescription = "Consultants",
                             modifier = Modifier.size(35.dp),
                             tint = Color.White
                         )
                     },
                     label = {
                         Text(
-                            text = "Activity",
+                            text = "Consultants",
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -284,7 +284,7 @@ fun UserProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Натисніть, щоб змінити фото",
+                            text = "Click to change photo",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.White,
