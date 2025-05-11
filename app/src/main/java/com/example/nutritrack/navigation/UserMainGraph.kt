@@ -8,7 +8,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.nutritrack.screens.user.DatePickerScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
+import com.example.nutritrack.screens.user.HistoryScreen
 import com.example.nutritrack.screens.user.MealDetailsScreen
 import com.example.nutritrack.screens.user.UserMainScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
@@ -36,6 +38,9 @@ fun NavGraphBuilder.userMainNavGraph(
                 },
                 onViewMealDetails = { mealType ->
                     navController.navigate("meal_details_screen/$mealType")
+                },
+                onCalendarClick = {
+                    navController.navigate("date_picker_screen")
                 }
             )
         }
@@ -80,6 +85,36 @@ fun NavGraphBuilder.userMainNavGraph(
                 // TODO: Save consumedFood to backend or local storage
                 // For now, we'll just navigate back
                 navController.navigateUp()
+            }
+        )
+    }
+    composable("date_picker_screen") {
+        DatePickerScreen(
+            onDateSelected = { selectedDate ->
+                navController.navigate("history_screen/$selectedDate") {
+                    popUpTo("date_picker_screen") {
+                        inclusive = true
+                    } // Закриваємо DatePickerScreen
+                }
+            },
+            onBackClick = { navController.popBackStack() }
+        )
+    }
+
+    // Додаємо екран історії за вибраний день
+    composable(
+        "history_screen/{selectedDate}",
+        arguments = listOf(navArgument("selectedDate") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
+        HistoryScreen(
+            selectedDate = selectedDate,
+            onBackClick = { navController.popBackStack() },
+            onAddFoodClick = { mealType ->
+                navController.navigate("food_search_screen/$mealType")
+            },
+            onViewMealDetails = { mealType ->
+                navController.navigate("meal_details_screen/$mealType")
             }
         )
     }

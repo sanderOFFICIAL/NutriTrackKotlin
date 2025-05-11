@@ -1,6 +1,5 @@
 package com.example.nutritrack.screens.user
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
@@ -52,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,48 +64,25 @@ import com.example.nutritrack.model.MealEntry
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserMainScreen(
-    onLogoutClick: () -> Unit,
-    onProfileClick: () -> Unit,
+fun HistoryScreen(
+    selectedDate: String,
+    onBackClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
-    onViewMealDetails: (String) -> Unit,
-    onCalendarClick: () -> Unit
+    onViewMealDetails: (String) -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var streak by remember { mutableStateOf(0) }
 
     val caloriesAnimationProgress = remember { Animatable(0f) }
-
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("NutriTrackPrefs", Context.MODE_PRIVATE)
-    val currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-    fun saveLastLoginDate(date: String) {
-        sharedPreferences.edit().putString("lastLoginDate", date).apply()
-    }
-
-    fun getLastLoginDate(): String? {
-        return sharedPreferences.getString("lastLoginDate", null)
-    }
-
-    fun saveStreak(value: Int) {
-        sharedPreferences.edit().putInt("currentStreak", value).apply()
-    }
-
-    fun getStreak(): Int {
-        return sharedPreferences.getInt("currentStreak", 0)
-    }
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(selectedDate) {
         scope.launch {
             try {
                 isLoading = true
@@ -118,45 +93,6 @@ fun UserMainScreen(
                     errorMessage = "Authorization error: IdToken not found"
                     return@launch
                 }
-
-                val lastLoginDateStr = getLastLoginDate()
-                var currentStreak = getStreak()
-
-                if (lastLoginDateStr == null) {
-                    currentStreak = 1
-                    val success = ApiService.addStreak(idToken, currentStreak)
-                    if (success) {
-                        saveStreak(currentStreak)
-                        saveLastLoginDate(currentDate)
-                    }
-                } else {
-                    val lastLoginDate =
-                        LocalDate.parse(lastLoginDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
-                    val daysDifference =
-                        ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
-
-                    when {
-                        daysDifference == 0 -> currentStreak = getStreak()
-                        daysDifference == 1 -> {
-                            currentStreak = getStreak() + 1
-                            val success = ApiService.updateStreak(idToken, currentStreak, true)
-                            if (success) {
-                                saveStreak(currentStreak)
-                                saveLastLoginDate(currentDate)
-                            }
-                        }
-
-                        daysDifference >= 2 -> {
-                            currentStreak = 0
-                            val success = ApiService.updateStreak(idToken, currentStreak, false)
-                            if (success) {
-                                saveStreak(currentStreak)
-                                saveLastLoginDate(currentDate)
-                            }
-                        }
-                    }
-                }
-                streak = currentStreak
 
                 val goalIds = ApiService.getAllUserGoalIds(idToken)
                 if (goalIds.isEmpty()) {
@@ -173,12 +109,13 @@ fun UserMainScreen(
                 goalData = goal
 
                 val meals = ApiService.getAllMeals(idToken)
+                val targetDate = LocalDate.parse(selectedDate, DateTimeFormatter.ISO_LOCAL_DATE)
                 mealEntries = meals.filter {
                     val entryDate = LocalDate.parse(
                         it.entry_date.split("T")[0],
                         DateTimeFormatter.ISO_LOCAL_DATE
                     )
-                    entryDate.isEqual(LocalDate.now())
+                    entryDate.isEqual(targetDate)
                 }
 
                 caloriesAnimationProgress.animateTo(
@@ -202,10 +139,10 @@ fun UserMainScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        IconButton(onClick = onLogoutClick) {
+                        IconButton(onClick = onBackClick) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_logout),
-                                contentDescription = "Logout",
+                                painter = painterResource(id = R.drawable.ic_back),
+                                contentDescription = "Back",
                                 modifier = Modifier.size(35.dp),
                                 tint = Color.White
                             )
@@ -215,30 +152,6 @@ fun UserMainScreen(
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    Text(
-                        text = streak.toString(),
-                        fontSize = 31.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    IconButton(onClick = { /* TODO: Action for flame icon */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_flame),
-                            contentDescription = "Fire",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    }
-                    IconButton(onClick = onCalendarClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_calendar),
-                            contentDescription = "Calendar",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
                         )
                     }
                 },
@@ -307,7 +220,7 @@ fun UserMainScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { onProfileClick() },
+                    onClick = { /* TODO: Action for "Profile" */ },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_profile),
@@ -367,7 +280,8 @@ fun UserMainScreen(
                 )
             } else if (goalData != null) {
                 Text(
-                    text = "Today",
+                    text = LocalDate.parse(selectedDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                        .format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -427,9 +341,9 @@ fun UserMainScreen(
                     ) {
                         Text(
                             text = if (totalConsumedCalories.toInt() == 0) {
-                                totalGoalCalories.toString() // Show goal when nothing consumed
+                                totalGoalCalories.toString()
                             } else {
-                                remainingCalories.toString() // Show remaining calories when food is consumed
+                                remainingCalories.toString()
                             },
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
@@ -554,7 +468,7 @@ fun UserMainScreen(
                 }
 
                 Text(
-                    text = "Today's diet",
+                    text = "Diet for this day",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
