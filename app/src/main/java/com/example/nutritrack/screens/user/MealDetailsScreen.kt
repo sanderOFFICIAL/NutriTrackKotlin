@@ -193,9 +193,9 @@ fun MealDetailsScreen(
                             ) {
                                 Column {
                                     Text(
-                                        text = "${meal.product_name} - ${meal.quantity_grams} g",
+                                        text = "${meal.product_name} \n- ${meal.quantity_grams} g",
                                         color = Color.White,
-                                        fontSize = 16.sp,
+                                        fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
@@ -244,7 +244,7 @@ fun MealDetailsScreen(
                                         painter = painterResource(id = R.drawable.ic_delete),
                                         contentDescription = "Delete",
                                         tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(21.dp)
                                     )
                                 }
                             }

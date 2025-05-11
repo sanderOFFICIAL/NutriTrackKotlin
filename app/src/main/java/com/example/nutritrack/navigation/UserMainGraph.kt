@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.screens.user.DatePickerScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
 import com.example.nutritrack.screens.user.HistoryScreen
@@ -26,6 +27,7 @@ fun NavGraphBuilder.userMainNavGraph(
         composable("user_main_screen") {
             UserMainScreen(
                 onLogoutClick = {
+                    FirebaseAuthHelper.signOut()
                     navController.navigate("welcome_screen") {
                         popUpTo("user_main_graph") { inclusive = true }
                     }

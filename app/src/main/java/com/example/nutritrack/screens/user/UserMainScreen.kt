@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults.textButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +39,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -83,6 +86,7 @@ fun UserMainScreen(
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var streak by remember { mutableStateOf(0) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     val caloriesAnimationProgress = remember { Animatable(0f) }
 
@@ -192,7 +196,51 @@ fun UserMainScreen(
             }
         }
     }
-
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = {
+                Text(
+                    text = "Logout Confirmation",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to log out?",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+            },
+            containerColor = Color(0xFF2F4F4F),
+            shape = RoundedCornerShape(12.dp),
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogoutClick()
+                    },
+                    colors = textButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Yes", fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false },
+                    colors = textButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("No", fontSize = 16.sp)
+                }
+            }
+        )
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -202,7 +250,7 @@ fun UserMainScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        IconButton(onClick = onLogoutClick) {
+                        IconButton(onClick = { showLogoutDialog = true }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_logout),
                                 contentDescription = "Logout",
