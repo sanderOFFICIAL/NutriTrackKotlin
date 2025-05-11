@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -47,7 +48,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,13 +70,14 @@ fun UserProfileScreen(
 ) {
     var nickname by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var weight by remember { mutableStateOf("") }
+    var weight by remember { mutableStateOf(0) }
     var userData by remember { mutableStateOf<UserData?>(null) }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploading by remember { mutableStateOf(false) }
     var uploadError by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
     var showGoalAchieved by remember { mutableStateOf(false) }
+    var targetWeight by remember { mutableStateOf(0) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -135,7 +136,18 @@ fun UserProfileScreen(
             if (userData != null) {
                 nickname = userData!!.nickname
                 description = userData!!.profile_description
-                weight = userData!!.current_weight.toString()
+                weight = userData!!.current_weight
+            }
+            val idToken = FirebaseAuthHelper.getIdToken()
+            if (idToken != null) {
+                val goalIds = ApiService.getAllUserGoalIds(idToken)
+                if (goalIds.isNotEmpty()) {
+                    val goalId = goalIds.first().goalId
+                    val goal = ApiService.getSpecificGoalById(goalId)
+                    if (goal != null) {
+                        targetWeight = goal.targetWeight
+                    }
+                }
             }
         }
     }
@@ -408,50 +420,65 @@ fun UserProfileScreen(
                     )
                 }
 
+
                 Text(
-                    text = "Weight:",
+                    text = "Target weight: $targetWeight kg",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.Start)
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(55.dp),
-                    shape = RoundedCornerShape(8.dp),
+                        .height(80.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xFF2F4F4F)
                     )
                 ) {
-                    TextField(
-                        value = weight,
-                        onValueChange = { weight = it },
+                    Row(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Transparent),
-                        textStyle = TextStyle(
-                            color = Color.White,
-                            fontSize = 16.sp
-                        ),
-                        placeholder = {
-                            Text(
-                                text = "Enter your weight (kg)",
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 16.sp
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconButton(
+                            onClick = { if (weight > 0) weight -= 1 },
+                            modifier = Modifier
+                                .size(80.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_minus),
+                                contentDescription = "Decrease weight",
+                                tint = Color.White
                             )
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = Color.White
+                        }
+                        Text(
+                            text = "$weight kg",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
-                    )
+                        IconButton(
+                            onClick = { weight += 1 },
+                            modifier = Modifier
+                                .size(80.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add),
+                                contentDescription = "Increase weight",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                 }
+
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = {
@@ -478,16 +505,13 @@ fun UserProfileScreen(
                                     }
                                 }
 
-                                val newWeight =
-                                    weight.toIntOrNull() ?: userData?.current_weight ?: 0
-                                if (newWeight != userData?.current_weight) {
+                                if (weight != userData?.current_weight) {
                                     val weightSuccess =
-                                        ApiService.updateCurrentWeight(idToken, newWeight)
+                                        ApiService.updateCurrentWeight(idToken, weight)
                                     if (!weightSuccess) {
                                         success = false
                                         uploadError = "Failed to update weight"
                                     } else {
-                                        // Перевірка, чи досягнута цільова вага з урахуванням зазору ±2 кг
                                         val goalIds = ApiService.getAllUserGoalIds(idToken)
                                         if (goalIds.isNotEmpty()) {
                                             val goalId = goalIds.first().goalId
@@ -496,9 +520,8 @@ fun UserProfileScreen(
                                                 val targetWeight = goal.targetWeight
                                                 val weightRange =
                                                     (targetWeight - 2)..(targetWeight + 2)
-                                                if (newWeight in weightRange) {
-                                                    showGoalAchieved =
-                                                        true // Показуємо екран досягнення
+                                                if (weight in weightRange) {
+                                                    showGoalAchieved = true
                                                 }
                                             }
                                         }
@@ -536,7 +559,6 @@ fun UserProfileScreen(
             }
         }
 
-        // Overlay for goal achievement
         if (showGoalAchieved) {
             LaunchedEffect(showGoalAchieved) {
                 val idToken = FirebaseAuthHelper.getIdToken()
@@ -589,7 +611,7 @@ fun UserProfileScreen(
                         )
                         Button(
                             onClick = {
-                                onSuccessScreenClick() // Переходимо на екран створення нової цілі
+                                onSuccessScreenClick()
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
