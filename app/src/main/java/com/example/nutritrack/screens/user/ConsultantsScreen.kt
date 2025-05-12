@@ -62,7 +62,8 @@ import kotlinx.coroutines.launch
 fun ConsultantsScreen(
     onBackClick: () -> Unit,
     onNotebookClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onConsultantProfileClick: (String) -> Unit // Додаємо callback для переходу
 ) {
     var consultants by remember { mutableStateOf<List<Consultant>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -256,7 +257,7 @@ fun ConsultantsScreen(
                     items(filteredConsultants) { consultant ->
                         ConsultantCard(
                             consultant = consultant,
-                            onClick = { /* TODO: Handle consultant selection */ }
+                            onClick = { onConsultantProfileClick(consultant.consultant_uid) } // Передаємо UID консультанта
                         )
                     }
                 }
@@ -281,7 +282,6 @@ fun ConsultantCard(consultant: Consultant, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Фото профілю або заглушка
             Box(
                 modifier = Modifier
                     .size(50.dp)

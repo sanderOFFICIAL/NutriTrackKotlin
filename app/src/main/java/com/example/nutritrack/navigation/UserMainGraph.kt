@@ -9,10 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
+import com.example.nutritrack.screens.user.ConsultantProfileScreen
 import com.example.nutritrack.screens.user.ConsultantsScreen
 import com.example.nutritrack.screens.user.DatePickerScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
-import com.example.nutritrack.screens.user.HistoryScreen
 import com.example.nutritrack.screens.user.MealDetailsScreen
 import com.example.nutritrack.screens.user.UserMainScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
@@ -113,22 +113,6 @@ fun NavGraphBuilder.userMainNavGraph(
         )
     }
 
-    composable(
-        "history_screen/{selectedDate}",
-        arguments = listOf(navArgument("selectedDate") { type = NavType.StringType })
-    ) { backStackEntry ->
-        val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
-        HistoryScreen(
-            selectedDate = selectedDate,
-            onBackClick = { navController.popBackStack() },
-            onAddFoodClick = { mealType ->
-                navController.navigate("food_search_screen/$mealType")
-            },
-            onViewMealDetails = { mealType, date ->
-                navController.navigate("meal_details_screen/$mealType/$date")
-            }
-        )
-    }
     composable("consultants_screen") {
         ConsultantsScreen(
             onBackClick = { navController.popBackStack() },
@@ -139,6 +123,24 @@ fun NavGraphBuilder.userMainNavGraph(
             },
             onProfileClick = {
                 navController.navigate("user_profile_screen")
+            },
+            onConsultantProfileClick = { consultantUid ->
+                navController.navigate("consultant_profile_screen/$consultantUid")
+            }
+        )
+    }
+
+    composable(
+        "consultant_profile_screen/{consultantUid}",
+        arguments = listOf(navArgument("consultantUid") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val consultantUid = backStackEntry.arguments?.getString("consultantUid") ?: ""
+        ConsultantProfileScreen(
+            consultantUid = consultantUid,
+            onBackClick = { navController.popBackStack() },
+            onRequestSent = {
+                // Поки що повернемося назад після надсилання запиту
+                navController.popBackStack()
             }
         )
     }

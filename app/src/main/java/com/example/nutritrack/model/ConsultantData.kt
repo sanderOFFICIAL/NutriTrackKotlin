@@ -13,5 +13,6 @@ data class Consultant(
     val created_at: String,
     val last_login: String,
     val max_clients: Int,
-    val current_clients: Int
+    val current_clients: Int,
+    val gender: String
 )

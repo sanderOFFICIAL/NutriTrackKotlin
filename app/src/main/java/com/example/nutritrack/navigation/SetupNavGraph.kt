@@ -1,5 +1,7 @@
 package com.example.nutritrack.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -11,6 +13,7 @@ import com.example.nutritrack.data.user.UserRegistrationViewModel
 import com.example.nutritrack.screens.SplashScreen
 import com.example.nutritrack.screens.WelcomeScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavGraph(navController: NavHostController) {
     val consultantViewModel: ConsultantRegistrationViewModel = viewModel()

@@ -16,6 +16,7 @@ import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
+import com.example.nutritrack.model.UserSendInviteRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -99,6 +100,9 @@ interface ApiServiceInterface {
 
     @GET("api/Consultant/get-all-consultants")
     suspend fun getAllConsultants(@Query("idToken") idToken: String): List<Consultant>
+
+    @POST("api/Consultant/user-send-invite")
+    suspend fun sendInviteToConsultant(@Body request: UserSendInviteRequest): Response<Void>
 }
 
 object ApiService {
@@ -428,6 +432,25 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to get consultants: $e")
                 emptyList()
+            }
+        }
+    }
+
+    suspend fun sendInviteToConsultant(idToken: String, consultantUid: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UserSendInviteRequest(idToken, consultantUid)
+                val response = apiService.sendInviteToConsultant(request)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Invite sent successfully to consultant: $consultantUid")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to send invite: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to send invite: $e")
+                false
             }
         }
     }
