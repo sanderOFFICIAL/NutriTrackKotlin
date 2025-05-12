@@ -63,6 +63,9 @@ fun ConsultantProfileScreen(
     var isSendingInvite by remember { mutableStateOf(false) }
     var inviteError by remember { mutableStateOf<String?>(null) }
     var inviteSuccess by remember { mutableStateOf(false) }
+    var isRemovingConsultant by remember { mutableStateOf(false) }
+    var removeError by remember { mutableStateOf<String?>(null) }
+    var hasLinkedRelationship by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -70,7 +73,15 @@ fun ConsultantProfileScreen(
         try {
             isLoading = true
             errorMessage = null
-            val idToken = FirebaseAuthHelper.getIdToken() ?: ""
+            val idToken = FirebaseAuthHelper.getIdToken() ?: run {
+                errorMessage = "Authorization error: IdToken not found"
+                return@LaunchedEffect
+            }
+
+            val relationships = ApiService.getLinkedRelationships(idToken)
+            hasLinkedRelationship =
+                relationships.any { it.isActive && it.consultantUid == consultantUid }
+
             val consultants = ApiService.getAllConsultants(idToken)
             consultant = consultants.find { it.consultant_uid == consultantUid }
             if (consultant == null) {
@@ -265,7 +276,6 @@ fun ConsultantProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Відображення статусу надсилання
             if (inviteError != null) {
                 Text(
                     text = inviteError!!,
@@ -286,56 +296,117 @@ fun ConsultantProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
+            } else if (removeError != null) {
+                Text(
+                    text = removeError!!,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    scope.launch {
-                        isSendingInvite = true
-                        inviteError = null
-                        inviteSuccess = false
+            if (hasLinkedRelationship) {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isRemovingConsultant = true
+                            removeError = null
 
-                        val idToken = FirebaseAuthHelper.getIdToken()
-                        if (idToken != null) {
-                            val success = ApiService.sendInviteToConsultant(idToken, consultantUid)
-                            if (success) {
-                                inviteSuccess = true
-                                onRequestSent()
+                            val idToken = FirebaseAuthHelper.getIdToken()
+                            if (idToken != null) {
+                                val success = ApiService.removeConsultant(idToken, consultantUid)
+                                if (success) {
+                                    hasLinkedRelationship = false
+                                    onBackClick()
+                                } else {
+                                    removeError = "Failed to remove consultant"
+                                }
                             } else {
-                                inviteError = "You already sent an invitation"
+                                removeError = "Failed to get idToken"
                             }
-                        } else {
-                            inviteError = "Failed to get idToken"
+                            isRemovingConsultant = false
                         }
-                        isSendingInvite = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2F4F4F)
+                    ),
+                    enabled = !isRemovingConsultant
+                ) {
+                    if (isRemovingConsultant) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Remove Consultant",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F4F4F)
-                ),
-                enabled = !isSendingInvite && !inviteSuccess && (consultant!!.max_clients - consultant!!.current_clients) > 0
-            ) {
-                if (isSendingInvite) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    Text(
-                        text = "Send Request",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                }
+            } else {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isSendingInvite = true
+                            inviteError = null
+                            inviteSuccess = false
+
+                            val idToken = FirebaseAuthHelper.getIdToken()
+                            if (idToken != null) {
+                                val success =
+                                    ApiService.sendInviteToConsultant(idToken, consultantUid)
+                                if (success) {
+                                    inviteSuccess = true
+                                    onRequestSent()
+                                } else {
+                                    inviteError = "You already sent an invitation"
+                                }
+                            } else {
+                                inviteError = "Failed to get idToken"
+                            }
+                            isSendingInvite = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2F4F4F)
+                    ),
+                    enabled = !isSendingInvite && !inviteSuccess && (consultant!!.max_clients - consultant!!.current_clients) > 0
+                ) {
+                    if (isSendingInvite) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Send Request",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 

@@ -8,9 +8,11 @@ import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
 import com.example.nutritrack.model.AddMealRequest
 import com.example.nutritrack.model.AddStreakRequest
 import com.example.nutritrack.model.Consultant
+import com.example.nutritrack.model.ConsultantNote
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
+import com.example.nutritrack.model.LinkedRelationship
 import com.example.nutritrack.model.MealEntry
 import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
@@ -103,6 +105,21 @@ interface ApiServiceInterface {
 
     @POST("api/Consultant/user-send-invite")
     suspend fun sendInviteToConsultant(@Body request: UserSendInviteRequest): Response<Void>
+
+    @GET("api/Consultant/get-linked-relationships")
+    suspend fun getLinkedRelationships(@Query("idToken") idToken: String): List<LinkedRelationship>
+
+    @DELETE("api/User/remove-consultant")
+    suspend fun removeConsultant(
+        @Query("idToken") idToken: String,
+        @Query("consultant_uid") consultantUid: String
+    ): Response<Void>
+
+    @GET("api/ConsultantNote/get-notes")
+    suspend fun getNotes(
+        @Query("goalId") goalId: Int,
+        @Query("idToken") idToken: String
+    ): List<ConsultantNote>
 }
 
 object ApiService {
@@ -453,5 +470,67 @@ object ApiService {
                 false
             }
         }
+    }
+
+    suspend fun getLinkedRelationships(idToken: String): List<LinkedRelationship> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getLinkedRelationships(idToken)
+                if (response.isNotEmpty()) {
+                    Log.d(
+                        "ApiService",
+                        "Linked relationships retrieved successfully: ${response.size} entries"
+                    )
+                    response
+                } else {
+                    Log.w("ApiService", "No linked relationships found")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get linked relationships: $e")
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun getNotes(goalId: Int, idToken: String): List<ConsultantNote> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getNotes(goalId, idToken)
+                if (response.isNotEmpty()) {
+                    Log.d(
+                        "ApiService",
+                        "Notes retrieved successfully for goalId $goalId: ${response.size} entries"
+                    )
+                    response
+                } else {
+                    Log.w("ApiService", "No notes found for goalId $goalId")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get notes for goalId $goalId: $e")
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun removeConsultant(idToken: String, consultantUid: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.removeConsultant(idToken, consultantUid)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Consultant removed successfully: $consultantUid")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to remove consultant: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to remove consultant: $e")
+                false
+            }
+        }
+
+
     }
 }

@@ -54,6 +54,7 @@ import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.Consultant
+import com.example.nutritrack.model.LinkedRelationship
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -63,12 +64,13 @@ fun ConsultantsScreen(
     onBackClick: () -> Unit,
     onNotebookClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onConsultantProfileClick: (String) -> Unit // Додаємо callback для переходу
+    onConsultantProfileClick: (String) -> Unit
 ) {
     var consultants by remember { mutableStateOf<List<Consultant>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var linkedRelationship by remember { mutableStateOf<LinkedRelationship?>(null) }
 
     val scope = rememberCoroutineScope()
 
@@ -82,8 +84,14 @@ fun ConsultantsScreen(
                     errorMessage = "Authorization error: IdToken not found"
                     return@launch
                 }
-                val response = ApiService.getAllConsultants(idToken)
-                consultants = response
+
+                val relationships = ApiService.getLinkedRelationships(idToken)
+                linkedRelationship = relationships.firstOrNull { it.isActive }
+
+                if (linkedRelationship == null) {
+                    val response = ApiService.getAllConsultants(idToken)
+                    consultants = response
+                }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
             } finally {
@@ -92,173 +100,183 @@ fun ConsultantsScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            NavigationBar(
-                containerColor = Color(0xFF2F4F4F),
-                modifier = Modifier.height(102.dp)
-            ) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNotebookClick() },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_notebook),
-                            contentDescription = "Notebook",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Notebook",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { /* Already on consultants screen */ },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_communication),
-                            contentDescription = "Consultants",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Consultants",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onProfileClick() },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_profile),
-                            contentDescription = "Profile",
-                            modifier = Modifier.size(35.dp),
-                            tint = Color.White
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Profile",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF64A79B)
-                    )
-                )
-            }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF64A79B))
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(38.dp))
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
-                placeholder = {
-                    Text(
-                        "Search by nickname...",
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Search",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF2F4F4F),
-                    unfocusedContainerColor = Color(0xFF2F4F4F),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
-                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = Color.White
-                ),
-                shape = RoundedCornerShape(8.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { /* Handle search if needed */ }),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+    if (linkedRelationship != null) {
+        ConsultantNotesScreen(
+            linkedRelationship = linkedRelationship!!,
+            onBackClick = onBackClick,
+            onNotebookClick = onNotebookClick,
+            onProfileClick = onProfileClick,
+            onConsultantProfileClick = onConsultantProfileClick
+        )
+    } else {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                NavigationBar(
+                    containerColor = Color(0xFF2F4F4F),
+                    modifier = Modifier.height(102.dp)
                 ) {
-                    CircularProgressIndicator(color = Color.White)
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { onNotebookClick() },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_notebook),
+                                contentDescription = "Notebook",
+                                modifier = Modifier.size(35.dp),
+                                tint = Color.White
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Notebook",
+                                color = Color.White,
+                                fontSize = 12.sp
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.White,
+                            selectedTextColor = Color.White,
+                            unselectedTextColor = Color.White,
+                            indicatorColor = Color(0xFF64A79B)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = { /* Already on consultants screen */ },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_communication),
+                                contentDescription = "Consultants",
+                                modifier = Modifier.size(35.dp),
+                                tint = Color.White
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Consultants",
+                                color = Color.White,
+                                fontSize = 12.sp
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.White,
+                            selectedTextColor = Color.White,
+                            unselectedTextColor = Color.White,
+                            indicatorColor = Color(0xFF64A79B)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { onProfileClick() },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_profile),
+                                contentDescription = "Profile",
+                                modifier = Modifier.size(35.dp),
+                                tint = Color.White
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Profile",
+                                color = Color.White,
+                                fontSize = 12.sp
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.White,
+                            selectedTextColor = Color.White,
+                            unselectedTextColor = Color.White,
+                            indicatorColor = Color(0xFF64A79B)
+                        )
+                    )
                 }
-            } else if (errorMessage != null) {
-                Text(
-                    text = errorMessage!!,
-                    color = Color.Red,
-                    fontSize = 16.sp,
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF64A79B))
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(38.dp))
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                val filteredConsultants = if (searchQuery.isNotEmpty()) {
-                    consultants.filter { it.nickname.contains(searchQuery, ignoreCase = true) }
-                } else {
-                    consultants
-                }
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filteredConsultants) { consultant ->
-                        ConsultantCard(
-                            consultant = consultant,
-                            onClick = { onConsultantProfileClick(consultant.consultant_uid) } // Передаємо UID консультанта
+                        .height(60.dp),
+                    placeholder = {
+                        Text(
+                            "Search by nickname...",
+                            color = Color.White.copy(alpha = 0.7f)
                         )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFF2F4F4F),
+                        unfocusedContainerColor = Color(0xFF2F4F4F),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
+                        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { /* Handle search if needed */ }),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                } else if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    val filteredConsultants = if (searchQuery.isNotEmpty()) {
+                        consultants.filter { it.nickname.contains(searchQuery, ignoreCase = true) }
+                    } else {
+                        consultants
+                    }
+
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredConsultants) { consultant ->
+                            ConsultantCard(
+                                consultant = consultant,
+                                onClick = { onConsultantProfileClick(consultant.consultant_uid) }
+                            )
+                        }
                     }
                 }
             }
