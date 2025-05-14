@@ -1,4 +1,4 @@
-package com.example.nutritrack.screens.user
+package com.example.nutritrack.screens.consultant
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -50,35 +50,35 @@ import coil.compose.AsyncImage
 import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
-import com.example.nutritrack.model.Consultant
+import com.example.nutritrack.model.UserData
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ConsultantProfileScreen(
-    consultantUid: String,
+fun UserProfileScreen(
+    userUid: String,
     onBackClick: () -> Unit,
-    onRequestSent: () -> Unit
+    onClientAdded: () -> Unit
 ) {
-    var consultant by remember { mutableStateOf<Consultant?>(null) }
+    var user by remember { mutableStateOf<UserData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSendingInvite by remember { mutableStateOf(false) }
     var inviteError by remember { mutableStateOf<String?>(null) }
     var inviteSuccess by remember { mutableStateOf(false) }
-    var isRemovingConsultant by remember { mutableStateOf(false) }
+    var isRemovingClient by remember { mutableStateOf(false) }
     var removeError by remember { mutableStateOf<String?>(null) }
     var hasLinkedRelationship by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
 
-    // Новий стан для відстеження типу дії (запит чи видалення)
+    // Стан для діалогу
     var dialogAction by remember { mutableStateOf<String?>(null) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogText by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(consultantUid) {
+    LaunchedEffect(userUid) {
         try {
             isLoading = true
             errorMessage = null
@@ -87,14 +87,17 @@ fun ConsultantProfileScreen(
                 return@LaunchedEffect
             }
 
+            // Перевіряємо наявність зв’язку між консультантом і користувачем
             val relationships = ApiService.getLinkedRelationships(idToken)
-            hasLinkedRelationship =
-                relationships.any { it.isActive && it.consultantUid == consultantUid }
+            hasLinkedRelationship = relationships.any { it.isActive && it.userUid == userUid }
+            // Перевіряємо, чи було надіслано запрошення (але ще не прийнято)
+            inviteSuccess = relationships.any { !it.isActive && it.userUid == userUid }
 
-            val consultants = ApiService.getAllConsultants(idToken)
-            consultant = consultants.find { it.consultant_uid == consultantUid }
-            if (consultant == null) {
-                errorMessage = "Consultant not found"
+            // Отримуємо дані користувача
+            val userData = ApiService.getUserByUid(userUid)
+            user = userData
+            if (user == null) {
+                errorMessage = "User not found"
             }
         } catch (e: Exception) {
             errorMessage = "Error: ${e.message}"
@@ -103,8 +106,8 @@ fun ConsultantProfileScreen(
         }
     }
 
-    // Функція для надсилання запиту консультанту
-    fun sendRequestToConsultant() {
+    // Функція для надсилання запрошення користувачу
+    fun sendInvite() {
         scope.launch {
             isSendingInvite = true
             inviteError = null
@@ -112,12 +115,12 @@ fun ConsultantProfileScreen(
 
             val idToken = FirebaseAuthHelper.getIdToken()
             if (idToken != null) {
-                val success = ApiService.sendInviteToConsultant(idToken, consultantUid)
+                val success = ApiService.sendInviteToUser(idToken, userUid)
                 if (success) {
                     inviteSuccess = true
-                    onRequestSent()
+                    onClientAdded()
                 } else {
-                    inviteError = "You already sent an invitation"
+                    inviteError = "You already sent an invitation or an error occurred"
                 }
             } else {
                 inviteError = "Failed to get idToken"
@@ -126,25 +129,26 @@ fun ConsultantProfileScreen(
         }
     }
 
-    // Функція для видалення консультанта
-    fun removeConsultant() {
+    // Функція для видалення клієнта
+    fun removeClient() {
         scope.launch {
-            isRemovingConsultant = true
+            isRemovingClient = true
             removeError = null
 
             val idToken = FirebaseAuthHelper.getIdToken()
             if (idToken != null) {
-                val success = ApiService.removeConsultant(idToken, consultantUid)
+                val success = ApiService.removeUser(idToken, userUid)
                 if (success) {
                     hasLinkedRelationship = false
+                    inviteSuccess = false
                     onBackClick()
                 } else {
-                    removeError = "Failed to remove consultant"
+                    removeError = "Failed to remove client"
                 }
             } else {
                 removeError = "Failed to get idToken"
             }
-            isRemovingConsultant = false
+            isRemovingClient = false
         }
     }
 
@@ -173,8 +177,8 @@ fun ConsultantProfileScreen(
                     onClick = {
                         showDialog = false
                         when (dialogAction) {
-                            "send_request" -> sendRequestToConsultant()
-                            "remove_consultant" -> removeConsultant()
+                            "send_invite" -> sendInvite()
+                            "remove_client" -> removeClient()
                         }
                     },
                     colors = textButtonColors(
@@ -221,7 +225,7 @@ fun ConsultantProfileScreen(
                 )
             }
             Text(
-                text = "Consultant Profile",
+                text = "User Profile",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -257,7 +261,7 @@ fun ConsultantProfileScreen(
                     .padding(16.dp),
                 textAlign = TextAlign.Center
             )
-        } else if (consultant != null) {
+        } else if (user != null) {
             Box(
                 modifier = Modifier
                     .size(160.dp)
@@ -265,9 +269,9 @@ fun ConsultantProfileScreen(
                     .background(Color.White.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
-                if (consultant!!.profile_picture.isNotEmpty()) {
+                if (user!!.profile_picture.isNotEmpty()) {
                     AsyncImage(
-                        model = consultant!!.profile_picture,
+                        model = user!!.profile_picture,
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(160.dp)
@@ -286,7 +290,7 @@ fun ConsultantProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = consultant!!.nickname,
+                text = user!!.nickname,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -319,7 +323,7 @@ fun ConsultantProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = consultant!!.profile_description,
+                        text = user!!.profile_description.ifEmpty { "No bio available" },
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.7f),
                         fontStyle = FontStyle.Italic,
@@ -346,29 +350,21 @@ fun ConsultantProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Clients: ${consultant!!.current_clients}/${consultant!!.max_clients}",
-                        fontSize = 14.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    val availableSlots = consultant!!.max_clients - consultant!!.current_clients
-                    Text(
-                        text = "Available Slots: $availableSlots",
+                        text = "Gender: ${user!!.gender}",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Experience: ${consultant!!.experience_years} years",
+                        text = "Height: ${user!!.height} cm",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Gender: ${consultant!!.gender}",
+                        text = "Weight: ${user!!.current_weight} kg",
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -389,7 +385,7 @@ fun ConsultantProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
-            } else if (inviteSuccess) {
+            } else if (inviteSuccess && !hasLinkedRelationship) {
                 Text(
                     text = "Invite sent successfully!",
                     color = Color.White,
@@ -399,7 +395,19 @@ fun ConsultantProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
-            } else if (removeError != null) {
+            } else if (hasLinkedRelationship) {
+                Text(
+                    text = "Client added successfully!",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+            }
+
+            if (removeError != null) {
                 Text(
                     text = removeError!!,
                     color = Color.Red,
@@ -416,10 +424,10 @@ fun ConsultantProfileScreen(
             if (hasLinkedRelationship) {
                 Button(
                     onClick = {
-                        dialogAction = "remove_consultant"
-                        dialogTitle = "Remove Consultant"
+                        dialogAction = "remove_client"
+                        dialogTitle = "Remove Client"
                         dialogText =
-                            "Are you sure you want to remove this consultant? This action cannot be undone."
+                            "Are you sure you want to remove this client? This action cannot be undone."
                         showDialog = true
                     },
                     modifier = Modifier
@@ -430,16 +438,16 @@ fun ConsultantProfileScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF2F4F4F)
                     ),
-                    enabled = !isRemovingConsultant
+                    enabled = !isRemovingClient
                 ) {
-                    if (isRemovingConsultant) {
+                    if (isRemovingClient) {
                         CircularProgressIndicator(
                             color = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
                     } else {
                         Text(
-                            text = "Remove Consultant",
+                            text = "Remove Client",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -451,9 +459,9 @@ fun ConsultantProfileScreen(
             } else {
                 Button(
                     onClick = {
-                        dialogAction = "send_request"
-                        dialogTitle = "Send Request"
-                        dialogText = "Are you sure you want to send a request to this consultant?"
+                        dialogAction = "send_invite"
+                        dialogTitle = "Send Invite"
+                        dialogText = "Are you sure you want to send an invite to this user?"
                         showDialog = true
                     },
                     modifier = Modifier
@@ -464,7 +472,7 @@ fun ConsultantProfileScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF2F4F4F)
                     ),
-                    enabled = !isSendingInvite && !inviteSuccess && (consultant!!.max_clients - consultant!!.current_clients) > 0
+                    enabled = !isSendingInvite && !inviteSuccess && !hasLinkedRelationship
                 ) {
                     if (isSendingInvite) {
                         CircularProgressIndicator(
@@ -473,7 +481,7 @@ fun ConsultantProfileScreen(
                         )
                     } else {
                         Text(
-                            text = "Send Request",
+                            text = "Add as Client",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,

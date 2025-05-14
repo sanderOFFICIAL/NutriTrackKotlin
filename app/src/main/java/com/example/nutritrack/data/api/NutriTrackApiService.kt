@@ -10,6 +10,8 @@ import com.example.nutritrack.model.AddStreakRequest
 import com.example.nutritrack.model.Consultant
 import com.example.nutritrack.model.ConsultantNote
 import com.example.nutritrack.model.ConsultantRegistrationData
+import com.example.nutritrack.model.ConsultantRequest
+import com.example.nutritrack.model.ConsultantSendInviteRequest
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.LinkedRelationship
@@ -18,6 +20,7 @@ import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
 import com.example.nutritrack.model.UserRegistrationData
+import com.example.nutritrack.model.UserRespondInviteRequest
 import com.example.nutritrack.model.UserSendInviteRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +42,6 @@ import retrofit2.http.Query
 data class LoginRequest(val idToken: String)
 
 interface ApiServiceInterface {
-
     @POST("api/Auth/login/consultant")
     suspend fun loginConsultant(@Body request: LoginRequest): Response<Void>
 
@@ -120,6 +122,24 @@ interface ApiServiceInterface {
         @Query("goalId") goalId: Int,
         @Query("idToken") idToken: String
     ): List<ConsultantNote>
+
+    @GET("api/User/get-all-users")
+    suspend fun getAllUsers(@Query("idToken") idToken: String): List<UserData>
+
+    @POST("api/Consultant/send-invite-to-user")
+    suspend fun sendInviteToUser(@Body request: ConsultantSendInviteRequest): Response<Void>
+
+    @DELETE("api/Consultant/consultant-remove-user")
+    suspend fun removeUser(
+        @Query("idToken") idToken: String,
+        @Query("user_uid") userUid: String
+    ): Response<Void>
+
+    @GET("api/Consultant/get-all-requests")
+    suspend fun getAllRequests(@Query("idToken") idToken: String): List<ConsultantRequest>
+
+    @POST("api/Consultant/user-respond-invite")
+    suspend fun userRespondInvite(@Body request: UserRespondInviteRequest): Response<Void>
 }
 
 object ApiService {
@@ -472,6 +492,61 @@ object ApiService {
         }
     }
 
+    suspend fun sendInviteToUser(idToken: String, userUid: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = ConsultantSendInviteRequest(idToken, userUid)
+                val response = apiService.sendInviteToUser(request)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Invite sent successfully to user: $userUid")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to send invite to user: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to send invite to user: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun removeConsultant(idToken: String, consultantUid: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.removeConsultant(idToken, consultantUid)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Consultant removed successfully: $consultantUid")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to remove consultant: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to remove consultant: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun getAllUsers(idToken: String): List<UserData> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAllUsers(idToken)
+                if (response.isNotEmpty()) {
+                    Log.d("ApiService", "Users retrieved successfully: ${response.size} entries")
+                    response
+                } else {
+                    Log.w("ApiService", "No users found")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get users: $e")
+                emptyList()
+            }
+        }
+    }
+
     suspend fun getLinkedRelationships(idToken: String): List<LinkedRelationship> {
         return withContext(Dispatchers.IO) {
             try {
@@ -514,23 +589,67 @@ object ApiService {
         }
     }
 
-    suspend fun removeConsultant(idToken: String, consultantUid: String): Boolean {
+
+    suspend fun removeUser(idToken: String, userUid: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.removeConsultant(idToken, consultantUid)
+                val response = apiService.removeUser(idToken, userUid)
                 if (response.isSuccessful) {
-                    Log.d("ApiService", "Consultant removed successfully: $consultantUid")
+                    Log.d("ApiService", "User removed successfully: $userUid")
                     true
                 } else {
-                    Log.e("ApiService", "Failed to remove consultant: ${response.code()}")
+                    Log.e("ApiService", "Failed to remove user: ${response.code()}")
                     false
                 }
             } catch (e: Exception) {
-                Log.e("ApiService", "Failed to remove consultant: $e")
+                Log.e("ApiService", "Failed to remove user: $e")
                 false
             }
         }
-
-
     }
+
+    suspend fun getAllRequests(idToken: String): List<ConsultantRequest> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAllRequests(idToken)
+                if (response.isNotEmpty()) {
+                    Log.d("ApiService", "Requests retrieved successfully: ${response.size} entries")
+                    response
+                } else {
+                    Log.w("ApiService", "No requests found")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get requests: $e")
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun userRespondInvite(
+        idToken: String,
+        consultantUid: String,
+        isAccepted: Boolean
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UserRespondInviteRequest(idToken, consultantUid, isAccepted)
+                val response = apiService.userRespondInvite(request)
+                if (response.isSuccessful) {
+                    Log.d(
+                        "ApiService",
+                        "Responded to invite successfully: consultantUid=$consultantUid, isAccepted=$isAccepted"
+                    )
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to respond to invite: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to respond to invite: $e")
+                false
+            }
+        }
+    }
+
 }

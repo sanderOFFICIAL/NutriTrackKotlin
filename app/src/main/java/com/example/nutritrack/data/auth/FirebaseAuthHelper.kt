@@ -35,6 +35,8 @@ object FirebaseAuthHelper {
         auth.signOut()
     }
 
+    fun getCurrentUser() = auth.currentUser
+
     suspend fun loginAsUser(): Result<Boolean> {
         return try {
             val idToken = getIdToken()

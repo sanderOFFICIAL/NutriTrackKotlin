@@ -65,7 +65,7 @@ fun SplashScreen(
 
         if (isConsultant) {
             Log.d("SplashScreen", "Consultant authenticated, navigating to ConsultantSuccessScreen")
-            navController.navigate("consultant_success_screen") {
+            navController.navigate("consultant_main_screen") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             return@LaunchedEffect

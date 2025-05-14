@@ -13,6 +13,7 @@ import com.example.nutritrack.screens.user.ConsultantProfileScreen
 import com.example.nutritrack.screens.user.ConsultantsScreen
 import com.example.nutritrack.screens.user.DatePickerScreen
 import com.example.nutritrack.screens.user.FoodSearchScreen
+import com.example.nutritrack.screens.user.HistoryScreen
 import com.example.nutritrack.screens.user.MealDetailsScreen
 import com.example.nutritrack.screens.user.UserMainScreen
 import com.example.nutritrack.screens.user.UserProfileScreen
@@ -110,6 +111,22 @@ fun NavGraphBuilder.userMainNavGraph(
                 }
             },
             onBackClick = { navController.popBackStack() }
+        )
+    }
+    composable(
+        "history_screen/{selectedDate}",
+        arguments = listOf(navArgument("selectedDate") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
+        HistoryScreen(
+            selectedDate = selectedDate,
+            onBackClick = { navController.popBackStack() },
+            onAddFoodClick = { mealType ->
+                navController.navigate("food_search_screen/$mealType")
+            },
+            onViewMealDetails = { mealType, date ->
+                navController.navigate("meal_details_screen/$mealType/$date")
+            }
         )
     }
 
