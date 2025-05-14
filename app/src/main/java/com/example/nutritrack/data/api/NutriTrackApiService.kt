@@ -140,6 +140,12 @@ interface ApiServiceInterface {
 
     @POST("api/Consultant/user-respond-invite")
     suspend fun userRespondInvite(@Body request: UserRespondInviteRequest): Response<Void>
+
+    @GET("api/Meal/get-meals-by-uid")
+    suspend fun getMealsByUid(@Query("uid") uid: String): List<MealEntry>
+
+    @GET("api/Goal/get-goal-id-by-user-uid/{userUid}")
+    suspend fun getGoalIdByUserUid(@Path("userUid") userUid: String): Response<GoalIdResponse>
 }
 
 object ApiService {
@@ -626,6 +632,27 @@ object ApiService {
         }
     }
 
+    suspend fun getMealsByUid(uid: String): List<MealEntry> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getMealsByUid(uid)
+                if (response.isNotEmpty()) {
+                    Log.d(
+                        "ApiService",
+                        "Meals retrieved successfully for uid $uid: ${response.size} entries"
+                    )
+                    response
+                } else {
+                    Log.w("ApiService", "No meals found for uid $uid")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get meals by uid $uid: $e")
+                emptyList()
+            }
+        }
+    }
+
     suspend fun userRespondInvite(
         idToken: String,
         consultantUid: String,
@@ -652,4 +679,20 @@ object ApiService {
         }
     }
 
+    suspend fun getGoalIdByUserUid(userUid: String): GoalIdResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getGoalIdByUserUid(userUid)
+                if (response.isSuccessful) {
+                    response.body()
+                } else {
+                    Log.e("ApiService", "Failed to get goal ID by user UID: ${response.code()}")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get goal ID by user UID: $e")
+                null
+            }
+        }
+    }
 }

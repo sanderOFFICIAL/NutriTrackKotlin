@@ -10,6 +10,7 @@ import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.screens.consultant.ConsultantMainScreen
 import com.example.nutritrack.screens.consultant.ConsultantSearchScreen
 import com.example.nutritrack.screens.consultant.ConsultantSuccessScreen
+import com.example.nutritrack.screens.consultant.UserMealScreen
 import com.example.nutritrack.screens.consultant.UserProfileScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -34,6 +35,21 @@ fun NavGraphBuilder.consultantMainNavGraph(
                 onSearchClick = {
                     navController.navigate("consultant_search_screen")
                 },
+                onUserMealClick = { userUid ->
+                    navController.navigate("consultant_user_meal_screen/$userUid")
+                }
+            )
+        }
+
+        composable("consultant_user_meal_screen/{userUid}") { backStackEntry ->
+            val userUid = backStackEntry.arguments?.getString("userUid") ?: ""
+            UserMealScreen(
+                userUid = userUid,
+                onBackClick = {
+                    navController.navigate("consultant_main_screen") {
+                        popUpTo("consultant_user_meal_screen/$userUid") { inclusive = true }
+                    }
+                }
             )
         }
 
