@@ -8,10 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.screens.consultant.ConsultantMainScreen
+import com.example.nutritrack.screens.consultant.ConsultantProfileScreen
 import com.example.nutritrack.screens.consultant.ConsultantSearchScreen
 import com.example.nutritrack.screens.consultant.ConsultantSuccessScreen
 import com.example.nutritrack.screens.consultant.UserMealScreen
-import com.example.nutritrack.screens.consultant.UserProfileScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun NavGraphBuilder.consultantMainNavGraph(
@@ -78,19 +78,22 @@ fun NavGraphBuilder.consultantMainNavGraph(
                 }
             )
         }
-        composable("consultant_user_profile_screen/{userUid}") { backStackEntry ->
-            val userUid = backStackEntry.arguments?.getString("userUid") ?: ""
-            UserProfileScreen(
-                userUid = userUid,
-                onBackClick = {
-                    navController.navigate("consultant_search_screen") {
-                        popUpTo("consultant_user_profile_screen/$userUid") { inclusive = true }
-                    }
-                },
-                onClientAdded = {
-                    // Поки що нічого не робимо, але можна додати логіку оновлення
+    }
+    composable("consultant_profile_screen") {
+        ConsultantProfileScreen(
+            onHomeClick = {
+                navController.navigate("consultant_main_screen") {
+                    popUpTo("consultant_profile_screen") { inclusive = true }
                 }
-            )
-        }
+            },
+            onSearchClick = {
+                navController.navigate("consultant_search_screen") {
+                    popUpTo("consultant_profile_screen") { inclusive = true }
+                }
+            },
+            onProfileClick = {
+                // Залишаємося на тому ж екрані, оскільки це профіль
+            }
+        )
     }
 }

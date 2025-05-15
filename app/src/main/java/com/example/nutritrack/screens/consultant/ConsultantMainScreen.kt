@@ -76,6 +76,10 @@ fun ConsultantMainScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isResponding by remember { mutableStateOf(false) }
     var respondError by remember { mutableStateOf<String?>(null) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
+    var userToRemove by remember { mutableStateOf<String?>(null) }
+    var isRemovingClient by remember { mutableStateOf(false) }
+    var removeError by remember { mutableStateOf<String?>(null) }
 
     val scope = rememberCoroutineScope()
 
@@ -99,6 +103,41 @@ fun ConsultantMainScreen(
         } else {
             errorMessage = "Authorization error: IdToken not found"
             isLoading = false
+        }
+    }
+
+    // Функція для видалення клієнта та його нотаток
+    fun removeClient(userUid: String) {
+        scope.launch {
+            isRemovingClient = true
+            removeError = null
+
+            val idToken = FirebaseAuthHelper.getIdToken()
+            if (idToken != null) {
+                // Отримати goalId користувача
+                val goalIdResponse = ApiService.getGoalIdByUserUid(userUid)
+                val goalId = goalIdResponse?.goalId
+
+                if (goalId != null) {
+                    // Отримати всі нотатки користувача
+                    val notes = ApiService.getNotes(goalId, idToken)
+                    // Видалити всі нотатки
+                    notes.forEach { note ->
+                        ApiService.deleteNote(idToken, note.note_id)
+                    }
+                }
+
+                // Видалити зв’язок із користувачем
+                val success = ApiService.removeUser(idToken, userUid)
+                if (success) {
+                    linkedRelationships = linkedRelationships.filter { it.userUid != userUid }
+                } else {
+                    removeError = "Failed to remove user"
+                }
+            } else {
+                removeError = "Failed to get idToken"
+            }
+            isRemovingClient = false
         }
     }
 
@@ -138,6 +177,58 @@ fun ConsultantMainScreen(
             dismissButton = {
                 TextButton(
                     onClick = { showLogoutDialog = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("No", fontSize = 16.sp)
+                }
+            }
+        )
+    }
+
+    if (showRemoveDialog) {
+        AlertDialog(
+            onDismissRequest = { showRemoveDialog = false },
+            title = {
+                Text(
+                    text = "Remove Client",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to remove this client? This action cannot be undone.",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+            },
+            containerColor = Color(0xFF2F4F4F),
+            shape = RoundedCornerShape(12.dp),
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRemoveDialog = false
+                        userToRemove?.let { userUid ->
+                            removeClient(userUid)
+                        }
+                        userToRemove = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Yes", fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showRemoveDialog = false
+                        userToRemove = null
+                    },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White
                     )
@@ -443,11 +534,11 @@ fun ConsultantMainScreen(
                 Text(
                     text = "No active clients yet.",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(top = 325.dp),
                     textAlign = TextAlign.Center
                 )
             } else {
@@ -466,9 +557,7 @@ fun ConsultantMainScreen(
                     items(linkedRelationships) { relationship ->
                         val user = relationship.user
                         Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onUserMealClick(user.user_uid) },
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(0xFF2F4F4F))
                         ) {
@@ -483,7 +572,8 @@ fun ConsultantMainScreen(
                                     modifier = Modifier
                                         .size(50.dp)
                                         .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.3f)),
+                                        .background(Color.White.copy(alpha = 0.3f))
+                                        .clickable { onUserMealClick(user.user_uid) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (user.profile_picture.isNotEmpty()) {
@@ -504,7 +594,9 @@ fun ConsultantMainScreen(
                                     }
                                 }
                                 Column(
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { onUserMealClick(user.user_uid) }
                                 ) {
                                     Text(
                                         text = user.nickname,
@@ -518,10 +610,37 @@ fun ConsultantMainScreen(
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                 }
+                                IconButton(
+                                    onClick = {
+                                        userToRemove = user.user_uid
+                                        showRemoveDialog = true
+                                    },
+                                    enabled = !isRemovingClient
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_delete),
+                                        contentDescription = "Remove Client",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
+            }
+
+            if (removeError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = removeError!!,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

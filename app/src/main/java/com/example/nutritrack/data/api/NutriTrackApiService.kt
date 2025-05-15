@@ -19,6 +19,10 @@ import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.LinkedRelationship
 import com.example.nutritrack.model.MealEntry
 import com.example.nutritrack.model.StreakResponse
+import com.example.nutritrack.model.UpdateConsultantMaxClientsRequest
+import com.example.nutritrack.model.UpdateConsultantNicknameRequest
+import com.example.nutritrack.model.UpdateConsultantProfileDescriptionRequest
+import com.example.nutritrack.model.UpdateConsultantProfilePictureRequest
 import com.example.nutritrack.model.UpdateNoteRequest
 import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
@@ -168,6 +172,18 @@ interface ApiServiceInterface {
         @Query("idToken") idToken: String,
         @Query("note_id") noteId: Int
     ): Response<Void>
+
+    @PUT("api/Consultant/update-nickname")
+    suspend fun updateConsultantNickname(@Body request: UpdateConsultantNicknameRequest): Response<Void>
+
+    @PUT("api/Consultant/update-profile-picture")
+    suspend fun updateConsultantProfilePicture(@Body request: UpdateConsultantProfilePictureRequest): Response<Void>
+
+    @PUT("api/Consultant/update-profile-description")
+    suspend fun updateConsultantProfileDescription(@Body request: UpdateConsultantProfileDescriptionRequest): Response<Void>
+
+    @PUT("api/Consultant/update-max-clients")
+    suspend fun updateConsultantMaxClients(@Body request: UpdateConsultantMaxClientsRequest): Response<Void>
 }
 
 object ApiService {
@@ -812,6 +828,93 @@ object ApiService {
                 }
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to delete note: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateConsultantNickname(idToken: String, newNickname: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateConsultantNicknameRequest(idToken, newNickname)
+                val response = apiService.updateConsultantNickname(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update consultant nickname: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update consultant nickname: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateConsultantProfilePicture(
+        idToken: String,
+        profilePictureUrl: String
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateConsultantProfilePictureRequest(idToken, profilePictureUrl)
+                val response = apiService.updateConsultantProfilePicture(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e(
+                        "ApiService",
+                        "Failed to update consultant profile picture: ${response.code()}"
+                    )
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update consultant profile picture: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateConsultantProfileDescription(
+        idToken: String,
+        newDescription: String
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateConsultantProfileDescriptionRequest(idToken, newDescription)
+                val response = apiService.updateConsultantProfileDescription(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e(
+                        "ApiService",
+                        "Failed to update consultant profile description: ${response.code()}"
+                    )
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update consultant profile description: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateConsultantMaxClients(idToken: String, newMaxClients: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateConsultantMaxClientsRequest(idToken, newMaxClients)
+                val response = apiService.updateConsultantMaxClients(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e(
+                        "ApiService",
+                        "Failed to update consultant max clients: ${response.code()}"
+                    )
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update consultant max clients: $e")
                 false
             }
         }
