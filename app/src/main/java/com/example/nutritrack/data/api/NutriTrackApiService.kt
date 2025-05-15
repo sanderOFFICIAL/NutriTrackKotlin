@@ -16,6 +16,7 @@ import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.LinkedRelationship
 import com.example.nutritrack.model.MealEntry
+import com.example.nutritrack.model.StreakResponse
 import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
@@ -86,6 +87,9 @@ interface ApiServiceInterface {
 
     @POST("api/Streak/add-streak")
     suspend fun addStreak(@Body request: AddStreakRequest): Response<Void>
+
+    @GET("api/Streak/get-streak")
+    suspend fun getStreak(@Query("idToken") idToken: String): Response<StreakResponse>
 
     @PUT("api/Streak/update-streak")
     suspend fun updateStreak(@Body request: UpdateStreakRequest): Response<Void>
@@ -675,6 +679,23 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to respond to invite: $e")
                 false
+            }
+        }
+    }
+
+    suspend fun getStreak(idToken: String): StreakResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getStreak(idToken)
+                if (response.isSuccessful) {
+                    response.body()
+                } else {
+                    Log.e("ApiService", "Failed to get streak: ${response.code()}")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to get streak: $e")
+                null
             }
         }
     }

@@ -14,3 +14,9 @@ data class UpdateStreakRequest(
     val current_streak: Int,
     val is_active: Boolean
 )
+
+@Serializable
+data class StreakResponse(
+    val currentStreak: Int,
+    val isActive: Boolean
+)

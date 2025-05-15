@@ -78,7 +78,7 @@ fun UserMainScreen(
     onLogoutClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
-    onViewMealDetails: (String, String) -> Unit, // Додаємо дату до параметрів
+    onViewMealDetails: (String, String) -> Unit,
     onCalendarClick: () -> Unit,
     onConsultantsClick: () -> Unit,
 ) {
@@ -124,39 +124,66 @@ fun UserMainScreen(
                     return@launch
                 }
 
+                // Перевіряємо, чи існує стрік на сервері
+                var currentStreak: Int
+                var streakResponse = ApiService.getStreak(idToken)
                 val lastLoginDateStr = getLastLoginDate()
-                var currentStreak = getStreak()
 
-                if (lastLoginDateStr == null) {
+                if (streakResponse == null && lastLoginDateStr == null) {
+                    // Стріка немає і це перший вхід — створюємо новий
                     currentStreak = 1
-                    val success = ApiService.addStreak(idToken, currentStreak)
-                    if (success) {
+                    if (ApiService.addStreak(idToken, currentStreak)) {
                         saveStreak(currentStreak)
                         saveLastLoginDate(currentDate)
+                    } else {
+                        errorMessage = "Failed to create streak"
+                        return@launch
+                    }
+                } else if (streakResponse == null) {
+                    // Стріка немає, але це не перший вхід — створюємо з початковим значенням
+                    currentStreak = 1
+                    if (ApiService.addStreak(idToken, currentStreak)) {
+                        saveStreak(currentStreak)
+                    } else {
+                        errorMessage = "Failed to create streak"
+                        return@launch
                     }
                 } else {
-                    val lastLoginDate =
-                        LocalDate.parse(lastLoginDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
-                    val daysDifference =
-                        ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
-
-                    when {
-                        daysDifference == 0 -> currentStreak = getStreak()
-                        daysDifference == 1 -> {
-                            currentStreak = getStreak() + 1
-                            val success = ApiService.updateStreak(idToken, currentStreak, true)
-                            if (success) {
-                                saveStreak(currentStreak)
-                                saveLastLoginDate(currentDate)
-                            }
+                    // Стрік існує, оновлюємо його
+                    currentStreak = streakResponse.currentStreak
+                    if (lastLoginDateStr == null) {
+                        // Це перший вхід, але стрік уже є (можливо, створений вручну)
+                        currentStreak = 1
+                        if (ApiService.updateStreak(idToken, currentStreak, true)) {
+                            saveStreak(currentStreak)
+                            saveLastLoginDate(currentDate)
                         }
+                    } else {
+                        val lastLoginDate =
+                            LocalDate.parse(lastLoginDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
+                        val daysDifference =
+                            ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
 
-                        daysDifference >= 2 -> {
-                            currentStreak = 0
-                            val success = ApiService.updateStreak(idToken, currentStreak, false)
-                            if (success) {
+                        when {
+                            daysDifference == 0 -> {
+                                currentStreak = streakResponse.currentStreak
                                 saveStreak(currentStreak)
-                                saveLastLoginDate(currentDate)
+                            }
+
+                            daysDifference == 1 -> {
+                                currentStreak = streakResponse.currentStreak + 1
+                                if (ApiService.updateStreak(idToken, currentStreak, true)) {
+                                    saveStreak(currentStreak)
+                                    saveLastLoginDate(currentDate)
+                                }
+                            }
+
+                            daysDifference >= 2 -> {
+                                currentStreak = 0
+                                if (ApiService.updateStreak(idToken, currentStreak, false)) {
+                                    saveStreak(currentStreak)
+                                    saveLastLoginDate(currentDate)
+                                }
                             }
                         }
                     }
