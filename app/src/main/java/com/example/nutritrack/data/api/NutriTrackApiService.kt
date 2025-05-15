@@ -6,17 +6,20 @@ import com.example.nutritrack.data.user.UpdateUserNicknameRequest
 import com.example.nutritrack.data.user.UpdateUserProfileDescriptionRequest
 import com.example.nutritrack.data.user.UpdateUserProfilePictureRequest
 import com.example.nutritrack.model.AddMealRequest
+import com.example.nutritrack.model.AddNoteRequest
 import com.example.nutritrack.model.AddStreakRequest
 import com.example.nutritrack.model.Consultant
 import com.example.nutritrack.model.ConsultantNote
 import com.example.nutritrack.model.ConsultantRegistrationData
 import com.example.nutritrack.model.ConsultantRequest
+import com.example.nutritrack.model.ConsultantRespondInviteRequest
 import com.example.nutritrack.model.ConsultantSendInviteRequest
 import com.example.nutritrack.model.GoalIdResponse
 import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.LinkedRelationship
 import com.example.nutritrack.model.MealEntry
 import com.example.nutritrack.model.StreakResponse
+import com.example.nutritrack.model.UpdateNoteRequest
 import com.example.nutritrack.model.UpdateStreakRequest
 import com.example.nutritrack.model.UserData
 import com.example.nutritrack.model.UserGoalData
@@ -150,6 +153,21 @@ interface ApiServiceInterface {
 
     @GET("api/Goal/get-goal-id-by-user-uid/{userUid}")
     suspend fun getGoalIdByUserUid(@Path("userUid") userUid: String): Response<GoalIdResponse>
+
+    @POST("api/Consultant/consultant-respond-invite")
+    suspend fun consultantRespondInvite(@Body request: ConsultantRespondInviteRequest): Response<Void>
+
+    @POST("api/ConsultantNote/add-note")
+    suspend fun addNote(@Body request: AddNoteRequest): Response<Void>
+
+    @PUT("api/ConsultantNote/update-note")
+    suspend fun updateNote(@Body request: UpdateNoteRequest): Response<Void>
+
+    @DELETE("api/ConsultantNote/delete-note")
+    suspend fun deleteNote(
+        @Query("idToken") idToken: String,
+        @Query("note_id") noteId: Int
+    ): Response<Void>
 }
 
 object ApiService {
@@ -700,6 +718,32 @@ object ApiService {
         }
     }
 
+    suspend fun consultantRespondInvite(
+        idToken: String,
+        userUid: String,
+        isAccepted: Boolean
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = ConsultantRespondInviteRequest(idToken, userUid, isAccepted)
+                val response = apiService.consultantRespondInvite(request)
+                if (response.isSuccessful) {
+                    Log.d(
+                        "ApiService",
+                        "Responded to user invite successfully: userUid=$userUid, isAccepted=$isAccepted"
+                    )
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to respond to user invite: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to respond to user invite: $e")
+                false
+            }
+        }
+    }
+
     suspend fun getGoalIdByUserUid(userUid: String): GoalIdResponse? {
         return withContext(Dispatchers.IO) {
             try {
@@ -713,6 +757,62 @@ object ApiService {
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to get goal ID by user UID: $e")
                 null
+            }
+        }
+    }
+
+    suspend fun addNote(idToken: String, goalId: Int, content: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = AddNoteRequest(idToken, goalId, content)
+                val response = apiService.addNote(request)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Note added successfully for goalId $goalId")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to add note: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to add note: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateNote(idToken: String, noteId: Int, content: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateNoteRequest(idToken, noteId, content)
+                val response = apiService.updateNote(request)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Note updated successfully: noteId=$noteId")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to update note: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update note: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun deleteNote(idToken: String, noteId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.deleteNote(idToken, noteId)
+                if (response.isSuccessful) {
+                    Log.d("ApiService", "Note deleted successfully: noteId=$noteId")
+                    true
+                } else {
+                    Log.e("ApiService", "Failed to delete note: ${response.code()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to delete note: $e")
+                false
             }
         }
     }

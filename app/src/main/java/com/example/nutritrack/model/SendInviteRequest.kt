@@ -32,3 +32,10 @@ data class UserRespondInviteRequest(
     val consultant_uid: String,
     val is_accepted: Boolean
 )
+
+@Serializable
+data class ConsultantRespondInviteRequest(
+    val idToken: String,
+    val user_uid: String,
+    val is_accepted: Boolean
+)

@@ -19,7 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults.textButtonColors
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +55,9 @@ import coil.compose.AsyncImage
 import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
+import com.example.nutritrack.model.ConsultantRequest
 import com.example.nutritrack.model.LinkedRelationship
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -66,8 +70,14 @@ fun ConsultantMainScreen(
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var linkedRelationships by remember { mutableStateOf<List<LinkedRelationship>>(emptyList()) }
+    var requests by remember { mutableStateOf<List<ConsultantRequest>>(emptyList()) }
+    var showRequestsDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isResponding by remember { mutableStateOf(false) }
+    var respondError by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         val idToken = FirebaseAuthHelper.getIdToken()
@@ -75,10 +85,14 @@ fun ConsultantMainScreen(
             try {
                 isLoading = true
                 errorMessage = null
+                // Завантажуємо зв’язки (клієнтів)
                 val relationships = ApiService.getLinkedRelationships(idToken)
                 linkedRelationships = relationships.filter { it.isActive }
+                // Завантажуємо запити
+                val requestResponse = ApiService.getAllRequests(idToken)
+                requests = requestResponse.filter { it.status == "pending" }
             } catch (e: Exception) {
-                errorMessage = "Error loading relationships: ${e.message}"
+                errorMessage = "Error loading data: ${e.message}"
             } finally {
                 isLoading = false
             }
@@ -114,7 +128,7 @@ fun ConsultantMainScreen(
                         showLogoutDialog = false
                         onLogoutClick()
                     },
-                    colors = textButtonColors(
+                    colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White
                     )
                 ) {
@@ -124,13 +138,134 @@ fun ConsultantMainScreen(
             dismissButton = {
                 TextButton(
                     onClick = { showLogoutDialog = false },
-                    colors = textButtonColors(
+                    colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White
                     )
                 ) {
                     Text("No", fontSize = 16.sp)
                 }
             }
+        )
+    }
+
+    if (showRequestsDialog) {
+        AlertDialog(
+            onDismissRequest = { showRequestsDialog = false },
+            title = {
+                Text(
+                    text = "Pending Requests",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                ) {
+                    if (requests.isEmpty()) {
+                        Text(
+                            text = "No pending requests",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(requests) { request ->
+                                RequestCard(
+                                    request = request,
+                                    onAccept = {
+                                        scope.launch {
+                                            isResponding = true
+                                            respondError = null
+                                            val idToken = FirebaseAuthHelper.getIdToken()
+                                            if (idToken != null) {
+                                                val success = ApiService.consultantRespondInvite(
+                                                    idToken,
+                                                    request.userUid,
+                                                    true
+                                                )
+                                                if (success) {
+                                                    requests =
+                                                        requests.filter { it.requestId != request.requestId }
+                                                    // Оновлюємо список клієнтів
+                                                    val relationships =
+                                                        ApiService.getLinkedRelationships(idToken)
+                                                    linkedRelationships =
+                                                        relationships.filter { it.isActive }
+                                                } else {
+                                                    respondError = "Failed to accept request"
+                                                }
+                                            } else {
+                                                respondError = "Failed to get idToken"
+                                            }
+                                            isResponding = false
+                                        }
+                                    },
+                                    onDecline = {
+                                        scope.launch {
+                                            isResponding = true
+                                            respondError = null
+                                            val idToken = FirebaseAuthHelper.getIdToken()
+                                            if (idToken != null) {
+                                                val success = ApiService.consultantRespondInvite(
+                                                    idToken,
+                                                    request.userUid,
+                                                    false
+                                                )
+                                                if (success) {
+                                                    requests =
+                                                        requests.filter { it.requestId != request.requestId }
+                                                } else {
+                                                    respondError = "Failed to decline request"
+                                                }
+                                            } else {
+                                                respondError = "Failed to get idToken"
+                                            }
+                                            isResponding = false
+                                        }
+                                    },
+                                    isResponding = isResponding
+                                )
+                            }
+                        }
+                    }
+
+                    if (respondError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = respondError!!,
+                            color = Color.Red,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            },
+            containerColor = Color(0xFF2F4F4F),
+            shape = RoundedCornerShape(12.dp),
+            confirmButton = {
+                TextButton(
+                    onClick = { showRequestsDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Close", fontSize = 16.sp)
+                }
+            },
+            dismissButton = {}
         )
     }
 
@@ -157,6 +292,33 @@ fun ConsultantMainScreen(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
+                    }
+                },
+                actions = {
+                    Box(
+                        modifier = Modifier
+                            .clickable { showRequestsDialog = true }
+                            .background(Color(0xFF64A79B), shape = RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_requests),
+                                contentDescription = "Requests",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "${requests.size}",
+                                fontSize = 16.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -358,6 +520,119 @@ fun ConsultantMainScreen(
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RequestCard(
+    request: ConsultantRequest,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    isResponding: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF64A79B))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (request.user.profile_picture.isNotEmpty()) {
+                        AsyncImage(
+                            model = request.user.profile_picture,
+                            contentDescription = "User Picture",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "No Profile Picture",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+                Column {
+                    Text(
+                        text = request.user.nickname,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Gender: ${request.user.gender}",
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onAccept,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2F4F4F)),
+                    enabled = !isResponding
+                ) {
+                    if (isResponding) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Accept",
+                            fontSize = 14.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+                Button(
+                    onClick = onDecline,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2F4F4F)),
+                    enabled = !isResponding
+                ) {
+                    if (isResponding) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Decline",
+                            fontSize = 14.sp,
+                            color = Color.White
+                        )
                     }
                 }
             }
