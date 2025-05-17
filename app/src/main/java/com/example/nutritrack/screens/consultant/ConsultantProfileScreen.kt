@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,6 +72,7 @@ fun ConsultantProfileScreen(
     var nickname by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var maxClients by remember { mutableStateOf(0) }
+    var experienceYears by remember { mutableStateOf(0) }
     var consultantData by remember { mutableStateOf<Consultant?>(null) }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploading by remember { mutableStateOf(false) }
@@ -77,6 +81,7 @@ fun ConsultantProfileScreen(
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -138,6 +143,7 @@ fun ConsultantProfileScreen(
                 nickname = consultantData!!.nickname
                 description = consultantData!!.profile_description
                 maxClients = consultantData!!.max_clients
+                experienceYears = consultantData!!.experience_years
             }
         }
     }
@@ -233,21 +239,22 @@ fun ConsultantProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFF64A79B))
-                .padding(top = 75.dp)
+                .padding(top = 75.dp, bottom = padding.calculateBottomPadding())
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Фото профілю
                 Box(
                     modifier = Modifier
                         .size(160.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.3f))
+                        .shadow(8.dp, CircleShape)
                         .clickable {
                             pickImageLauncher.launch("image/*")
                         },
@@ -278,52 +285,78 @@ fun ConsultantProfileScreen(
                         )
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.5f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Click to change photo",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White,
+                    if (profileImageUri == null && (consultantData?.profile_picture?.isEmpty() != false)) {
+                        Box(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .align(Alignment.Center),
-                            textAlign = TextAlign.Center
-                        )
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Click to change photo",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .align(Alignment.Center),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
                     if (isUploading) {
-                        CircularProgressIndicator(
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.6f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (uploadError != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Red.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = uploadError ?: "Unknown error",
+                            fontSize = 16.sp,
                             color = Color.White,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.padding(12.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                if (successMessage != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Green.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = successMessage ?: "",
+                            fontSize = 16.sp,
+                            color = Color.White,
+                            modifier = Modifier.padding(12.dp),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // Повідомлення про помилки або успіх
-                if (uploadError != null) {
-                    Text(
-                        text = uploadError ?: "Unknown error",
-                        fontSize = 16.sp,
-                        color = Color.Red,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                }
-                if (successMessage != null) {
-                    Text(
-                        text = successMessage ?: "",
-                        fontSize = 16.sp,
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                }
-
-                // Поле для нікнейму
                 Text(
                     text = "Nickname:",
                     fontSize = 16.sp,
@@ -334,7 +367,8 @@ fun ConsultantProfileScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(55.dp),
+                        .height(55.dp)
+                        .shadow(4.dp, RoundedCornerShape(8.dp)),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xFF2F4F4F)
@@ -368,7 +402,6 @@ fun ConsultantProfileScreen(
                     )
                 }
 
-                // Поле для біо
                 Text(
                     text = "Bio:",
                     fontSize = 16.sp,
@@ -379,7 +412,8 @@ fun ConsultantProfileScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp),
+                        .height(100.dp)
+                        .shadow(4.dp, RoundedCornerShape(8.dp)),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xFF2F4F4F)
@@ -413,7 +447,6 @@ fun ConsultantProfileScreen(
                     )
                 }
 
-                // Блок для зміни максимальної кількості клієнтів
                 Text(
                     text = "Max Clients:",
                     fontSize = 16.sp,
@@ -427,7 +460,8 @@ fun ConsultantProfileScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(80.dp),
+                        .height(80.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xFF2F4F4F)
@@ -442,38 +476,99 @@ fun ConsultantProfileScreen(
                     ) {
                         IconButton(
                             onClick = { if (maxClients > 0) maxClients -= 1 },
-                            modifier = Modifier
-                                .size(80.dp),
+                            modifier = Modifier.size(60.dp),
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_minus),
                                 contentDescription = "Decrease max clients",
-                                tint = Color.White
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
                             )
                         }
+
                         Text(
                             text = "$maxClients",
-                            fontSize = 20.sp,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
+
                         IconButton(
                             onClick = { maxClients += 1 },
-                            modifier = Modifier
-                                .size(80.dp),
+                            modifier = Modifier.size(60.dp),
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_add),
                                 contentDescription = "Increase max clients",
-                                tint = Color.White
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Experience Years:",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF2F4F4F)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconButton(
+                            onClick = { if (experienceYears > 0) experienceYears -= 1 },
+                            modifier = Modifier.size(60.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_minus),
+                                contentDescription = "Decrease experience years",
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
 
-                // Кнопка для збереження змін
+                        Text(
+                            text = "$experienceYears",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+
+                        IconButton(
+                            onClick = { experienceYears += 1 },
+                            modifier = Modifier.size(60.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add),
+                                contentDescription = "Increase experience years",
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 Button(
                     onClick = {
                         scope.launch {
@@ -511,6 +606,18 @@ fun ConsultantProfileScreen(
                                     }
                                 }
 
+                                if (experienceYears != consultantData?.experience_years) {
+                                    val experienceYearsSuccess =
+                                        ApiService.updateConsultantExperienceYears(
+                                            idToken,
+                                            experienceYears
+                                        )
+                                    if (!experienceYearsSuccess) {
+                                        success = false
+                                        uploadError = "Failed to update experience years"
+                                    }
+                                }
+
                                 if (success) {
                                     val idToken = FirebaseAuthHelper.getIdToken()
                                     if (idToken != null) {
@@ -527,20 +634,21 @@ fun ConsultantProfileScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(55.dp),
+                        .height(60.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2F4F4F)
+                        containerColor = Color(0xFF2F4F4F),
+                        contentColor = Color.White
                     )
                 ) {
                     Text(
-                        text = "Save Changes",
+                        text = "Save changes",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         color = Color.White
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

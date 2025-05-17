@@ -19,6 +19,7 @@ import com.example.nutritrack.model.GoalResponse
 import com.example.nutritrack.model.LinkedRelationship
 import com.example.nutritrack.model.MealEntry
 import com.example.nutritrack.model.StreakResponse
+import com.example.nutritrack.model.UpdateConsultantExperienceYearsRequest
 import com.example.nutritrack.model.UpdateConsultantMaxClientsRequest
 import com.example.nutritrack.model.UpdateConsultantNicknameRequest
 import com.example.nutritrack.model.UpdateConsultantProfileDescriptionRequest
@@ -184,6 +185,9 @@ interface ApiServiceInterface {
 
     @PUT("api/Consultant/update-max-clients")
     suspend fun updateConsultantMaxClients(@Body request: UpdateConsultantMaxClientsRequest): Response<Void>
+
+    @PUT("api/Consultant/update-experience-years")
+    suspend fun updateConsultantExperienceYears(@Body request: UpdateConsultantExperienceYearsRequest): Response<Void>
 }
 
 object ApiService {
@@ -828,6 +832,27 @@ object ApiService {
                 }
             } catch (e: Exception) {
                 Log.e("ApiService", "Failed to delete note: $e")
+                false
+            }
+        }
+    }
+
+    suspend fun updateConsultantExperienceYears(idToken: String, newExperienceYears: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = UpdateConsultantExperienceYearsRequest(idToken, newExperienceYears)
+                val response = apiService.updateConsultantExperienceYears(request)
+                if (response.isSuccessful) {
+                    true
+                } else {
+                    Log.e(
+                        "ApiService",
+                        "Failed to update consultant experience years: ${response.code()}"
+                    )
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("ApiService", "Failed to update consultant experience years: $e")
                 false
             }
         }

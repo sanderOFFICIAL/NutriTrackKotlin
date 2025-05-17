@@ -25,3 +25,9 @@ data class UpdateConsultantMaxClientsRequest(
     val idToken: String,
     val new_max_clients: Int
 )
+
+@Serializable
+data class UpdateConsultantExperienceYearsRequest(
+    val idToken: String,
+    val new_experience_years: Int
+)
