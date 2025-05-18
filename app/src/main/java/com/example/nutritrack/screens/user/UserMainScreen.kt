@@ -125,64 +125,67 @@ fun UserMainScreen(
                     return@launch
                 }
 
-                // Перевіряємо, чи існує стрік на сервері
-                var currentStreak: Int
-                var streakResponse = ApiService.getStreak(idToken)
                 val lastLoginDateStr = getLastLoginDate()
+                val currentDate = LocalDate.now()
+                var currentStreak: Int
+
+                val streakResponse = ApiService.getMostRecentStreak(idToken)
 
                 if (streakResponse == null && lastLoginDateStr == null) {
-                    // Стріка немає і це перший вхід — створюємо новий
                     currentStreak = 1
                     if (ApiService.addStreak(idToken, currentStreak)) {
                         saveStreak(currentStreak)
-                        saveLastLoginDate(currentDate)
+                        saveLastLoginDate(currentDate.toString())
                     } else {
                         errorMessage = context.getString(R.string.failed_to_create_streak)
                         return@launch
                     }
                 } else if (streakResponse == null) {
-                    // Стріка немає, але це не перший вхід — створюємо з початковим значенням
                     currentStreak = 1
                     if (ApiService.addStreak(idToken, currentStreak)) {
                         saveStreak(currentStreak)
+                        saveLastLoginDate(currentDate.toString())
                     } else {
                         errorMessage = context.getString(R.string.failed_to_create_streak2)
                         return@launch
                     }
                 } else {
-                    currentStreak = streakResponse.currentStreak
-                    if (lastLoginDateStr == null) {
-                        currentStreak = 1
-                        if (ApiService.updateStreak(idToken, currentStreak, true)) {
+                    currentStreak = streakResponse.current_streak
+                    val streakDate = LocalDate.parse(
+                        streakResponse.streak_date.split("T")[0],
+                        DateTimeFormatter.ISO_LOCAL_DATE
+                    )
+                    val lastLoginDate = lastLoginDateStr?.let {
+                        LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE)
+                    } ?: streakDate
+
+                    val daysDifference = ChronoUnit.DAYS.between(lastLoginDate, currentDate).toInt()
+
+                    when {
+                        daysDifference == 0 -> {
+                            currentStreak = streakResponse.current_streak
                             saveStreak(currentStreak)
-                            saveLastLoginDate(currentDate)
                         }
-                    } else {
-                        val lastLoginDate =
-                            LocalDate.parse(lastLoginDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
-                        val daysDifference =
-                            ChronoUnit.DAYS.between(lastLoginDate, LocalDate.now()).toInt()
 
-                        when {
-                            daysDifference == 0 -> {
-                                currentStreak = streakResponse.currentStreak
+                        daysDifference == 1 -> {
+                            currentStreak = streakResponse.current_streak + 1
+                            if (ApiService.updateStreak(idToken, currentStreak, true)) {
                                 saveStreak(currentStreak)
+                                saveLastLoginDate(currentDate.toString())
+                            } else {
+                                errorMessage = context.getString(R.string.failed_to_update_streak)
+                                return@launch
                             }
+                        }
 
-                            daysDifference == 1 -> {
-                                currentStreak = streakResponse.currentStreak + 1
-                                if (ApiService.updateStreak(idToken, currentStreak, true)) {
-                                    saveStreak(currentStreak)
-                                    saveLastLoginDate(currentDate)
-                                }
-                            }
-
-                            daysDifference >= 2 -> {
-                                currentStreak = 0
-                                if (ApiService.updateStreak(idToken, currentStreak, false)) {
-                                    saveStreak(currentStreak)
-                                    saveLastLoginDate(currentDate)
-                                }
+                        daysDifference >= 2 -> {
+                            currentStreak = 0
+                            if (ApiService.updateStreak(idToken, currentStreak, false)) {
+                                saveStreak(currentStreak)
+                                saveLastLoginDate(currentDate.toString())
+                            } else {
+                                errorMessage = context.getString(R.string.failed_to_update_streak)
+                                return@launch
                             }
                         }
                     }

@@ -96,8 +96,8 @@ interface ApiServiceInterface {
     @POST("api/Streak/add-streak")
     suspend fun addStreak(@Body request: AddStreakRequest): Response<Void>
 
-    @GET("api/Streak/get-streak")
-    suspend fun getStreak(@Query("idToken") idToken: String): Response<StreakResponse>
+    @GET("api/Streak/get-streaks")
+    suspend fun getStreaks(@Query("idToken") idToken: String): Response<List<StreakResponse>>
 
     @PUT("api/Streak/update-streak")
     suspend fun updateStreak(@Body request: UpdateStreakRequest): Response<Void>
@@ -721,22 +721,23 @@ object ApiService {
         }
     }
 
-    suspend fun getStreak(idToken: String): StreakResponse? {
+    suspend fun getMostRecentStreak(idToken: String): StreakResponse? {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getStreak(idToken)
+                val response = apiService.getStreaks(idToken)
                 if (response.isSuccessful) {
-                    response.body()
+                    response.body()?.maxByOrNull { it.streak_date }
                 } else {
-                    Log.e("ApiService", "Failed to get streak: ${response.code()}")
+                    Log.e("ApiService", "Failed to get streaks: ${response.code()}")
                     null
                 }
             } catch (e: Exception) {
-                Log.e("ApiService", "Failed to get streak: $e")
+                Log.e("ApiService", "Failed to get streaks: $e")
                 null
             }
         }
     }
+
 
     suspend fun consultantRespondInvite(
         idToken: String,

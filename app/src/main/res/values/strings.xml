@@ -277,4 +277,5 @@
     <string name="total_carbs_g">Total Carbs: %1$s g</string>
     <string name="total_fats_g">Total Fats: %1$s g</string>
     <string name="leave_a_note2">Leave a Note</string>
+    <string name="failed_to_update_streak">Failed to update streak</string>
 </resources>

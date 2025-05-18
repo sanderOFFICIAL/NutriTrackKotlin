@@ -278,4 +278,5 @@
     <string name="total_carbs_g">Загальна кількість вуглеводів: %1$s г</string>
     <string name="total_fats_g">Загальна кількість жирів: %1$s г</string>
     <string name="leave_a_note2">Залишити нотатку</string>
+    <string name="failed_to_update_streak">Помилка оновлення стріку</string>
 </resources>
