@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -79,6 +81,9 @@ fun UserProfileScreen(
     var successMessage by remember { mutableStateOf<String?>(null) }
     var showGoalAchieved by remember { mutableStateOf(false) }
     var targetWeight by remember { mutableStateOf(0) }
+
+    // Create a scroll state for the column
+    val scrollState = rememberScrollState()
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -248,11 +253,14 @@ fun UserProfileScreen(
                 .fillMaxSize()
                 .background(Color(0xFF64A79B))
                 .padding(top = 75.dp)
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+                    .padding(bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -481,7 +489,6 @@ fun UserProfileScreen(
                     }
 
                 }
-
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = {
@@ -562,7 +569,10 @@ fun UserProfileScreen(
                         color = Color.White
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+
+                // Add additional spacer at the bottom to ensure there's space after the button
+                // when scrolling to the bottom
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
 

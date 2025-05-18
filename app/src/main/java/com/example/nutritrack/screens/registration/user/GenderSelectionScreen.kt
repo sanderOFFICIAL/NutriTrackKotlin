@@ -48,7 +48,7 @@ fun GenderSelectionScreen(
 
         Text(
             text = stringResource(R.string.please_specify_your_gender),
-            fontSize = 23.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.padding(top = 25.dp, bottom = 8.dp)

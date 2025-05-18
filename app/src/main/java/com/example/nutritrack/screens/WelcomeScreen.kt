@@ -171,7 +171,7 @@ fun WelcomeScreen(
             ) {
                 Text(
                     text = stringResource(R.string.i_already_have_an_account),
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color.White
                 )
             }

@@ -437,7 +437,7 @@ fun FoodSearchScreen(
                             Text(
                                 stringResource(R.string.save_all),
                                 color = Color.White,
-                                fontSize = 16.sp
+                                fontSize = 14.sp
                             )
                         }
                     }
@@ -721,7 +721,7 @@ fun FoodDetailsDialog(
                         Text(
                             stringResource(R.string.cancel),
                             color = Color.White,
-                            fontSize = 12.95.sp
+                            fontSize = 12.4.sp
                         )
                     }
 

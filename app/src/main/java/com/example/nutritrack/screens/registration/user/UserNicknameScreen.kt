@@ -126,15 +126,15 @@ fun UserNicknameScreen(
                 painter = painterResource(id = R.drawable.progress_bar_step6),
                 contentDescription = "Progress bar step 2",
                 modifier = Modifier
-                    .size(420.dp)
+                    .size(580.dp)
                     .align(Alignment.TopCenter)
-                    .padding(top = 200.dp)
+                    .padding(top = 120.dp, bottom = 220.dp)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 252.dp),
+                    .padding(top = 200.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {

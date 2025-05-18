@@ -216,7 +216,9 @@ fun ConsultantProfileScreen(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "Back",
                     tint = Color.White,
-                    modifier = Modifier.size(45.dp)
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .size(55.dp)
                 )
             }
             Text(
@@ -226,6 +228,7 @@ fun ConsultantProfileScreen(
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
+                    .padding(top = 8.dp)
                     .weight(1f)
                     .wrapContentWidth(Alignment.CenterHorizontally)
             )
@@ -463,7 +466,7 @@ fun ConsultantProfileScreen(
                 Button(
                     onClick = {
                         dialogAction = "send_request"
-                        dialogTitle = "Send Request"
+                        dialogTitle = context.getString(R.string.send_request)
                         dialogText =
                             context.getString(R.string.are_you_sure_you_want_to_send_a_request_to_this_consultant)
                         showDialog = true

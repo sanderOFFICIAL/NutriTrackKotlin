@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +48,7 @@ fun ConsultantNicknameScreen(
     val nickname = remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
+    val context = LocalContext.current
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.fillMaxSize()
@@ -63,15 +64,15 @@ fun ConsultantNicknameScreen(
                 painter = painterResource(id = R.drawable.progress_bar_step2),
                 contentDescription = "Progress bar step 2",
                 modifier = Modifier
-                    .size(420.dp)
+                    .size(580.dp)
                     .align(Alignment.TopCenter)
-                    .padding(top = 200.dp)
+                    .padding(top = 120.dp, bottom = 220.dp)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 252.dp),
+                    .padding(top = 200.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -135,7 +136,7 @@ fun ConsultantNicknameScreen(
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Please enter a name",
+                                    message = context.getString(R.string.please_enter_a_name),
                                     duration = SnackbarDuration.Short
                                 )
                             }

@@ -219,7 +219,9 @@ fun UserProfileScreen(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "Back",
                     tint = Color.White,
-                    modifier = Modifier.size(45.dp)
+                    modifier = Modifier
+                        .size(55.dp)
+                        .padding(top = 8.dp)
                 )
             }
             Text(
@@ -231,6 +233,7 @@ fun UserProfileScreen(
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentWidth(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.size(30.dp))
         }

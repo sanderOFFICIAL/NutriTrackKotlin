@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">НутріТрек</string>
+    <string name="app_name">NutriTrack</string>
     <string name="new_user">Новий користувач</string>
     <string name="new_consultant">Новий консультант</string>
     <string name="i_already_have_an_account">У мене вже є обліковий запис</string>
@@ -135,7 +135,7 @@
     <string name="enter_a_food_name_to_search">Введіть назву продукту для пошуку</string>
     <string name="added_products">Додані продукти (%1$s)</string>
     <string name="g">%1$s (%2$s г)</string>
-    <string name="save_all">Зберегти все</string>
+    <string name="save_all">Зберегти</string>
     <string name="unable_to_load_food_details_please_try_again">Не вдалося завантажити дані про продукт. Спробуйте ще раз.</string>
     <string name="ingredients">Інгредієнти:</string>
     <string name="nutrients">Поживні речовини (%1$s)</string>
@@ -279,4 +279,9 @@
     <string name="total_fats_g">Загальна кількість жирів: %1$s г</string>
     <string name="leave_a_note2">Залишити нотатку</string>
     <string name="failed_to_update_streak">Помилка оновлення стріку</string>
+    <string name="breakfast_card">сніданок</string>
+    <string name="lunch_card">обід</string>
+    <string name="dinner_card">вечеря</string>
+    <string name="snack_card">перекус</string>
+    <string name="please_enter_a_name">Будь ласка, введіть ім\'я</string>
 </resources>

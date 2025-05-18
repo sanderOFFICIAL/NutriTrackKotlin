@@ -661,10 +661,10 @@ fun UserMainScreen(
 
                 val mealCalories = mealEntries.groupBy { it.meal_type }
                     .mapValues { it.value.sumOf { meal -> meal.calories } }
-                val breakfastCalories = mealCalories["breakfast"] ?: 0
-                val lunchCalories = mealCalories["lunch"] ?: 0
-                val dinnerCalories = mealCalories["dinner"] ?: 0
-                val snackCalories = mealCalories["snack"] ?: 0
+                val breakfastCalories = mealCalories[stringResource(R.string.breakfast_card)] ?: 0
+                val lunchCalories = mealCalories[stringResource(R.string.lunch_card)] ?: 0
+                val dinnerCalories = mealCalories[stringResource(R.string.dinner_card)] ?: 0
+                val snackCalories = mealCalories[stringResource(R.string.snack_card)] ?: 0
 
                 val totalCalories = goalData!!.dailyCalories
                 val breakfastGoal = (totalCalories * 0.3).toInt()

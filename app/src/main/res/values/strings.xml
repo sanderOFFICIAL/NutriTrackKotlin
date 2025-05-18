@@ -278,4 +278,9 @@
     <string name="total_fats_g">Total Fats: %1$s g</string>
     <string name="leave_a_note2">Leave a Note</string>
     <string name="failed_to_update_streak">Failed to update streak</string>
+    <string name="breakfast_card">breakfast</string>
+    <string name="lunch_card">lunch</string>
+    <string name="dinner_card">dinner</string>
+    <string name="snack_card">snack</string>
+    <string name="please_enter_a_name">Please enter a name</string>
 </resources>
