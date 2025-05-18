@@ -40,7 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,7 +73,6 @@ fun ConsultantProfileScreen(
     var hasLinkedRelationship by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
 
-    // Новий стан для відстеження типу дії (запит чи видалення)
     var dialogAction by remember { mutableStateOf<String?>(null) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogText by remember { mutableStateOf("") }
@@ -103,7 +104,6 @@ fun ConsultantProfileScreen(
         }
     }
 
-    // Функція для надсилання запиту консультанту
     fun sendRequestToConsultant() {
         scope.launch {
             isSendingInvite = true
@@ -126,7 +126,6 @@ fun ConsultantProfileScreen(
         }
     }
 
-    // Функція для видалення консультанта
     fun removeConsultant() {
         scope.launch {
             isRemovingConsultant = true
@@ -181,7 +180,7 @@ fun ConsultantProfileScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Yes", fontSize = 16.sp)
+                    Text(stringResource(R.string.yes), fontSize = 16.sp)
                 }
             },
             dismissButton = {
@@ -191,7 +190,7 @@ fun ConsultantProfileScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("No", fontSize = 16.sp)
+                    Text(stringResource(R.string.no), fontSize = 16.sp)
                 }
             }
         )
@@ -221,7 +220,7 @@ fun ConsultantProfileScreen(
                 )
             }
             Text(
-                text = "Consultant Profile",
+                text = stringResource(R.string.consultant_profile),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -310,7 +309,7 @@ fun ConsultantProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Bio",
+                        text = stringResource(R.string.bio),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -346,7 +345,11 @@ fun ConsultantProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Clients: ${consultant!!.current_clients}/${consultant!!.max_clients}",
+                        text = stringResource(
+                            R.string.clients2,
+                            consultant!!.current_clients,
+                            consultant!!.max_clients
+                        ),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -354,21 +357,29 @@ fun ConsultantProfileScreen(
                     )
                     val availableSlots = consultant!!.max_clients - consultant!!.current_clients
                     Text(
-                        text = "Available Slots: $availableSlots",
+                        text = stringResource(R.string.available_slots2, availableSlots),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Experience: ${consultant!!.experience_years} years",
+                        text = stringResource(
+                            R.string.experience_years3,
+                            consultant!!.experience_years
+                        ),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    val genderLocalized = when (consultant?.gender?.lowercase()) {
+                        "male" -> stringResource(R.string.gender_male)
+                        "female" -> stringResource(R.string.gender_female)
+                        else -> consultant?.gender ?: ""
+                    }
                     Text(
-                        text = "Gender: ${consultant!!.gender}",
+                        text = stringResource(R.string.gender3, genderLocalized),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -391,7 +402,7 @@ fun ConsultantProfileScreen(
                 )
             } else if (inviteSuccess) {
                 Text(
-                    text = "Invite sent successfully!",
+                    text = stringResource(R.string.invite_sent_successfully),
                     color = Color.White,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -412,14 +423,14 @@ fun ConsultantProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
+            val context = LocalContext.current
             if (hasLinkedRelationship) {
                 Button(
                     onClick = {
                         dialogAction = "remove_consultant"
                         dialogTitle = "Remove Consultant"
                         dialogText =
-                            "Are you sure you want to remove this consultant? This action cannot be undone."
+                            context.getString(R.string.are_you_sure_you_want_to_remove_this_consultant_this_action_cannot_be_undone)
                         showDialog = true
                     },
                     modifier = Modifier
@@ -439,7 +450,7 @@ fun ConsultantProfileScreen(
                         )
                     } else {
                         Text(
-                            text = "Remove Consultant",
+                            text = stringResource(R.string.remove_consultant),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -453,7 +464,8 @@ fun ConsultantProfileScreen(
                     onClick = {
                         dialogAction = "send_request"
                         dialogTitle = "Send Request"
-                        dialogText = "Are you sure you want to send a request to this consultant?"
+                        dialogText =
+                            context.getString(R.string.are_you_sure_you_want_to_send_a_request_to_this_consultant)
                         showDialog = true
                     },
                     modifier = Modifier
@@ -473,7 +485,7 @@ fun ConsultantProfileScreen(
                         )
                     } else {
                         Text(
-                            text = "Send Request",
+                            text = stringResource(R.string.send_request),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,

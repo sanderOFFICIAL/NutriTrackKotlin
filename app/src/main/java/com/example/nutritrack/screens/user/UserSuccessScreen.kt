@@ -16,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nutritrack.R
 
 @Composable
 fun UserSuccessScreen(
@@ -43,7 +45,7 @@ fun UserSuccessScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Thank you for registering!",
+                    text = stringResource(R.string.thank_you_for_registering),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -52,7 +54,7 @@ fun UserSuccessScreen(
                 )
 
                 Text(
-                    text = "You have successfully registered as a user.",
+                    text = stringResource(R.string.you_have_successfully_registered_as_a_user),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
@@ -76,7 +78,7 @@ fun UserSuccessScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Create your goal",
+                    text = stringResource(R.string.create_your_goal),
                     fontSize = 20.sp,
                     color = Color.White
                 )

@@ -46,7 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -89,10 +91,8 @@ fun ConsultantMainScreen(
             try {
                 isLoading = true
                 errorMessage = null
-                // Завантажуємо зв’язки (клієнтів)
                 val relationships = ApiService.getLinkedRelationships(idToken)
                 linkedRelationships = relationships.filter { it.isActive }
-                // Завантажуємо запити
                 val requestResponse = ApiService.getAllRequests(idToken)
                 requests = requestResponse.filter { it.status == "pending" }
             } catch (e: Exception) {
@@ -106,7 +106,6 @@ fun ConsultantMainScreen(
         }
     }
 
-    // Функція для видалення клієнта та його нотаток
     fun removeClient(userUid: String) {
         scope.launch {
             isRemovingClient = true
@@ -114,20 +113,16 @@ fun ConsultantMainScreen(
 
             val idToken = FirebaseAuthHelper.getIdToken()
             if (idToken != null) {
-                // Отримати goalId користувача
                 val goalIdResponse = ApiService.getGoalIdByUserUid(userUid)
                 val goalId = goalIdResponse?.goalId
 
                 if (goalId != null) {
-                    // Отримати всі нотатки користувача
                     val notes = ApiService.getNotes(goalId, idToken)
-                    // Видалити всі нотатки
                     notes.forEach { note ->
                         ApiService.deleteNote(idToken, note.note_id)
                     }
                 }
 
-                // Видалити зв’язок із користувачем
                 val success = ApiService.removeUser(idToken, userUid)
                 if (success) {
                     linkedRelationships = linkedRelationships.filter { it.userUid != userUid }
@@ -146,7 +141,7 @@ fun ConsultantMainScreen(
             onDismissRequest = { showLogoutDialog = false },
             title = {
                 Text(
-                    text = "Logout Confirmation",
+                    text = stringResource(R.string.logout_confirmation2),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -154,7 +149,7 @@ fun ConsultantMainScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to log out?",
+                    text = stringResource(R.string.are_you_sure_you_want_to_log_out2),
                     color = Color.White,
                     fontSize = 16.sp
                 )
@@ -171,7 +166,7 @@ fun ConsultantMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Yes", fontSize = 16.sp)
+                    Text(stringResource(R.string.yes), fontSize = 16.sp)
                 }
             },
             dismissButton = {
@@ -181,7 +176,7 @@ fun ConsultantMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("No", fontSize = 16.sp)
+                    Text(stringResource(R.string.no), fontSize = 16.sp)
                 }
             }
         )
@@ -192,7 +187,7 @@ fun ConsultantMainScreen(
             onDismissRequest = { showRemoveDialog = false },
             title = {
                 Text(
-                    text = "Remove Client",
+                    text = stringResource(R.string.remove_client),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -200,7 +195,7 @@ fun ConsultantMainScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to remove this client? This action cannot be undone.",
+                    text = stringResource(R.string.are_you_sure_you_want_to_remove_this_client_this_action_cannot_be_undone),
                     color = Color.White,
                     fontSize = 16.sp
                 )
@@ -220,7 +215,7 @@ fun ConsultantMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Yes", fontSize = 16.sp)
+                    Text(stringResource(R.string.yes), fontSize = 16.sp)
                 }
             },
             dismissButton = {
@@ -233,18 +228,18 @@ fun ConsultantMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("No", fontSize = 16.sp)
+                    Text(stringResource(R.string.no), fontSize = 16.sp)
                 }
             }
         )
     }
-
+    val context = LocalContext.current
     if (showRequestsDialog) {
         AlertDialog(
             onDismissRequest = { showRequestsDialog = false },
             title = {
                 Text(
-                    text = "Pending Requests",
+                    text = stringResource(R.string.pending_requests2),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -260,7 +255,7 @@ fun ConsultantMainScreen(
                 ) {
                     if (requests.isEmpty()) {
                         Text(
-                            text = "No pending requests",
+                            text = stringResource(R.string.no_pending_requests2),
                             color = Color.White,
                             fontSize = 16.sp,
                             modifier = Modifier
@@ -289,13 +284,13 @@ fun ConsultantMainScreen(
                                                 if (success) {
                                                     requests =
                                                         requests.filter { it.requestId != request.requestId }
-                                                    // Оновлюємо список клієнтів
                                                     val relationships =
                                                         ApiService.getLinkedRelationships(idToken)
                                                     linkedRelationships =
                                                         relationships.filter { it.isActive }
                                                 } else {
-                                                    respondError = "Failed to accept request"
+                                                    respondError =
+                                                        context.getString(R.string.failed_to_accept_request)
                                                 }
                                             } else {
                                                 respondError = "Failed to get idToken"
@@ -318,10 +313,12 @@ fun ConsultantMainScreen(
                                                     requests =
                                                         requests.filter { it.requestId != request.requestId }
                                                 } else {
-                                                    respondError = "Failed to decline request"
+                                                    respondError =
+                                                        context.getString(R.string.failed_to_decline_request)
                                                 }
                                             } else {
-                                                respondError = "Failed to get idToken"
+                                                respondError =
+                                                    context.getString(R.string.failed_to_get_idtoken2)
                                             }
                                             isResponding = false
                                         }
@@ -353,7 +350,7 @@ fun ConsultantMainScreen(
                     onClick = { showRequestsDialog = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Close", fontSize = 16.sp)
+                    Text(stringResource(R.string.close), fontSize = 16.sp)
                 }
             },
             dismissButton = {}
@@ -436,7 +433,7 @@ fun ConsultantMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Home",
+                            text = stringResource(R.string.home),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -462,7 +459,7 @@ fun ConsultantMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Search",
+                            text = stringResource(R.string.search),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -488,7 +485,7 @@ fun ConsultantMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile2),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -532,7 +529,7 @@ fun ConsultantMainScreen(
                 )
             } else if (linkedRelationships.isEmpty()) {
                 Text(
-                    text = "No active clients yet.",
+                    text = stringResource(R.string.no_active_clients_yet),
                     color = Color.White,
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
@@ -543,7 +540,7 @@ fun ConsultantMainScreen(
                 )
             } else {
                 Text(
-                    text = "Your Clients",
+                    text = stringResource(R.string.your_clients),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -604,8 +601,13 @@ fun ConsultantMainScreen(
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
+                                    val genderTranslated = when (user.gender.lowercase()) {
+                                        "male" -> stringResource(R.string.gender_male)
+                                        "female" -> stringResource(R.string.gender_female)
+                                        else -> user.gender
+                                    }
                                     Text(
-                                        text = "Gender: ${user.gender}",
+                                        text = stringResource(R.string.gender4, genderTranslated),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
@@ -699,8 +701,13 @@ fun RequestCard(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+                    val genderTranslated = when (request.user.gender.lowercase()) {
+                        "male" -> stringResource(R.string.gender_male)
+                        "female" -> stringResource(R.string.gender_female)
+                        else -> request.user.gender // fallback
+                    }
                     Text(
-                        text = "Gender: ${request.user.gender}",
+                        text = stringResource(R.string.gender2, genderTranslated),
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.7f)
                     )
@@ -726,7 +733,7 @@ fun RequestCard(
                         )
                     } else {
                         Text(
-                            text = "Accept",
+                            text = stringResource(R.string.accept2),
                             fontSize = 14.sp,
                             color = Color.White
                         )
@@ -748,7 +755,7 @@ fun RequestCard(
                         )
                     } else {
                         Text(
-                            text = "Decline",
+                            text = stringResource(R.string.decline2),
                             fontSize = 14.sp,
                             color = Color.White
                         )

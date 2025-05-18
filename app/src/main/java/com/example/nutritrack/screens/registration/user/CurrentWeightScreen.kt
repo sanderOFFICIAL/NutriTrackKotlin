@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,7 @@ fun CurrentWeightScreen(
             )
 
             Text(
-                text = "Enter your weight",
+                text = stringResource(R.string.enter_your_weight),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -67,7 +68,7 @@ fun CurrentWeightScreen(
             )
 
             Text(
-                text = "Your weight will help us to choose the right amount of calories for you. Don't worry, we won't tell anyone...",
+                text = stringResource(R.string.your_weight_will_help_us_to_choose_the_right_amount_of_calories_for_you_don_t_worry_we_won_t_tell_anyone),
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
@@ -94,7 +95,7 @@ fun CurrentWeightScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${selectedWeight.value} kg",
+                    text = stringResource(R.string.kg, selectedWeight.value),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -118,7 +119,7 @@ fun CurrentWeightScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Continue",
+                text = stringResource(R.string.Сontinue),
                 fontSize = 20.sp,
                 color = Color.White
             )

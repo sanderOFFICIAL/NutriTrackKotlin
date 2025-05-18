@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +70,7 @@ fun HistoryScreen(
     selectedDate: String,
     onBackClick: () -> Unit,
     onAddFoodClick: (String) -> Unit,
-    onViewMealDetails: (String, String) -> Unit // Додаємо дату до параметрів
+    onViewMealDetails: (String, String) -> Unit
 ) {
     var goalData by remember { mutableStateOf<GoalResponse?>(null) }
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -201,7 +202,7 @@ fun HistoryScreen(
                 )
 
                 Text(
-                    text = "The number of calories",
+                    text = stringResource(R.string.the_number_of_calories2),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -263,9 +264,17 @@ fun HistoryScreen(
                         )
                         Text(
                             text = if (totalConsumedCalories.toInt() == 0) {
-                                "Daily Goal: $totalGoalCalories\nRemaining: $totalGoalCalories"
+                                stringResource(
+                                    R.string.daily_goal_remaining2,
+                                    totalGoalCalories,
+                                    totalGoalCalories
+                                )
                             } else {
-                                "Consumed: $totalConsumedCalories\nRemaining: $remainingCalories"
+                                stringResource(
+                                    R.string.consumed_remaining2,
+                                    totalConsumedCalories,
+                                    remainingCalories
+                                )
                             },
                             fontSize = 14.sp,
                             color = Color.White,
@@ -322,7 +331,11 @@ fun HistoryScreen(
                         }
 
                         Text(
-                            text = "Proteins\n${totalProtein.toInt()}/${goalData!!.dailyProtein.toInt()}",
+                            text = stringResource(
+                                R.string.proteins2,
+                                totalProtein.toInt(),
+                                goalData!!.dailyProtein.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -346,7 +359,11 @@ fun HistoryScreen(
                         }
 
                         Text(
-                            text = "Fats\n${totalFats.toInt()}/${goalData!!.dailyFats.toInt()}",
+                            text = stringResource(
+                                R.string.fats2,
+                                totalFats.toInt(),
+                                goalData!!.dailyFats.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -370,7 +387,11 @@ fun HistoryScreen(
                         }
 
                         Text(
-                            text = "Carbs\n${totalCarbs.toInt()}/${goalData!!.dailyCarbs.toInt()}",
+                            text = stringResource(
+                                R.string.carbs3,
+                                totalCarbs.toInt(),
+                                goalData!!.dailyCarbs.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -380,7 +401,7 @@ fun HistoryScreen(
                 }
 
                 Text(
-                    text = "Diet for this day",
+                    text = stringResource(R.string.diet_for_this_day),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -402,13 +423,25 @@ fun HistoryScreen(
 
                 val meals = listOf(
                     Triple(
-                        "Breakfast",
+                        stringResource(R.string.breakfast),
                         R.drawable.ic_breakfast,
                         breakfastCalories to breakfastGoal
                     ),
-                    Triple("Lunch", R.drawable.ic_lunch, lunchCalories to lunchGoal),
-                    Triple("Dinner", R.drawable.ic_dinner, dinnerCalories to dinnerGoal),
-                    Triple("Snack", R.drawable.ic_snack, snackCalories to snackGoal)
+                    Triple(
+                        stringResource(R.string.lunch),
+                        R.drawable.ic_lunch,
+                        lunchCalories to lunchGoal
+                    ),
+                    Triple(
+                        stringResource(R.string.dinner),
+                        R.drawable.ic_dinner,
+                        dinnerCalories to dinnerGoal
+                    ),
+                    Triple(
+                        stringResource(R.string.snack),
+                        R.drawable.ic_snack,
+                        snackCalories to snackGoal
+                    )
                 )
                 meals.forEach { (meal, iconRes, caloriesPair) ->
                     val (consumed, goal) = caloriesPair
@@ -421,7 +454,7 @@ fun HistoryScreen(
                                     meal.lowercase(),
                                     selectedDate
                                 )
-                            }, // Передаємо дату з HistoryScreen
+                            },
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFF2F4F4F)
@@ -449,7 +482,7 @@ fun HistoryScreen(
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "${consumed.toInt()}/$goal cal",
+                                    text = stringResource(R.string.cal2, consumed.toInt(), goal),
                                     fontSize = 14.sp,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )
@@ -459,7 +492,7 @@ fun HistoryScreen(
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_add),
-                                    contentDescription = "Add",
+                                    contentDescription = stringResource(R.string.add),
                                     modifier = Modifier.size(30.dp),
                                     tint = Color.White
                                 )

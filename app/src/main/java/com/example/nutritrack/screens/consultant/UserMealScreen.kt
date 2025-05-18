@@ -41,7 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,7 +87,7 @@ fun UserMealScreen(
 
     val currentDate = LocalDate.now()
     val scope = rememberCoroutineScope()
-
+    val context = LocalContext.current
     LaunchedEffect(userUid) {
         try {
             isLoading = true
@@ -96,15 +98,15 @@ fun UserMealScreen(
                 val goalResponse = ApiService.getSpecificGoalById(goalIdResponse.goalId)
                 goal = goalResponse
             } else {
-                errorMessage = "No goal found for this user."
+                errorMessage = context.getString(R.string.no_goal_found_for_this_user)
             }
 
             meals = ApiService.getMealsByUid(userUid)
             if (meals.isEmpty()) {
                 errorMessage = if (errorMessage != null) {
-                    "$errorMessage\nNo meal data available for this user."
+                    context.getString(R.string.no_meal_data_available_for_this_user, errorMessage)
                 } else {
-                    "No meal data available for this user."
+                    context.getString(R.string.no_meal_data_available_for_this_user2)
                 }
             } else {
                 val filteredMeals = meals.filter {
@@ -116,16 +118,16 @@ fun UserMealScreen(
                 }
                 if (filteredMeals.isEmpty()) {
                     errorMessage = if (errorMessage != null) {
-                        "$errorMessage\nNo meal data available for today."
+                        context.getString(R.string.no_meal_data_available_for_today, errorMessage)
                     } else {
-                        "No meal data available for today."
+                        context.getString(R.string.no_meal_data_available_for_today2)
                     }
                 } else {
                     groupedMeals = filteredMeals.groupBy { Pair(it.entry_date, it.meal_type) }
                 }
             }
         } catch (e: Exception) {
-            errorMessage = "Error loading data: ${e.message}"
+            errorMessage = context.getString(R.string.error_loading_data, e.message)
         } finally {
             isLoading = false
         }
@@ -136,10 +138,9 @@ fun UserMealScreen(
             isLoadingNotes = true
             val idToken = FirebaseAuthHelper.getIdToken()
             if (idToken != null) {
-                val currentGoal = goal // Capture the current value of goal
+                val currentGoal = goal
                 if (currentGoal != null) {
                     val allNotes = ApiService.getNotes(currentGoal.goalId, idToken)
-                    // Фільтруємо нотатки за поточною датою (15 травня 2025)
                     val filteredNotes = allNotes.filter {
                         val noteDate = LocalDateTime.parse(
                             it.created_at,
@@ -154,7 +155,6 @@ fun UserMealScreen(
         }
     }
 
-    // Діалогове вікно для створення/редагування нотатки
     if (showNoteDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -165,7 +165,9 @@ fun UserMealScreen(
             },
             title = {
                 Text(
-                    text = if (editingNote == null) "Leave a Note" else "Edit Note",
+                    text = if (editingNote == null) stringResource(R.string.leave_a_note) else stringResource(
+                        R.string.edit_note
+                    ),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -195,7 +197,7 @@ fun UserMealScreen(
                         shape = RoundedCornerShape(8.dp),
                         placeholder = {
                             Text(
-                                text = "Enter your note here...",
+                                text = stringResource(R.string.enter_your_note_here),
                                 color = Color.White.copy(alpha = 0.7f)
                             )
                         }
@@ -223,13 +225,11 @@ fun UserMealScreen(
                             isSavingNote = true
                             noteError = null
                             val idToken = FirebaseAuthHelper.getIdToken()
-                            val currentGoal = goal // Capture the current value of goal
+                            val currentGoal = goal
                             if (idToken != null && currentGoal?.goalId != null) {
                                 val success = if (editingNote == null) {
-                                    // Додавання нової нотатки
                                     ApiService.addNote(idToken, currentGoal.goalId, noteContent)
                                 } else {
-                                    // Оновлення існуючої нотатки
                                     ApiService.updateNote(
                                         idToken,
                                         editingNote!!.note_id,
@@ -237,7 +237,6 @@ fun UserMealScreen(
                                     )
                                 }
                                 if (success) {
-                                    // Оновлюємо список нотаток після додавання/редагування
                                     val allNotes = ApiService.getNotes(currentGoal.goalId, idToken)
                                     notes = allNotes.filter {
                                         val noteDate = LocalDateTime.parse(
@@ -252,10 +251,13 @@ fun UserMealScreen(
                                     showNoteDialog = false
                                 } else {
                                     noteError =
-                                        if (editingNote == null) "Failed to save note" else "Failed to update note"
+                                        if (editingNote == null) context.getString(R.string.failed_to_save_note) else context.getString(
+                                            R.string.failed_to_update_note
+                                        )
                                 }
                             } else {
-                                noteError = "Authentication or goal ID error"
+                                noteError =
+                                    context.getString(R.string.authentication_or_goal_id_error)
                             }
                             isSavingNote = false
                         }
@@ -280,7 +282,9 @@ fun UserMealScreen(
                         )
                     } else {
                         Text(
-                            text = if (editingNote == null) "Send" else "Update",
+                            text = if (editingNote == null) stringResource(R.string.send) else stringResource(
+                                R.string.update
+                            ),
                             color = Color.White,
                             fontSize = 16.sp
                         )
@@ -298,19 +302,18 @@ fun UserMealScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Cancel", fontSize = 16.sp)
+                    Text(stringResource(R.string.cancel), fontSize = 16.sp)
                 }
             }
         )
     }
 
-    // Діалогове вікно для перегляду нотаток
     if (showNotesListDialog) {
         AlertDialog(
             onDismissRequest = { showNotesListDialog = false },
             title = {
                 Text(
-                    text = "Today's Notes",
+                    text = stringResource(R.string.today_s_notes),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -330,7 +333,7 @@ fun UserMealScreen(
                     }
                 } else if (notes.isEmpty()) {
                     Text(
-                        text = "No notes for today.",
+                        text = stringResource(R.string.no_notes_for_today),
                         color = Color.White,
                         fontSize = 16.sp,
                         modifier = Modifier
@@ -363,7 +366,10 @@ fun UserMealScreen(
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
                                     Text(
-                                        text = "Created: ${formatTime(note.created_at)}",
+                                        text = stringResource(
+                                            R.string.created,
+                                            formatTime(note.created_at)
+                                        ),
                                         color = Color.White.copy(alpha = 0.5f),
                                         fontSize = 12.sp,
                                         modifier = Modifier.padding(bottom = 4.dp)
@@ -381,7 +387,7 @@ fun UserMealScreen(
                                             },
                                             colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                                         ) {
-                                            Text("Edit", fontSize = 14.sp)
+                                            Text(stringResource(R.string.edit), fontSize = 14.sp)
                                         }
                                         TextButton(
                                             onClick = {
@@ -412,7 +418,7 @@ fun UserMealScreen(
                                             },
                                             colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
                                         ) {
-                                            Text("Delete", fontSize = 14.sp)
+                                            Text(stringResource(R.string.delete), fontSize = 14.sp)
                                         }
                                     }
                                 }
@@ -428,7 +434,7 @@ fun UserMealScreen(
                     onClick = { showNotesListDialog = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Close", fontSize = 16.sp)
+                    Text(stringResource(R.string.close), fontSize = 16.sp)
                 }
             },
             dismissButton = {}
@@ -443,7 +449,7 @@ fun UserMealScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Meal History",
+                    text = stringResource(R.string.meal_history),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -487,7 +493,6 @@ fun UserMealScreen(
                 .padding(horizontal = 16.dp)
                 .padding(top = 16.dp)
         ) {
-            // User's Daily Goal always visible
             if (goal != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -500,28 +505,28 @@ fun UserMealScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "User's Daily Goal",
+                            text = stringResource(R.string.user_s_daily_goal),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "Calories: ${goal!!.dailyCalories} kcal",
+                            text = stringResource(R.string.calories_kcal, goal!!.dailyCalories),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "Protein: ${goal!!.dailyProtein} g",
+                            text = stringResource(R.string.protein_g, goal!!.dailyProtein),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "Carbs: ${goal!!.dailyCarbs} g",
+                            text = stringResource(R.string.carbs_g, goal!!.dailyCarbs),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "Fats: ${goal!!.dailyFats} g",
+                            text = stringResource(R.string.fats_g, goal!!.dailyFats),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
@@ -531,7 +536,6 @@ fun UserMealScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Content based on loading state
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -567,24 +571,33 @@ fun UserMealScreen(
                                         .padding(16.dp)
                                 ) {
                                     Text(
-                                        text = "Meal Type: ${mealType.replaceFirstChar { it.uppercase() }}",
+                                        text = stringResource(
+                                            R.string.meal_type,
+                                            mealType.replaceFirstChar { it.uppercase() }),
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
                                     Text(
-                                        text = "Date: ${formatDate(date)}",
+                                        text = stringResource(R.string.date2, formatDate(date)),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                     Text(
-                                        text = "Created: ${formatTime(mealGroup.first().created_at)}",
+                                        text = stringResource(
+                                            R.string.created2,
+                                            formatTime(mealGroup.first().created_at)
+                                        ),
                                         fontSize = 12.sp,
                                         color = Color.White.copy(alpha = 0.5f)
                                     )
                                     mealGroup.forEach { meal ->
                                         Text(
-                                            text = "• ${meal.product_name} (${meal.quantity_grams} g)",
+                                            text = stringResource(
+                                                R.string.g5,
+                                                meal.product_name,
+                                                meal.quantity_grams
+                                            ),
                                             fontSize = 14.sp,
                                             color = Color.White.copy(alpha = 0.7f)
                                         )
@@ -594,22 +607,28 @@ fun UserMealScreen(
                                     val totalCarbs = mealGroup.sumOf { it.carbs }
                                     val totalFats = mealGroup.sumOf { it.fats }
                                     Text(
-                                        text = "Total Calories: $totalCalories kcal",
+                                        text = stringResource(
+                                            R.string.total_calories_kcal,
+                                            totalCalories
+                                        ),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                     Text(
-                                        text = "Total Protein: $totalProtein g",
+                                        text = stringResource(
+                                            R.string.total_protein_g,
+                                            totalProtein
+                                        ),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                     Text(
-                                        text = "Total Carbs: $totalCarbs g",
+                                        text = stringResource(R.string.total_carbs_g, totalCarbs),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
                                     Text(
-                                        text = "Total Fats: $totalFats g",
+                                        text = stringResource(R.string.total_fats_g, totalFats),
                                         fontSize = 14.sp,
                                         color = Color.White.copy(alpha = 0.7f)
                                     )
@@ -622,7 +641,6 @@ fun UserMealScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Leave a Note button always visible
             Button(
                 onClick = { showNoteDialog = true },
                 modifier = Modifier
@@ -633,7 +651,7 @@ fun UserMealScreen(
                 enabled = goal != null
             ) {
                 Text(
-                    text = "Leave a Note",
+                    text = stringResource(R.string.leave_a_note2),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold

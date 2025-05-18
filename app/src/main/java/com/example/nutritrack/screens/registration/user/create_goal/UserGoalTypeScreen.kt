@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,7 @@ fun UserGoalTypeScreen(
         )
 
         Text(
-            text = "What is your goal?",
+            text = stringResource(R.string.what_is_your_goal),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -54,7 +55,7 @@ fun UserGoalTypeScreen(
         )
 
         Text(
-            text = "Choose the type of your goal so that we can calculate everything for you",
+            text = stringResource(R.string.choose_the_type_of_your_goal_so_that_we_can_calculate_everything_for_you),
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 80.dp),
@@ -82,7 +83,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Maintain current weight",
+                    text = stringResource(R.string.maintain_current_weight),
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -103,7 +104,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Lose weight",
+                    text = stringResource(R.string.lose_weight),
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -124,7 +125,7 @@ fun UserGoalTypeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Gain weight",
+                    text = stringResource(R.string.gain_weight),
                     fontSize = 20.sp,
                     color = Color.White
                 )

@@ -40,7 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,13 +73,12 @@ fun UserProfileScreen(
     var hasLinkedRelationship by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
 
-    // Стан для діалогу
     var dialogAction by remember { mutableStateOf<String?>(null) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogText by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
-
+    val context = LocalContext.current
     LaunchedEffect(userUid) {
         try {
             isLoading = true
@@ -87,17 +88,15 @@ fun UserProfileScreen(
                 return@LaunchedEffect
             }
 
-            // Перевіряємо наявність зв’язку між консультантом і користувачем
             val relationships = ApiService.getLinkedRelationships(idToken)
             hasLinkedRelationship = relationships.any { it.isActive && it.userUid == userUid }
-            // Перевіряємо, чи було надіслано запрошення (але ще не прийнято)
+
             inviteSuccess = relationships.any { !it.isActive && it.userUid == userUid }
 
-            // Отримуємо дані користувача
             val userData = ApiService.getUserByUid(userUid)
             user = userData
             if (user == null) {
-                errorMessage = "User not found"
+                errorMessage = context.getString(R.string.user_not_found)
             }
         } catch (e: Exception) {
             errorMessage = "Error: ${e.message}"
@@ -106,7 +105,6 @@ fun UserProfileScreen(
         }
     }
 
-    // Функція для надсилання запрошення користувачу
     fun sendInvite() {
         scope.launch {
             isSendingInvite = true
@@ -120,7 +118,8 @@ fun UserProfileScreen(
                     inviteSuccess = true
                     onClientAdded()
                 } else {
-                    inviteError = "You already sent an invitation or an error occurred"
+                    inviteError =
+                        context.getString(R.string.you_already_sent_an_invitation_or_an_error_occurred)
                 }
             } else {
                 inviteError = "Failed to get idToken"
@@ -129,7 +128,6 @@ fun UserProfileScreen(
         }
     }
 
-    // Функція для видалення клієнта
     fun removeClient() {
         scope.launch {
             isRemovingClient = true
@@ -143,10 +141,10 @@ fun UserProfileScreen(
                     inviteSuccess = false
                     onBackClick()
                 } else {
-                    removeError = "Failed to remove client"
+                    removeError = context.getString(R.string.failed_to_remove_client)
                 }
             } else {
-                removeError = "Failed to get idToken"
+                removeError = context.getString(R.string.failed_to_get_idtoken3)
             }
             isRemovingClient = false
         }
@@ -185,7 +183,7 @@ fun UserProfileScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Yes", fontSize = 16.sp)
+                    Text(stringResource(R.string.yes), fontSize = 16.sp)
                 }
             },
             dismissButton = {
@@ -195,7 +193,7 @@ fun UserProfileScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("No", fontSize = 16.sp)
+                    Text(stringResource(R.string.no), fontSize = 16.sp)
                 }
             }
         )
@@ -225,7 +223,7 @@ fun UserProfileScreen(
                 )
             }
             Text(
-                text = "User Profile",
+                text = stringResource(R.string.user_profile),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -314,7 +312,7 @@ fun UserProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Bio",
+                        text = stringResource(R.string.bio2),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -323,7 +321,7 @@ fun UserProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = user!!.profile_description.ifEmpty { "No bio available" },
+                        text = user!!.profile_description.ifEmpty { stringResource(R.string.no_bio_available) },
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.7f),
                         fontStyle = FontStyle.Italic,
@@ -349,22 +347,27 @@ fun UserProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val genderLocalized = when (user!!.gender.lowercase()) {
+                        "male" -> stringResource(R.string.gender_male)
+                        "female" -> stringResource(R.string.gender_female)
+                        else -> user!!.gender
+                    }
                     Text(
-                        text = "Gender: ${user!!.gender}",
+                        text = stringResource(R.string.gender5, genderLocalized),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Height: ${user!!.height} cm",
+                        text = stringResource(R.string.height_cm2, user!!.height),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Weight: ${user!!.current_weight} kg",
+                        text = stringResource(R.string.weight_kg2, user!!.current_weight),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -387,7 +390,7 @@ fun UserProfileScreen(
                 )
             } else if (inviteSuccess && !hasLinkedRelationship) {
                 Text(
-                    text = "Invite sent successfully!",
+                    text = stringResource(R.string.invite_sent_successfully2),
                     color = Color.White,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -397,7 +400,7 @@ fun UserProfileScreen(
                 )
             } else if (hasLinkedRelationship) {
                 Text(
-                    text = "Client added successfully!",
+                    text = stringResource(R.string.client_added_successfully),
                     color = Color.White,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -425,9 +428,9 @@ fun UserProfileScreen(
                 Button(
                     onClick = {
                         dialogAction = "remove_client"
-                        dialogTitle = "Remove Client"
+                        dialogTitle = context.getString(R.string.remove_client2)
                         dialogText =
-                            "Are you sure you want to remove this client? This action cannot be undone."
+                            context.getString(R.string.are_you_sure_you_want_to_remove_this_client_this_action_cannot_be_undone2)
                         showDialog = true
                     },
                     modifier = Modifier
@@ -447,7 +450,7 @@ fun UserProfileScreen(
                         )
                     } else {
                         Text(
-                            text = "Remove Client",
+                            text = stringResource(R.string.remove_client2),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -460,8 +463,9 @@ fun UserProfileScreen(
                 Button(
                     onClick = {
                         dialogAction = "send_invite"
-                        dialogTitle = "Send Invite"
-                        dialogText = "Are you sure you want to send an invite to this user?"
+                        dialogTitle = context.getString(R.string.send_invite)
+                        dialogText =
+                            context.getString(R.string.are_you_sure_you_want_to_send_an_invite_to_this_user)
                         showDialog = true
                     },
                     modifier = Modifier
@@ -481,7 +485,7 @@ fun UserProfileScreen(
                         )
                     } else {
                         Text(
-                            text = "Add as Client",
+                            text = stringResource(R.string.add_as_client),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,

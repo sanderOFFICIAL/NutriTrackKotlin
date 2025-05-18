@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,7 @@ fun ActivityLevelScreen(
         )
 
         Text(
-            text = "What is your daily activity level?",
+            text = stringResource(R.string.what_is_your_daily_activity_level),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -54,7 +55,7 @@ fun ActivityLevelScreen(
         )
 
         Text(
-            text = "Activity affects the amount of calories the body needs",
+            text = stringResource(R.string.activity_affects_the_amount_of_calories_the_body_needs),
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 32.dp),
@@ -86,13 +87,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Sedentary lifestyle",
+                        text = stringResource(R.string.sedentary_lifestyle),
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Lack of physical activity",
+                        text = stringResource(R.string.lack_of_physical_activity),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -118,13 +119,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Light activity",
+                        text = stringResource(R.string.light_activity),
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Light exercises 1-3 times a week",
+                        text = stringResource(R.string.light_exercises_1_3_times_a_week),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -150,13 +151,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Moderate activity",
+                        text = stringResource(R.string.moderate_activity),
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Training 2-4 times a week",
+                        text = stringResource(R.string.training_2_4_times_a_week),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -182,13 +183,13 @@ fun ActivityLevelScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "High activity",
+                        text = stringResource(R.string.high_activity),
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Training 6-7 times a week/physical work",
+                        text = stringResource(R.string.training_6_7_times_a_week_physical_work),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center

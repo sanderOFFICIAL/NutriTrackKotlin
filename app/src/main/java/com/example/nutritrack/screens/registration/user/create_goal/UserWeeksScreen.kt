@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -75,7 +76,7 @@ fun UserWeeksScreen(
                 )
 
                 Text(
-                    text = "Specify the number of weeks",
+                    text = stringResource(R.string.specify_the_number_of_weeks),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -84,7 +85,7 @@ fun UserWeeksScreen(
                 )
 
                 Text(
-                    text = "Specify the number of weeks in which you want to achieve the goal",
+                    text = stringResource(R.string.specify_the_number_of_weeks_in_which_you_want_to_achieve_the_goal),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 49.dp),
@@ -114,7 +115,7 @@ fun UserWeeksScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${selectedWeeks.value} weeks",
+                        text = stringResource(R.string.weeks, selectedWeeks.value),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -141,7 +142,6 @@ fun UserWeeksScreen(
                                         "Goal Data: ${viewModel.userData.value}"
                                     )
 
-                                    // Перевіряємо та видаляємо стару ціль, якщо вона існує
                                     val goalIds = ApiService.getAllUserGoalIds(idToken)
                                     if (goalIds.isNotEmpty()) {
                                         val oldGoalId = goalIds.first().goalId
@@ -156,7 +156,6 @@ fun UserWeeksScreen(
                                         }
                                     }
 
-                                    // Створюємо нову ціль
                                     val success =
                                         ApiService.createUserGoal(viewModel.userData.value)
                                     if (success) {
@@ -197,7 +196,7 @@ fun UserWeeksScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Create a goal",
+                    text = stringResource(R.string.create_a_goal),
                     fontSize = 20.sp,
                     color = Color.White
                 )

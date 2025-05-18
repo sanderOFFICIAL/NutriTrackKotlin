@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,7 +116,8 @@ fun ConsultantProfileScreen(
                                         profileImageUri = null
                                     }
                                 } else {
-                                    uploadError = "Failed to update profile picture"
+                                    uploadError =
+                                        context.getString(R.string.failed_to_update_profile_picture2)
                                 }
                             } else {
                                 uploadError = "Failed to get idToken"
@@ -123,12 +125,13 @@ fun ConsultantProfileScreen(
                             isUploading = false
                         }
                     }.addOnFailureListener { e ->
-                        uploadError = "Failed to get download URL: ${e.message}"
+                        uploadError =
+                            context.getString(R.string.failed_to_get_download_url2, e.message)
                         isUploading = false
                     }
                 }
                 .addOnFailureListener { e ->
-                    uploadError = "Failed to upload image: ${e.message}"
+                    uploadError = context.getString(R.string.failed_to_upload_image2, e.message)
                     isUploading = false
                 }
         }
@@ -167,7 +170,7 @@ fun ConsultantProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Home",
+                            text = stringResource(R.string.home),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -193,7 +196,7 @@ fun ConsultantProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Search",
+                            text = stringResource(R.string.search),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -219,7 +222,7 @@ fun ConsultantProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile2),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -294,7 +297,7 @@ fun ConsultantProfileScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Click to change photo",
+                                text = stringResource(R.string.click_to_change_photo2),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.White,
@@ -358,7 +361,7 @@ fun ConsultantProfileScreen(
                 }
 
                 Text(
-                    text = "Nickname:",
+                    text = stringResource(R.string.nickname2),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -386,7 +389,7 @@ fun ConsultantProfileScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Enter your nickname",
+                                text = stringResource(R.string.enter_your_nickname2),
                                 color = Color.White.copy(alpha = 0.5f),
                                 fontSize = 16.sp
                             )
@@ -403,7 +406,7 @@ fun ConsultantProfileScreen(
                 }
 
                 Text(
-                    text = "Bio:",
+                    text = stringResource(R.string.bio3),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -431,7 +434,7 @@ fun ConsultantProfileScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Enter your bio",
+                                text = stringResource(R.string.enter_your_bio2),
                                 color = Color.White.copy(alpha = 0.5f),
                                 fontSize = 16.sp
                             )
@@ -448,7 +451,7 @@ fun ConsultantProfileScreen(
                 }
 
                 Text(
-                    text = "Max Clients:",
+                    text = stringResource(R.string.max_clients),
                     fontSize = 16.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -508,7 +511,7 @@ fun ConsultantProfileScreen(
                 }
 
                 Text(
-                    text = "Experience Years:",
+                    text = stringResource(R.string.experience_years5),
                     fontSize = 16.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -581,7 +584,8 @@ fun ConsultantProfileScreen(
                                         ApiService.updateConsultantNickname(idToken, nickname)
                                     if (!nicknameSuccess) {
                                         success = false
-                                        uploadError = "Failed to update nickname"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_nickname2)
                                     }
                                 }
 
@@ -593,7 +597,8 @@ fun ConsultantProfileScreen(
                                         )
                                     if (!descriptionSuccess) {
                                         success = false
-                                        uploadError = "Failed to update profile description"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_profile_description2)
                                     }
                                 }
 
@@ -602,7 +607,8 @@ fun ConsultantProfileScreen(
                                         ApiService.updateConsultantMaxClients(idToken, maxClients)
                                     if (!maxClientsSuccess) {
                                         success = false
-                                        uploadError = "Failed to update max clients"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_max_clients2)
                                     }
                                 }
 
@@ -614,7 +620,8 @@ fun ConsultantProfileScreen(
                                         )
                                     if (!experienceYearsSuccess) {
                                         success = false
-                                        uploadError = "Failed to update experience years"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_experience_years)
                                     }
                                 }
 
@@ -624,7 +631,8 @@ fun ConsultantProfileScreen(
                                         val consultants = ApiService.getAllConsultants(idToken)
                                         consultantData =
                                             consultants.find { it.consultant_uid == FirebaseAuthHelper.getUid() }
-                                        successMessage = "Profile updated successfully"
+                                        successMessage =
+                                            context.getString(R.string.profile_updated_successfully2)
                                     }
                                 }
                             } else {
@@ -642,7 +650,7 @@ fun ConsultantProfileScreen(
                     )
                 ) {
                     Text(
-                        text = "Save changes",
+                        text = stringResource(R.string.save_changes2),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
                         color = Color.White

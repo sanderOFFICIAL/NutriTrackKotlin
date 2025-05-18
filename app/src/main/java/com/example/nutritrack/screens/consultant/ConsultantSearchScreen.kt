@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -112,7 +113,7 @@ fun ConsultantSearchScreen(
                     },
                     label = {
                         Text(
-                            text = "Home",
+                            text = stringResource(R.string.home),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -138,7 +139,7 @@ fun ConsultantSearchScreen(
                     },
                     label = {
                         Text(
-                            text = "Search",
+                            text = stringResource(R.string.search),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -164,7 +165,7 @@ fun ConsultantSearchScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile2),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -196,7 +197,7 @@ fun ConsultantSearchScreen(
                     .height(60.dp),
                 placeholder = {
                     Text(
-                        "Search by nickname...",
+                        stringResource(R.string.search_by_nickname2),
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 },
@@ -316,18 +317,23 @@ fun UserCard(user: UserData, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
+                val genderTranslated = when (user.gender.lowercase()) {
+                    "male" -> stringResource(R.string.gender_male)
+                    "female" -> stringResource(R.string.gender_female)
+                    else -> user.gender
+                }
                 Text(
-                    text = "Gender: ${user.gender}",
+                    text = stringResource(R.string.gender4, genderTranslated),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Height: ${user.height} cm",
+                    text = stringResource(R.string.height_cm, user.height),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Weight: ${user.current_weight} kg",
+                    text = stringResource(R.string.weight_kg, user.current_weight),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )

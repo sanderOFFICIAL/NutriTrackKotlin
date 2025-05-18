@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ fun ConsultantExperienceYearsScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Specify your experience",
+                    text = stringResource(R.string.specify_your_experience),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -76,7 +77,7 @@ fun ConsultantExperienceYearsScreen(
                 )
 
                 Text(
-                    text = "How many years have you been working as consultant?",
+                    text = stringResource(R.string.how_many_years_have_you_been_working_as_consultant),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 40.dp),
@@ -106,7 +107,7 @@ fun ConsultantExperienceYearsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${selectedExperienceYears.value} years",
+                        text = stringResource(R.string.years, selectedExperienceYears.value),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -130,7 +131,7 @@ fun ConsultantExperienceYearsScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Continue",
+                    text = stringResource(R.string.continue2),
                     fontSize = 20.sp,
                     color = Color.White
                 )

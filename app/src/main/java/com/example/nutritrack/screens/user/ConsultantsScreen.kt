@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -142,7 +143,7 @@ fun ConsultantsScreen(
                         },
                         label = {
                             Text(
-                                text = "Notebook",
+                                text = stringResource(R.string.notebook),
                                 color = Color.White,
                                 fontSize = 12.sp
                             )
@@ -168,7 +169,7 @@ fun ConsultantsScreen(
                         },
                         label = {
                             Text(
-                                text = "Consultants",
+                                text = stringResource(R.string.consultants),
                                 color = Color.White,
                                 fontSize = 12.sp
                             )
@@ -194,7 +195,7 @@ fun ConsultantsScreen(
                         },
                         label = {
                             Text(
-                                text = "Profile",
+                                text = stringResource(R.string.profile),
                                 color = Color.White,
                                 fontSize = 12.sp
                             )
@@ -225,7 +226,7 @@ fun ConsultantsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Consultants",
+                        text = stringResource(R.string.consultants),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -272,7 +273,7 @@ fun ConsultantsScreen(
                         .height(60.dp),
                     placeholder = {
                         Text(
-                            "Search by nickname...",
+                            stringResource(R.string.search_by_nickname),
                             color = Color.White.copy(alpha = 0.7f)
                         )
                     },
@@ -341,13 +342,12 @@ fun ConsultantsScreen(
             }
         }
 
-        // Діалогове вікно для відображення запитів
         if (showRequestsDialog) {
             AlertDialog(
                 onDismissRequest = { showRequestsDialog = false },
                 title = {
                     Text(
-                        text = "Pending Requests",
+                        text = stringResource(R.string.pending_requests),
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -363,7 +363,7 @@ fun ConsultantsScreen(
                     ) {
                         if (requests.isEmpty()) {
                             Text(
-                                text = "No pending requests",
+                                text = stringResource(R.string.no_pending_requests),
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 modifier = Modifier
@@ -392,7 +392,6 @@ fun ConsultantsScreen(
                                                     if (success) {
                                                         requests =
                                                             requests.filter { it.requestId != request.requestId }
-                                                        // Перевіряємо, чи з'явився новий зв'язок
                                                         val relationships =
                                                             ApiService.getLinkedRelationships(
                                                                 idToken
@@ -458,7 +457,7 @@ fun ConsultantsScreen(
                         onClick = { showRequestsDialog = false },
                         colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                     ) {
-                        Text("Close", fontSize = 16.sp)
+                        Text(stringResource(R.string.close), fontSize = 16.sp)
                     }
                 },
                 dismissButton = {}
@@ -518,18 +517,22 @@ fun ConsultantCard(consultant: Consultant, onClick: () -> Unit) {
                     color = Color.White
                 )
                 Text(
-                    text = "Experience: ${consultant.experience_years} years",
+                    text = stringResource(R.string.experience_years, consultant.experience_years),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Clients: ${consultant.current_clients}/${consultant.max_clients}",
+                    text = stringResource(
+                        R.string.clients,
+                        consultant.current_clients,
+                        consultant.max_clients
+                    ),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )
                 val availableSlots = consultant.max_clients - consultant.current_clients
                 Text(
-                    text = "Available: $availableSlots slots",
+                    text = stringResource(R.string.available_slots, availableSlots),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f)
                 )
@@ -592,7 +595,10 @@ fun RequestCard(
                         color = Color.White
                     )
                     Text(
-                        text = "Experience: ${request.consultant.experience_years} years",
+                        text = stringResource(
+                            R.string.experience_years2,
+                            request.consultant.experience_years
+                        ),
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.7f)
                     )
@@ -618,7 +624,7 @@ fun RequestCard(
                         )
                     } else {
                         Text(
-                            text = "Accept",
+                            text = stringResource(R.string.accept),
                             fontSize = 14.sp,
                             color = Color.White
                         )
@@ -640,7 +646,7 @@ fun RequestCard(
                         )
                     } else {
                         Text(
-                            text = "Decline",
+                            text = stringResource(R.string.decline),
                             fontSize = 14.sp,
                             color = Color.White
                         )

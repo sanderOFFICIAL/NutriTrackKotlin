@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,7 @@ fun ConsultantMaxClientsScreen(
                     val userExist = ApiService.checkUserExists(idToken)
                     if (userExist) {
                         snackbarHostState.showSnackbar(
-                            message = "Error: You can't create an account because you're already registered as a user at this email address",
+                            message = context.getString(R.string.error_you_can_t_create_an_account_because_you_re_already_registered_as_a_user_at_this_email_address),
                             duration = SnackbarDuration.Short
 
                         )
@@ -80,7 +81,7 @@ fun ConsultantMaxClientsScreen(
                         }
                     } else if (consultantExist) {
                         snackbarHostState.showSnackbar(
-                            message = "Error: The consultant with this account is already registered, please log in",
+                            message = context.getString(R.string.error_the_consultant_with_this_account_is_already_registered_please_log_in),
                             duration = SnackbarDuration.Short
                         )
                         navController.navigate("welcome_screen") {
@@ -93,7 +94,7 @@ fun ConsultantMaxClientsScreen(
                             onRegistrationSuccess()
                         } else {
                             snackbarHostState.showSnackbar(
-                                message = "Error: Could not register a consultant",
+                                message = context.getString(R.string.error_could_not_register_a_consultant),
                                 duration = SnackbarDuration.Long
                             )
                         }
@@ -142,7 +143,7 @@ fun ConsultantMaxClientsScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Specify the number of clients",
+                        text = stringResource(R.string.specify_the_number_of_clients),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -151,7 +152,7 @@ fun ConsultantMaxClientsScreen(
                     )
 
                     Text(
-                        text = "How many clients can you take on at once?",
+                        text = stringResource(R.string.how_many_clients_can_you_take_on_at_once),
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
@@ -182,7 +183,7 @@ fun ConsultantMaxClientsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "${selectedMaxClients.value} clients",
+                            text = stringResource(R.string.clients4, selectedMaxClients.value),
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -204,7 +205,7 @@ fun ConsultantMaxClientsScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Register",
+                        text = stringResource(R.string.register),
                         fontSize = 20.sp,
                         color = Color.White
                     )

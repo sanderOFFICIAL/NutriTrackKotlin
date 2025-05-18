@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,15 +47,15 @@ fun GenderSelectionScreen(
         )
 
         Text(
-            text = "Please specify your gender!",
-            fontSize = 28.sp,
+            text = stringResource(R.string.please_specify_your_gender),
+            fontSize = 23.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.padding(top = 25.dp, bottom = 8.dp)
         )
 
         Text(
-            text = "This information will help us choose the right amount of calories for you.",
+            text = stringResource(R.string.this_information_will_help_us_choose_the_right_amount_of_calories_for_you),
             fontSize = 16.sp,
             color = Color.White,
             modifier = Modifier.padding(bottom = 80.dp),
@@ -82,7 +83,7 @@ fun GenderSelectionScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Female",
+                    text = stringResource(R.string.female),
                     fontSize = 20.sp,
                     color = Color.White
                 )
@@ -103,7 +104,7 @@ fun GenderSelectionScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Male",
+                    text = stringResource(R.string.male),
                     fontSize = 20.sp,
                     color = Color.White
                 )

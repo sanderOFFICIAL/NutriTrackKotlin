@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nutritrack.R
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -113,7 +115,7 @@ fun DatePickerScreen(
                         .padding(horizontal = 8.dp)
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -142,7 +144,7 @@ fun DatePickerScreen(
                         .padding(horizontal = 8.dp)
                 ) {
                     Text(
-                        text = "OK",
+                        text = stringResource(R.string.ok),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )

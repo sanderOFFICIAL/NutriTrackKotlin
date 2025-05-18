@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,7 @@ fun HeightSelectionScreen(
     onNextClick: () -> Unit,
 ) {
     val heights = (100..250).toList()
-    val selectedHeight = remember { mutableStateOf(170) } // Початковий зріст 185 см
+    val selectedHeight = remember { mutableStateOf(170) }
 
     Column(
         modifier = Modifier
@@ -58,7 +59,7 @@ fun HeightSelectionScreen(
             )
 
             Text(
-                text = "Enter your height in centimeters",
+                text = stringResource(R.string.enter_your_height_in_centimeters),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -67,7 +68,7 @@ fun HeightSelectionScreen(
             )
 
             Text(
-                text = "Your height will help us choose the right amount of calories for you",
+                text = stringResource(R.string.your_height_will_help_us_choose_the_right_amount_of_calories_for_you),
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
@@ -94,7 +95,7 @@ fun HeightSelectionScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${selectedHeight.value} cm",
+                    text = stringResource(R.string.cm, selectedHeight.value),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -118,7 +119,7 @@ fun HeightSelectionScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Continue",
+                text = stringResource(R.string.Сontinue),
                 fontSize = 20.sp,
                 color = Color.White
             )

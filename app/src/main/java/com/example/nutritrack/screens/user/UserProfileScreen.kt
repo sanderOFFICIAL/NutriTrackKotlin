@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -110,20 +111,22 @@ fun UserProfileScreen(
                                         profileImageUri = null
                                     }
                                 } else {
-                                    uploadError = "Failed to update profile picture"
+                                    uploadError =
+                                        context.getString(R.string.failed_to_update_profile_picture)
                                 }
                             } else {
-                                uploadError = "Failed to get idToken"
+                                uploadError = context.getString(R.string.failed_to_get_idtoken)
                             }
                             isUploading = false
                         }
                     }.addOnFailureListener { e ->
-                        uploadError = "Failed to get download URL: ${e.message}"
+                        uploadError =
+                            context.getString(R.string.failed_to_get_download_url, e.message)
                         isUploading = false
                     }
                 }
                 .addOnFailureListener { e ->
-                    uploadError = "Failed to upload image: ${e.message}"
+                    uploadError = context.getString(R.string.failed_to_upload_image, e.message)
                     isUploading = false
                 }
         }
@@ -171,7 +174,7 @@ fun UserProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Notebook",
+                            text = stringResource(R.string.notebook),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -197,7 +200,7 @@ fun UserProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Consultants",
+                            text = stringResource(R.string.consultants),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -223,7 +226,7 @@ fun UserProfileScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -296,7 +299,7 @@ fun UserProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Click to change photo",
+                            text = stringResource(R.string.click_to_change_photo),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.White,
@@ -333,7 +336,7 @@ fun UserProfileScreen(
                 }
 
                 Text(
-                    text = "Nickname:",
+                    text = stringResource(R.string.nickname),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -360,7 +363,7 @@ fun UserProfileScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Enter your nickname",
+                                text = stringResource(R.string.enter_your_nickname),
                                 color = Color.White.copy(alpha = 0.5f),
                                 fontSize = 16.sp
                             )
@@ -377,7 +380,7 @@ fun UserProfileScreen(
                 }
 
                 Text(
-                    text = "Bio:",
+                    text = stringResource(R.string.bio),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -404,7 +407,7 @@ fun UserProfileScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Enter your bio",
+                                text = stringResource(R.string.enter_your_bio),
                                 color = Color.White.copy(alpha = 0.5f),
                                 fontSize = 16.sp
                             )
@@ -422,7 +425,7 @@ fun UserProfileScreen(
 
 
                 Text(
-                    text = "Target weight: $targetWeight kg",
+                    text = stringResource(R.string.target_weight_kg, targetWeight),
                     fontSize = 16.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -459,7 +462,7 @@ fun UserProfileScreen(
                             )
                         }
                         Text(
-                            text = "$weight kg",
+                            text = stringResource(R.string.kg3, weight),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -492,7 +495,8 @@ fun UserProfileScreen(
                                         ApiService.updateNickname(idToken, nickname)
                                     if (!nicknameSuccess) {
                                         success = false
-                                        uploadError = "Failed to update nickname"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_nickname)
                                     }
                                 }
 
@@ -501,7 +505,8 @@ fun UserProfileScreen(
                                         ApiService.updateProfileDescription(idToken, description)
                                     if (!descriptionSuccess) {
                                         success = false
-                                        uploadError = "Failed to update profile description"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_profile_description)
                                     }
                                 }
 
@@ -510,7 +515,8 @@ fun UserProfileScreen(
                                         ApiService.updateCurrentWeight(idToken, weight)
                                     if (!weightSuccess) {
                                         success = false
-                                        uploadError = "Failed to update weight"
+                                        uploadError =
+                                            context.getString(R.string.failed_to_update_weight)
                                     } else {
                                         val goalIds = ApiService.getAllUserGoalIds(idToken)
                                         if (goalIds.isNotEmpty()) {
@@ -532,7 +538,8 @@ fun UserProfileScreen(
                                     val uid = FirebaseAuthHelper.getUid()
                                     if (uid != null) {
                                         userData = ApiService.getUserByUid(uid)
-                                        successMessage = "Profile updated successfully"
+                                        successMessage =
+                                            context.getString(R.string.profile_updated_successfully)
                                     }
                                 }
                             } else {
@@ -549,7 +556,7 @@ fun UserProfileScreen(
                     )
                 ) {
                     Text(
-                        text = "Save Changes",
+                        text = stringResource(R.string.save_changes),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -597,14 +604,14 @@ fun UserProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Congratulations!",
+                            text = stringResource(R.string.congratulations),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center
                         )
                         Text(
-                            text = "You have reached the weight you want! Your goal will be deleted create a new one.",
+                            text = stringResource(R.string.you_have_reached_the_weight_you_want_your_goal_will_be_deleted_create_a_new_one),
                             fontSize = 18.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -622,7 +629,7 @@ fun UserProfileScreen(
                             )
                         ) {
                             Text(
-                                text = "Create new goal",
+                                text = stringResource(R.string.create_new_goal),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White

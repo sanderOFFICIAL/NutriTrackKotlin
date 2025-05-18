@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -80,7 +81,7 @@ fun ConsultantNicknameScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Please provide your name",
+                        text = stringResource(R.string.please_provide_your_name2),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -89,7 +90,7 @@ fun ConsultantNicknameScreen(
                     )
 
                     Text(
-                        text = "This is the name your customers will see",
+                        text = stringResource(R.string.this_is_the_name_your_customers_will_see),
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
@@ -99,7 +100,7 @@ fun ConsultantNicknameScreen(
                     TextField(
                         value = nickname.value,
                         onValueChange = { nickname.value = it },
-                        label = { Text("Your name", fontSize = 14.sp) },
+                        label = { Text(stringResource(R.string.your_name2), fontSize = 14.sp) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp)
@@ -150,7 +151,7 @@ fun ConsultantNicknameScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Continue",
+                        text = stringResource(R.string.continue2),
                         fontSize = 20.sp,
                         color = Color.White
                     )

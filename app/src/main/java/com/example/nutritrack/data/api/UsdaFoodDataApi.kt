@@ -10,14 +10,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-/**
- * API client for retrieving food data from USDA Food Data Central API
- */
+
 class UsdaFoodDataApi(private val apiKey: String) {
     private val baseUrl = "https://api.nal.usda.gov/fdc/v1"
     private val tag = "UsdaFoodDataApi"
 
-    // For detailed logging of requests and responses
+
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -41,7 +39,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
             try {
                 Log.d(tag, "Starting search for query: $query, maxResults: $maxResults")
 
-                // Optimized URL for search - adding more parameters for better accuracy
                 val url = "$baseUrl/foods/search?query=${encode(query)}" +
                         "&pageSize=$maxResults" +
                         "&dataType=Foundation,SR%20Legacy,Survey%20(FNDDS),Branded" +
@@ -137,12 +134,10 @@ class UsdaFoodDataApi(private val apiKey: String) {
                         continue
                     }
 
-                    // Prepare food item name
                     val description = cleanFoodDescription(food.optString("description", ""))
                     val brandName = food.optString("brandName", "").trim()
                     val dataType = food.optString("dataType", "")
 
-                    // Build informative name combining description and brand
                     val nameBuilder = StringBuilder()
                     nameBuilder.append(description)
                     if (brandName.isNotBlank() && !description.contains(
@@ -155,20 +150,16 @@ class UsdaFoodDataApi(private val apiKey: String) {
 
                     val fullName = nameBuilder.toString()
 
-                    // Skip if name is empty
                     if (fullName.isBlank()) {
                         Log.w(tag, "Item with empty name skipped, fdcId: $fdcId")
                         continue
                     }
 
-                    // Extract nutrients
                     val nutrients = extractNutrients(food)
 
-                    // Additional data for description
                     val additionalDesc = food.optString("additionalDescriptions", "").trim()
                     val ingredients = food.optString("ingredients", "").trim()
 
-                    // Build description
                     val descBuilder = StringBuilder()
                     if (brandName.isNotBlank()) {
                         descBuilder.append("Brand: ").append(brandName)
@@ -216,9 +207,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
         return foodList
     }
 
-    /**
-     * Format data type into a more readable format
-     */
     private fun prettifyDataType(dataType: String): String {
         return when (dataType) {
             "Branded" -> "Branded"
@@ -229,13 +217,11 @@ class UsdaFoodDataApi(private val apiKey: String) {
         }
     }
 
-    /**
-     * Clean and format food description
-     */
+
     private fun cleanFoodDescription(description: String): String {
         return description.trim()
-            .replace(Regex("\\s+"), " ") // Replace multiple spaces with one
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } // Capitalize first letter
+            .replace(Regex("\\s+"), " ")
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
 
     /**
@@ -248,12 +234,10 @@ class UsdaFoodDataApi(private val apiKey: String) {
             val food = JSONObject(json)
             val fdcId = food.optString("fdcId", "")
 
-            // Prepare food item name
             val description = cleanFoodDescription(food.optString("description", ""))
             val brandName = food.optString("brandName", "").trim()
             val dataType = food.optString("dataType", "")
 
-            // Build informative name
             val nameBuilder = StringBuilder()
             nameBuilder.append(description)
             if (brandName.isNotBlank() && !description.contains(brandName, ignoreCase = true)) {
@@ -267,13 +251,11 @@ class UsdaFoodDataApi(private val apiKey: String) {
                 return null
             }
 
-            // Extract additional information
             val ingredients = food.optString("ingredients", "").trim()
             val additionalDesc = food.optString("additionalDescriptions", "").trim()
             val servingSize = food.optJSONObject("servingSize")?.optDouble("value", 0.0) ?: 0.0
             val servingSizeUnit = food.optString("servingSizeUnit", "")
 
-            // Build full description
             val detailsBuilder = StringBuilder()
             if (brandName.isNotBlank()) {
                 detailsBuilder.append("Brand: ").append(brandName).append("\n")
@@ -294,7 +276,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
 
             val detailedDescription = detailsBuilder.toString().trim()
 
-            // Extract nutrients from detailed response
             val nutrients = extractDetailedNutrients(food)
 
             val foodItem = FoodItem(
@@ -329,23 +310,19 @@ class UsdaFoodDataApi(private val apiKey: String) {
     private fun extractNutrients(food: JSONObject): Map<String, Float> {
         val nutrients = mutableMapOf<String, Float>()
         try {
-            // Initialize default values
             nutrients["calories"] = 0f
             nutrients["protein"] = 0f
             nutrients["fat"] = 0f
             nutrients["carbs"] = 0f
 
-            // Check for foodNutrients
             if (food.has("foodNutrients")) {
                 val nutrientArray = food.getJSONArray("foodNutrients")
                 for (i in 0 until nutrientArray.length()) {
                     val nutrient = nutrientArray.getJSONObject(i)
 
-                    // Nutrient ID
                     var nutrientId = 0
                     var amount = 0f
 
-                    // Check different nutrient formats
                     if (nutrient.has("nutrientId")) {
                         nutrientId = nutrient.optInt("nutrientId", 0)
                         amount = nutrient.optDouble("value", 0.0).toFloat()
@@ -355,12 +332,11 @@ class UsdaFoodDataApi(private val apiKey: String) {
                         amount = nutrient.optDouble("amount", 0.0).toFloat()
                     }
 
-                    // Assign values to corresponding nutrients
                     when (nutrientId) {
-                        1008 -> nutrients["calories"] = amount // Energy (kcal)
-                        1003 -> nutrients["protein"] = amount // Protein
-                        1004 -> nutrients["fat"] = amount // Total fat
-                        1005 -> nutrients["carbs"] = amount // Carbohydrates
+                        1008 -> nutrients["calories"] = amount
+                        1003 -> nutrients["protein"] = amount
+                        1004 -> nutrients["fat"] = amount
+                        1005 -> nutrients["carbs"] = amount
                     }
                 }
             }
@@ -378,13 +354,11 @@ class UsdaFoodDataApi(private val apiKey: String) {
     private fun extractDetailedNutrients(food: JSONObject): Map<String, Float> {
         val nutrients = mutableMapOf<String, Float>()
         try {
-            // Initialize default values
             nutrients["calories"] = 0f
             nutrients["protein"] = 0f
             nutrients["fat"] = 0f
             nutrients["carbs"] = 0f
 
-            // Check for foodNutrients in detailed format
             if (food.has("foodNutrients")) {
                 val nutrientArray = food.getJSONArray("foodNutrients")
                 for (i in 0 until nutrientArray.length()) {
@@ -394,7 +368,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
                     var amount = 0f
                     var name = ""
 
-                    // Check different formats
                     if (nutrient.has("nutrient")) {
                         val nutrientObj = nutrient.getJSONObject("nutrient")
                         nutrientId = nutrientObj.optInt("id", 0)
@@ -406,8 +379,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
                         amount = nutrient.optDouble("value", 0.0).toFloat()
                     }
 
-                    // Assign values to corresponding nutrients
-                    // Additional name check for reliability
                     when {
                         nutrientId == 1008 || name.contains("Energy", ignoreCase = true) ->
                             nutrients["calories"] = amount
@@ -424,7 +395,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
                 }
             }
 
-            // Check for labelNutrients as a fallback
             if (food.has("labelNutrients")) {
                 extractFromLabelNutrients(food.getJSONObject("labelNutrients"), nutrients)
             }
@@ -440,9 +410,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
         return nutrients
     }
 
-    /**
-     * Extract nutrients from labelNutrients object
-     */
     private fun extractFromLabelNutrients(
         labelNutrients: JSONObject,
         nutrients: MutableMap<String, Float>
@@ -485,9 +452,6 @@ class UsdaFoodDataApi(private val apiKey: String) {
     }
 }
 
-/**
- * Data class representing a food item
- */
 @Serializable
 data class FoodItem(
     val id: String = "",
@@ -505,12 +469,10 @@ data class FoodItem(
      * @return New FoodItem with recalculated nutrients
      */
     fun calculateNutrientsForWeight(weightGrams: Float): FoodItem {
-        // Extract number from serving description or use 100g as default
         val servingWeight = servingDescription
             .replace("[^0-9.]".toRegex(), "")
             .toFloatOrNull() ?: 100f
 
-        // Calculate ratio for nutrient recalculation
         val ratio = weightGrams / servingWeight
 
         return FoodItem(

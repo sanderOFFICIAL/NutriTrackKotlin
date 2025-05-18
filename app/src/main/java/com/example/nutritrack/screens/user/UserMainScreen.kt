@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -120,7 +121,7 @@ fun UserMainScreen(
 
                 val idToken = FirebaseAuthHelper.getIdToken()
                 if (idToken == null) {
-                    errorMessage = "Authorization error: IdToken not found"
+                    errorMessage = context.getString(R.string.authorization_error_idtoken_not_found)
                     return@launch
                 }
 
@@ -136,7 +137,7 @@ fun UserMainScreen(
                         saveStreak(currentStreak)
                         saveLastLoginDate(currentDate)
                     } else {
-                        errorMessage = "Failed to create streak"
+                        errorMessage = context.getString(R.string.failed_to_create_streak)
                         return@launch
                     }
                 } else if (streakResponse == null) {
@@ -145,14 +146,12 @@ fun UserMainScreen(
                     if (ApiService.addStreak(idToken, currentStreak)) {
                         saveStreak(currentStreak)
                     } else {
-                        errorMessage = "Failed to create streak"
+                        errorMessage = context.getString(R.string.failed_to_create_streak2)
                         return@launch
                     }
                 } else {
-                    // Стрік існує, оновлюємо його
                     currentStreak = streakResponse.currentStreak
                     if (lastLoginDateStr == null) {
-                        // Це перший вхід, але стрік уже є (можливо, створений вручну)
                         currentStreak = 1
                         if (ApiService.updateStreak(idToken, currentStreak, true)) {
                             saveStreak(currentStreak)
@@ -192,14 +191,14 @@ fun UserMainScreen(
 
                 val goalIds = ApiService.getAllUserGoalIds(idToken)
                 if (goalIds.isEmpty()) {
-                    errorMessage = "Target not found"
+                    errorMessage = context.getString(R.string.target_not_found)
                     return@launch
                 }
 
                 val goalId = goalIds.first().goalId
                 val goal = ApiService.getSpecificGoalById(goalId)
                 if (goal == null) {
-                    errorMessage = "Unable to obtain target details"
+                    errorMessage = context.getString(R.string.unable_to_obtain_target_details)
                     return@launch
                 }
                 goalData = goal
@@ -229,7 +228,7 @@ fun UserMainScreen(
             onDismissRequest = { showLogoutDialog = false },
             title = {
                 Text(
-                    text = "Logout Confirmation",
+                    text = stringResource(R.string.logout_confirmation),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -237,7 +236,7 @@ fun UserMainScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to log out?",
+                    text = stringResource(R.string.are_you_sure_you_want_to_log_out),
                     color = Color.White,
                     fontSize = 16.sp
                 )
@@ -254,7 +253,7 @@ fun UserMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Yes", fontSize = 16.sp)
+                    Text(stringResource(R.string.yes), fontSize = 16.sp)
                 }
             },
             dismissButton = {
@@ -264,7 +263,7 @@ fun UserMainScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("No", fontSize = 16.sp)
+                    Text(stringResource(R.string.no), fontSize = 16.sp)
                 }
             }
         )
@@ -342,7 +341,7 @@ fun UserMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Notebook",
+                            text = stringResource(R.string.notebook),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -368,7 +367,7 @@ fun UserMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Consultants",
+                            text = stringResource(R.string.consultants),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -394,7 +393,7 @@ fun UserMainScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -443,7 +442,7 @@ fun UserMainScreen(
                 )
             } else if (goalData != null) {
                 Text(
-                    text = "Today",
+                    text = stringResource(R.string.today),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -451,7 +450,7 @@ fun UserMainScreen(
                 )
 
                 Text(
-                    text = "The number of calories",
+                    text = stringResource(R.string.the_number_of_calories),
                     fontSize = 16.sp,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -503,9 +502,9 @@ fun UserMainScreen(
                     ) {
                         Text(
                             text = if (totalConsumedCalories.toInt() == 0) {
-                                totalGoalCalories.toString() // Show goal when nothing consumed
+                                totalGoalCalories.toString()
                             } else {
-                                remainingCalories.toString() // Show remaining calories when food is consumed
+                                remainingCalories.toString()
                             },
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
@@ -513,9 +512,17 @@ fun UserMainScreen(
                         )
                         Text(
                             text = if (totalConsumedCalories.toInt() == 0) {
-                                "Daily Goal: $totalGoalCalories\nRemaining: $totalGoalCalories"
+                                stringResource(
+                                    R.string.daily_goal_remaining,
+                                    totalGoalCalories,
+                                    totalGoalCalories
+                                )
                             } else {
-                                "Consumed: $totalConsumedCalories\nRemaining: $remainingCalories"
+                                stringResource(
+                                    R.string.consumed_remaining,
+                                    totalConsumedCalories,
+                                    remainingCalories
+                                )
                             },
                             fontSize = 14.sp,
                             color = Color.White,
@@ -572,7 +579,11 @@ fun UserMainScreen(
                         }
 
                         Text(
-                            text = "Proteins\n${totalProtein.toInt()}/${goalData!!.dailyProtein.toInt()}",
+                            text = stringResource(
+                                R.string.proteins,
+                                totalProtein.toInt(),
+                                goalData!!.dailyProtein.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -596,7 +607,11 @@ fun UserMainScreen(
                         }
 
                         Text(
-                            text = "Fats\n${totalFats.toInt()}/${goalData!!.dailyFats.toInt()}",
+                            text = stringResource(
+                                R.string.fats,
+                                totalFats.toInt(),
+                                goalData!!.dailyFats.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -620,7 +635,11 @@ fun UserMainScreen(
                         }
 
                         Text(
-                            text = "Carbs\n${totalCarbs.toInt()}/${goalData!!.dailyCarbs.toInt()}",
+                            text = stringResource(
+                                R.string.carbs,
+                                totalCarbs.toInt(),
+                                goalData!!.dailyCarbs.toInt()
+                            ),
                             fontSize = 12.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -630,7 +649,7 @@ fun UserMainScreen(
                 }
 
                 Text(
-                    text = "Today's diet",
+                    text = stringResource(R.string.today_s_diet),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -652,13 +671,25 @@ fun UserMainScreen(
 
                 val meals = listOf(
                     Triple(
-                        "Breakfast",
+                        stringResource(R.string.breakfast),
                         R.drawable.ic_breakfast,
                         breakfastCalories to breakfastGoal
                     ),
-                    Triple("Lunch", R.drawable.ic_lunch, lunchCalories to lunchGoal),
-                    Triple("Dinner", R.drawable.ic_dinner, dinnerCalories to dinnerGoal),
-                    Triple("Snack", R.drawable.ic_snack, snackCalories to snackGoal)
+                    Triple(
+                        stringResource(R.string.lunch),
+                        R.drawable.ic_lunch,
+                        lunchCalories to lunchGoal
+                    ),
+                    Triple(
+                        stringResource(R.string.dinner),
+                        R.drawable.ic_dinner,
+                        dinnerCalories to dinnerGoal
+                    ),
+                    Triple(
+                        stringResource(R.string.snack),
+                        R.drawable.ic_snack,
+                        snackCalories to snackGoal
+                    )
                 )
                 meals.forEach { (meal, iconRes, caloriesPair) ->
                     val (consumed, goal) = caloriesPair
@@ -699,7 +730,7 @@ fun UserMainScreen(
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "${consumed.toInt()}/$goal cal",
+                                    text = stringResource(R.string.cal, consumed.toInt(), goal),
                                     fontSize = 14.sp,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )

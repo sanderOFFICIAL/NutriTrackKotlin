@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,7 @@ fun YearSelectionScreen(
 
             // Заголовок
             Text(
-                text = "Specify your year of birth",
+                text = stringResource(R.string.specify_your_year_of_birth),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -70,7 +71,7 @@ fun YearSelectionScreen(
 
             // Підзаголовок
             Text(
-                text = "This information is used to calculate",
+                text = stringResource(R.string.this_information_is_used_to_calculate),
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 49.dp),
@@ -121,7 +122,7 @@ fun YearSelectionScreen(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = "Continue",
+                text = stringResource(R.string.Сontinue),
                 fontSize = 20.sp,
                 color = Color.White
             )

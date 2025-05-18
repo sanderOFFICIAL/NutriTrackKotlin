@@ -28,7 +28,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -80,7 +82,7 @@ fun ConsultantProfileDescriptionScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Enter a profile description",
+                        text = stringResource(R.string.enter_a_profile_description),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -89,7 +91,7 @@ fun ConsultantProfileDescriptionScreen(
                     )
 
                     Text(
-                        text = "Tell us about yourself so customers can learn more",
+                        text = stringResource(R.string.tell_us_about_yourself_so_customers_can_learn_more),
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 20.dp),
@@ -99,7 +101,12 @@ fun ConsultantProfileDescriptionScreen(
                     TextField(
                         value = profileDescription.value,
                         onValueChange = { profileDescription.value = it },
-                        label = { Text("Your profile description", fontSize = 16.sp) },
+                        label = {
+                            Text(
+                                stringResource(R.string.your_profile_description),
+                                fontSize = 16.sp
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
@@ -125,7 +132,7 @@ fun ConsultantProfileDescriptionScreen(
                         )
                     )
                 }
-
+                val context = LocalContext.current
                 Button(
                     onClick = {
                         if (profileDescription.value.isNotEmpty()) {
@@ -134,7 +141,7 @@ fun ConsultantProfileDescriptionScreen(
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Please enter a profile description",
+                                    message = context.getString(R.string.please_enter_a_profile_description),
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -150,7 +157,7 @@ fun ConsultantProfileDescriptionScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Continue",
+                        text = stringResource(R.string.continue2),
                         fontSize = 20.sp,
                         color = Color.White
                     )

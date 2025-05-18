@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +55,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MealDetailsScreen(
     mealType: String,
-    selectedDate: String, // Додаємо параметр для дати
+    selectedDate: String,
     onBackClick: () -> Unit
 ) {
     var mealEntries by remember { mutableStateOf<List<MealEntry>>(emptyList()) }
@@ -88,7 +89,7 @@ fun MealDetailsScreen(
         }
     }
 
-    LaunchedEffect(selectedDate) { // Оновлюємо залежність, щоб реагувати на зміну дати
+    LaunchedEffect(selectedDate) {
         scope.launch {
             loadMeals()
         }
@@ -137,7 +138,7 @@ fun MealDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Loading...",
+                        text = stringResource(R.string.loading),
                         color = Color.White,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -165,7 +166,11 @@ fun MealDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No products added on $selectedDate for $mealType",
+                        text = stringResource(
+                            R.string.no_products_added_on_for,
+                            selectedDate,
+                            mealType
+                        ),
                         color = Color.White,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -193,29 +198,36 @@ fun MealDetailsScreen(
                             ) {
                                 Column {
                                     Text(
-                                        text = "${meal.product_name} \n- ${meal.quantity_grams} g",
+                                        text = stringResource(
+                                            R.string.g4,
+                                            meal.product_name,
+                                            meal.quantity_grams
+                                        ),
                                         color = Color.White,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Calories: ${meal.calories} cal",
+                                        text = stringResource(
+                                            R.string.calories_cal4,
+                                            meal.calories
+                                        ),
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 14.sp
                                     )
                                     Text(
-                                        text = "Protein: ${meal.protein} g",
+                                        text = stringResource(R.string.protein_g4, meal.protein),
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 14.sp
                                     )
                                     Text(
-                                        text = "Fats: ${meal.fats} g",
+                                        text = stringResource(R.string.fats_g4, meal.fats),
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 14.sp
                                     )
                                     Text(
-                                        text = "Carbs: ${meal.carbs} g",
+                                        text = stringResource(R.string.carbs_g4, meal.carbs),
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 14.sp
                                     )

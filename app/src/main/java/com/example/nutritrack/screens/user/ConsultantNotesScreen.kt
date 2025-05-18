@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -151,7 +152,7 @@ fun ConsultantNotesScreen(
                     },
                     label = {
                         Text(
-                            text = "Notebook",
+                            text = stringResource(R.string.notebook),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -177,7 +178,7 @@ fun ConsultantNotesScreen(
                     },
                     label = {
                         Text(
-                            text = "Consultants",
+                            text = stringResource(R.string.consultants),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -203,7 +204,7 @@ fun ConsultantNotesScreen(
                     },
                     label = {
                         Text(
-                            text = "Profile",
+                            text = stringResource(R.string.profile),
                             color = Color.White,
                             fontSize = 12.sp
                         )
@@ -243,7 +244,7 @@ fun ConsultantNotesScreen(
                     )
                 }
                 Text(
-                    text = "Consultant Notes",
+                    text = stringResource(R.string.consultant_notes),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -306,7 +307,10 @@ fun ConsultantNotesScreen(
                             color = Color.White
                         )
                         Text(
-                            text = "Experience: ${linkedRelationship.consultant.experience_years} years",
+                            text = stringResource(
+                                R.string.experience_years4,
+                                linkedRelationship.consultant.experience_years
+                            ),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
@@ -317,7 +321,7 @@ fun ConsultantNotesScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Notes from Consultant",
+                text = stringResource(R.string.notes_from_consultant),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -357,7 +361,7 @@ fun ConsultantNotesScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "No notes available yet.",
+                            text = stringResource(R.string.no_notes_available_yet),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
@@ -381,7 +385,7 @@ fun ConsultantNotesScreen(
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = "From: ${note.consultant_nickname}",
+                                    text = stringResource(R.string.from, note.consultant_nickname),
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -395,7 +399,7 @@ fun ConsultantNotesScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Date: ${note.created_at}",
+                                    text = stringResource(R.string.date, note.created_at),
                                     fontSize = 12.sp,
                                     color = Color.White.copy(alpha = 0.5f),
                                     textAlign = TextAlign.End,

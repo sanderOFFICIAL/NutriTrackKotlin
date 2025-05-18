@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -72,7 +73,7 @@ fun UserNicknameScreen(
                     val consultantExist = ApiService.checkConsultantExists(idToken)
                     if (consultantExist) {
                         snackbarHostState.showSnackbar(
-                            message = "Error: You can't create an account because you are registered as a consultant for this email",
+                            message = context.getString(R.string.error_you_can_t_create_an_account_because_you_are_registered_as_a_consultant_for_this_email),
                             duration = SnackbarDuration.Short
                         )
                         navController.navigate("welcome_screen") {
@@ -80,7 +81,7 @@ fun UserNicknameScreen(
                         }
                     } else if (userExists) {
                         snackbarHostState.showSnackbar(
-                            message = "Error: The user with this account is already logged in, please log in",
+                            message = context.getString(R.string.error_the_user_with_this_account_is_already_logged_in_please_log_in),
                             duration = SnackbarDuration.Short
                         )
                         navController.navigate("welcome_screen") {
@@ -94,7 +95,7 @@ fun UserNicknameScreen(
                             onRegistrationSuccess()
                         } else {
                             snackbarHostState.showSnackbar(
-                                message = "Error: Unable to register user",
+                                message = context.getString(R.string.error_unable_to_register_user),
                                 duration = SnackbarDuration.Long
                             )
                         }
@@ -103,7 +104,7 @@ fun UserNicknameScreen(
                 } catch (e: Exception) {
                     Log.e("UserNicknameScreen", "Google Sign-In failed: $e")
                     snackbarHostState.showSnackbar(
-                        message = "Authorization error: $e",
+                        message = context.getString(R.string.authorization_error, e),
                         duration = SnackbarDuration.Long
                     )
                 }
@@ -143,7 +144,7 @@ fun UserNicknameScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Please provide your name",
+                        text = stringResource(R.string.please_provide_your_name),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -152,7 +153,7 @@ fun UserNicknameScreen(
                     )
 
                     Text(
-                        text = "This is the name your consultants will see",
+                        text = stringResource(R.string.this_is_the_name_your_consultants_will_see),
                         fontSize = 16.sp,
                         color = Color.White,
                         modifier = Modifier.padding(bottom = 40.dp),
@@ -162,7 +163,7 @@ fun UserNicknameScreen(
                     TextField(
                         value = nickname.value,
                         onValueChange = { nickname.value = it },
-                        label = { Text("Your name", fontSize = 14.sp) },
+                        label = { Text(stringResource(R.string.your_name), fontSize = 14.sp) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp)
@@ -196,7 +197,7 @@ fun UserNicknameScreen(
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Please enter a nickname",
+                                    message = context.getString(R.string.please_enter_a_nickname),
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -212,7 +213,7 @@ fun UserNicknameScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Register",
+                        text = stringResource(R.string.register),
                         fontSize = 20.sp,
                         color = Color.White
                     )

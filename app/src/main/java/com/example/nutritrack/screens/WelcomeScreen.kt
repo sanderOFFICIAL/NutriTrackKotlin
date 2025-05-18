@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,7 +132,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "New user",
+                    text = stringResource(R.string.new_user),
                     fontSize = 21.sp,
                     color = Color.White
                 )
@@ -149,7 +150,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "New consultant",
+                    text = stringResource(R.string.new_consultant),
                     fontSize = 21.sp,
                     color = Color.White
                 )
@@ -169,8 +170,8 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "I already have an account",
-                    fontSize = 21.sp,
+                    text = stringResource(R.string.i_already_have_an_account),
+                    fontSize = 20.sp,
                     color = Color.White
                 )
             }
@@ -204,7 +205,7 @@ fun WelcomeScreen(
                 verticalArrangement = Arrangement.spacedBy(25.dp)
             ) {
                 Text(
-                    text = "Select the type of account",
+                    text = stringResource(R.string.select_the_type_of_account),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -217,7 +218,8 @@ fun WelcomeScreen(
                             bottomSheetLoading = true
                             try {
                                 if (idToken == null) {
-                                    bottomSheetError = "Wait for authorization to complete..."
+                                    bottomSheetError =
+                                        context.getString(R.string.wait_for_authorization_to_complete)
                                     return@launch
                                 }
 
@@ -230,11 +232,14 @@ fun WelcomeScreen(
                                     },
                                     onFailure = { exception ->
                                         bottomSheetError =
-                                            "User not found. Try logging in as a consultant: ${exception.message}"
+                                            context.getString(
+                                                R.string.user_not_found_try_logging_in_as_a_consultant,
+                                                exception.message
+                                            )
                                     }
                                 )
                             } catch (e: Exception) {
-                                bottomSheetError = "Error: ${e.message}"
+                                bottomSheetError = context.getString(R.string.error, e.message)
                             } finally {
                                 bottomSheetLoading = false
                             }
@@ -257,7 +262,7 @@ fun WelcomeScreen(
                         )
                     } else {
                         Text(
-                            text = "Log in as a user",
+                            text = stringResource(R.string.log_in_as_a_user),
                             fontSize = 20.sp,
                             color = Color.White
                         )
@@ -270,7 +275,8 @@ fun WelcomeScreen(
                             bottomSheetLoading = true
                             try {
                                 if (idToken == null) {
-                                    bottomSheetError = "Wait for authorization to complete..."
+                                    bottomSheetError =
+                                        context.getString(R.string.wait_for_authorization_to_complete)
                                     return@launch
                                 }
 
@@ -283,11 +289,14 @@ fun WelcomeScreen(
                                     },
                                     onFailure = { exception ->
                                         bottomSheetError =
-                                            "Consultant not found. Try logging in as a user: ${exception.message}"
+                                            context.getString(
+                                                R.string.consultant_not_found_try_logging_in_as_a_user,
+                                                exception.message
+                                            )
                                     }
                                 )
                             } catch (e: Exception) {
-                                bottomSheetError = "Error: ${e.message}"
+                                bottomSheetError = context.getString(R.string.error, e.message)
                             } finally {
                                 bottomSheetLoading = false
                             }
@@ -310,7 +319,7 @@ fun WelcomeScreen(
                         )
                     } else {
                         Text(
-                            text = "Log in as a consultant",
+                            text = stringResource(R.string.log_in_as_a_consultant),
                             fontSize = 20.sp,
                             color = Color.White
                         )

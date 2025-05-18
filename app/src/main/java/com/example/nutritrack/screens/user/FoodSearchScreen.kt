@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -162,7 +163,7 @@ fun FoodSearchScreen(
                 )
             }
             Text(
-                text = "Add to $mealType",
+                text = stringResource(R.string.add_to, mealType),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -198,7 +199,12 @@ fun FoodSearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp),
-            placeholder = { Text("Search for food...", color = Color.White.copy(alpha = 0.7f)) },
+            placeholder = {
+                Text(
+                    stringResource(R.string.search_for_food),
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            },
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_search),
@@ -266,7 +272,7 @@ fun FoodSearchScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Enter a food name to search",
+                            text = stringResource(R.string.enter_a_food_name_to_search),
                             color = Color.White,
                             textAlign = TextAlign.Center,
                             fontSize = 16.sp
@@ -313,7 +319,7 @@ fun FoodSearchScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Added Products (${addedProducts.size})",
+                        text = stringResource(R.string.added_products, addedProducts.size),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -340,7 +346,11 @@ fun FoodSearchScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "${product.product_name} (${product.quantity_grams} g)",
+                                        text = stringResource(
+                                            R.string.g,
+                                            product.product_name,
+                                            product.quantity_grams
+                                        ),
                                         fontSize = 14.sp,
                                         color = Color.White
                                     )
@@ -377,7 +387,11 @@ fun FoodSearchScreen(
                                 .height(50.dp)
                                 .padding(horizontal = 8.dp)
                         ) {
-                            Text("Close", color = Color.White, fontSize = 16.sp)
+                            Text(
+                                stringResource(R.string.close),
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
                         }
                         Button(
                             onClick = {
@@ -420,7 +434,11 @@ fun FoodSearchScreen(
                                 .height(50.dp)
                                 .padding(horizontal = 8.dp)
                         ) {
-                            Text("Save All", color = Color.White, fontSize = 16.sp)
+                            Text(
+                                stringResource(R.string.save_all),
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
                         }
                     }
                 }
@@ -456,14 +474,14 @@ fun FoodSearchScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Error",
+                        text = stringResource(R.string.error),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Unable to load food details. Please try again.",
+                        text = stringResource(R.string.unable_to_load_food_details_please_try_again),
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -478,7 +496,7 @@ fun FoodSearchScreen(
                             .height(50.dp)
                             .padding(horizontal = 8.dp)
                     ) {
-                        Text("Close", color = Color.White, fontSize = 16.sp)
+                        Text(stringResource(R.string.close), color = Color.White, fontSize = 16.sp)
                     }
                 }
             }
@@ -559,7 +577,12 @@ fun FoodDetailsDialog(
                 val previewLength = 61
                 val ingredientsSection = food.description.split("•")
                     .map { it.trim() }
-                    .firstOrNull { it.contains("Ingredients:", ignoreCase = true) }
+                    .firstOrNull {
+                        it.contains(
+                            stringResource(R.string.ingredients),
+                            ignoreCase = true
+                        )
+                    }
                     ?.trim()
 
                 if (!ingredientsSection.isNullOrBlank()) {
@@ -608,7 +631,7 @@ fun FoodDetailsDialog(
                 }
 
                 Text(
-                    text = "Nutrients (${calculatedFood.servingDescription})",
+                    text = stringResource(R.string.nutrients, calculatedFood.servingDescription),
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f),
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -621,27 +644,27 @@ fun FoodDetailsDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     NutrientInfo(
-                        name = "Calories",
+                        name = stringResource(R.string.calories),
                         value = calculatedFood.calories.toFloat(),
-                        unit = "kcal",
+                        unit = stringResource(R.string.kcal),
                         color = Color.White
                     )
                     NutrientInfo(
-                        name = "Protein",
+                        name = stringResource(R.string.protein),
                         value = calculatedFood.protein,
-                        unit = "g",
+                        unit = stringResource(R.string.g2),
                         color = Color.White
                     )
                     NutrientInfo(
-                        name = "Fat",
+                        name = stringResource(R.string.fat),
                         value = calculatedFood.fat,
-                        unit = "g",
+                        unit = stringResource(R.string.g2),
                         color = Color.White
                     )
                     NutrientInfo(
-                        name = "Carbs",
+                        name = stringResource(R.string.carbs2),
                         value = calculatedFood.carbs,
-                        unit = "g",
+                        unit = stringResource(R.string.g2),
                         color = Color.White
                     )
                 }
@@ -655,7 +678,7 @@ fun FoodDetailsDialog(
                             weightInput = newValue
                         }
                     },
-                    label = { Text("Weight (g/ml)", color = Color.White) },
+                    label = { Text(stringResource(R.string.weight_g_ml), color = Color.White) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -695,7 +718,11 @@ fun FoodDetailsDialog(
                             .height(50.dp)
                             .padding(horizontal = 8.dp)
                     ) {
-                        Text("Cancel", color = Color.White, fontSize = 16.sp)
+                        Text(
+                            stringResource(R.string.cancel),
+                            color = Color.White,
+                            fontSize = 12.95.sp
+                        )
                     }
 
                     Button(
@@ -715,7 +742,7 @@ fun FoodDetailsDialog(
                             .height(50.dp)
                             .padding(horizontal = 8.dp)
                     ) {
-                        Text("Add", color = Color.White, fontSize = 16.sp)
+                        Text(stringResource(R.string.add), color = Color.White, fontSize = 16.sp)
                     }
                 }
             }
@@ -760,7 +787,7 @@ fun FoodItemCard(
             }
 
             Text(
-                text = "Per 100g",
+                text = stringResource(R.string.per_100g),
                 fontSize = 13.sp,
                 color = Color.White.copy(alpha = 0.7f),
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -773,27 +800,27 @@ fun FoodItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 NutrientInfo(
-                    name = "Calories",
+                    name = stringResource(R.string.calories),
                     value = foodItem.calories.toFloat(),
-                    unit = "kcal",
+                    unit = stringResource(R.string.kcal),
                     color = Color.White
                 )
                 NutrientInfo(
-                    name = "Protein",
+                    name = stringResource(R.string.protein),
                     value = foodItem.protein,
-                    unit = "g",
+                    unit = stringResource(R.string.g2),
                     color = Color.White
                 )
                 NutrientInfo(
-                    name = "Fat",
+                    name = stringResource(R.string.fat),
                     value = foodItem.fat,
-                    unit = "g",
+                    unit = stringResource(R.string.g2),
                     color = Color.White
                 )
                 NutrientInfo(
-                    name = "Carbs",
+                    name = stringResource(R.string.carbs2),
                     value = foodItem.carbs,
-                    unit = "g",
+                    unit = stringResource(R.string.g2),
                     color = Color.White
                 )
             }
