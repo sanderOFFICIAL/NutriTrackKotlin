@@ -53,6 +53,8 @@ import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.UserData
+import com.example.nutritrack.util.LocalStorageUtil
+import com.example.nutritrack.util.RequestMetadata
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -117,6 +119,16 @@ fun UserProfileScreen(
                 if (success) {
                     inviteSuccess = true
                     onClientAdded()
+                    // Зберігаємо метадані запиту
+                    val requestId = ApiService.getAllRequests(idToken)
+                        .filter { it.userUid == userUid && it.status == "pending" }
+                        .maxByOrNull { it.requestId }?.requestId
+                    if (requestId != null) {
+                        LocalStorageUtil.saveRequestMetadata(
+                            context,
+                            RequestMetadata(requestId, "consultant")
+                        )
+                    }
                 } else {
                     inviteError =
                         context.getString(R.string.you_already_sent_an_invitation_or_an_error_occurred)

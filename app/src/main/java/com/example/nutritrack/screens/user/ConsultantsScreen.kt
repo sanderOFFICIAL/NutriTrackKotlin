@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +62,7 @@ import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.Consultant
 import com.example.nutritrack.model.ConsultantRequest
 import com.example.nutritrack.model.LinkedRelationship
+import com.example.nutritrack.util.LocalStorageUtil
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -81,7 +83,7 @@ fun ConsultantsScreen(
     var showRequestsDialog by remember { mutableStateOf(false) }
     var isResponding by remember { mutableStateOf(false) }
     var respondError by remember { mutableStateOf<String?>(null) }
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -102,9 +104,16 @@ fun ConsultantsScreen(
                     val response = ApiService.getAllConsultants(idToken)
                     consultants = response
 
-                    // Завантажуємо запити
-                    val requestResponse = ApiService.getAllRequests(idToken)
-                    requests = requestResponse.filter { it.status == "pending" }
+                    // Завантажуємо всі запити
+                    val allRequests =
+                        ApiService.getAllRequests(idToken).filter { it.status == "pending" }
+                    // Читаємо метадані з локального файлу, використовуючи переданий context
+                    val metadata = LocalStorageUtil.readRequestMetadata(context)
+                    // Фільтруємо запити, де ініціатор — "consultant"
+                    requests = allRequests.filter { request ->
+                        val requestMetadata = metadata.find { it.requestId == request.requestId }
+                        requestMetadata?.initiator == "consultant"
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
@@ -548,6 +557,7 @@ fun RequestCard(
     onDecline: () -> Unit,
     isResponding: Boolean
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -609,7 +619,10 @@ fun RequestCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = onAccept,
+                    onClick = {
+                        onAccept()
+                        LocalStorageUtil.removeRequestMetadata(context, request.requestId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(40.dp),
@@ -631,7 +644,10 @@ fun RequestCard(
                     }
                 }
                 Button(
-                    onClick = onDecline,
+                    onClick = {
+                        onDecline()
+                        LocalStorageUtil.removeRequestMetadata(context, request.requestId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(40.dp),

@@ -53,6 +53,8 @@ import com.example.nutritrack.R
 import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.Consultant
+import com.example.nutritrack.util.LocalStorageUtil
+import com.example.nutritrack.util.RequestMetadata
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -72,7 +74,7 @@ fun ConsultantProfileScreen(
     var removeError by remember { mutableStateOf<String?>(null) }
     var hasLinkedRelationship by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     var dialogAction by remember { mutableStateOf<String?>(null) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogText by remember { mutableStateOf("") }
@@ -104,7 +106,7 @@ fun ConsultantProfileScreen(
         }
     }
 
-    fun sendRequestToConsultant() {
+    fun sendRequestToConsultant(context: android.content.Context) {
         scope.launch {
             isSendingInvite = true
             inviteError = null
@@ -116,6 +118,16 @@ fun ConsultantProfileScreen(
                 if (success) {
                     inviteSuccess = true
                     onRequestSent()
+                    // Зберігаємо метадані запиту
+                    val requestId = ApiService.getAllRequests(idToken)
+                        .filter { it.consultantUid == consultantUid && it.status == "pending" }
+                        .maxByOrNull { it.requestId }?.requestId
+                    if (requestId != null) {
+                        LocalStorageUtil.saveRequestMetadata(
+                            context, // Використовуємо переданий context
+                            RequestMetadata(requestId, "user")
+                        )
+                    }
                 } else {
                     inviteError = "You already sent an invitation"
                 }
@@ -172,7 +184,7 @@ fun ConsultantProfileScreen(
                     onClick = {
                         showDialog = false
                         when (dialogAction) {
-                            "send_request" -> sendRequestToConsultant()
+                            "send_request" -> sendRequestToConsultant(context)
                             "remove_consultant" -> removeConsultant()
                         }
                     },

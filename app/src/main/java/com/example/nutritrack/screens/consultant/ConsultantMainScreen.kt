@@ -59,6 +59,7 @@ import com.example.nutritrack.data.api.ApiService
 import com.example.nutritrack.data.auth.FirebaseAuthHelper
 import com.example.nutritrack.model.ConsultantRequest
 import com.example.nutritrack.model.LinkedRelationship
+import com.example.nutritrack.util.LocalStorageUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,8 +83,8 @@ fun ConsultantMainScreen(
     var userToRemove by remember { mutableStateOf<String?>(null) }
     var isRemovingClient by remember { mutableStateOf(false) }
     var removeError by remember { mutableStateOf<String?>(null) }
-
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         val idToken = FirebaseAuthHelper.getIdToken()
@@ -93,8 +94,17 @@ fun ConsultantMainScreen(
                 errorMessage = null
                 val relationships = ApiService.getLinkedRelationships(idToken)
                 linkedRelationships = relationships.filter { it.isActive }
-                val requestResponse = ApiService.getAllRequests(idToken)
-                requests = requestResponse.filter { it.status == "pending" }
+
+                // Завантажуємо всі запити
+                val allRequests =
+                    ApiService.getAllRequests(idToken).filter { it.status == "pending" }
+                // Читаємо метадані з локального файлу
+                val metadata = LocalStorageUtil.readRequestMetadata(context)
+                // Фільтруємо запити, де ініціатор — "user"
+                requests = allRequests.filter { request ->
+                    val requestMetadata = metadata.find { it.requestId == request.requestId }
+                    requestMetadata?.initiator == "user"
+                }
             } catch (e: Exception) {
                 errorMessage = "Error loading data: ${e.message}"
             } finally {
@@ -233,7 +243,7 @@ fun ConsultantMainScreen(
             }
         )
     }
-    val context = LocalContext.current
+
     if (showRequestsDialog) {
         AlertDialog(
             onDismissRequest = { showRequestsDialog = false },
@@ -655,6 +665,7 @@ fun RequestCard(
     onDecline: () -> Unit,
     isResponding: Boolean
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -704,7 +715,7 @@ fun RequestCard(
                     val genderTranslated = when (request.user.gender.lowercase()) {
                         "male" -> stringResource(R.string.gender_male)
                         "female" -> stringResource(R.string.gender_female)
-                        else -> request.user.gender // fallback
+                        else -> request.user.gender
                     }
                     Text(
                         text = stringResource(R.string.gender2, genderTranslated),
@@ -718,7 +729,10 @@ fun RequestCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = onAccept,
+                    onClick = {
+                        onAccept()
+                        LocalStorageUtil.removeRequestMetadata(context, request.requestId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(40.dp),
@@ -740,7 +754,10 @@ fun RequestCard(
                     }
                 }
                 Button(
-                    onClick = onDecline,
+                    onClick = {
+                        onDecline()
+                        LocalStorageUtil.removeRequestMetadata(context, request.requestId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(40.dp),
